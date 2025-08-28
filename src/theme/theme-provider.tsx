@@ -25,13 +25,19 @@ export type ThemeProviderProps = {
 export function ThemeProvider({ themeOverrides, children, ...other }: ThemeProviderProps) {
   const settings = useSettingsContext();
 
+  // Force light mode regardless of settings
+  const forcedSettings = {
+    ...settings.state,
+    colorScheme: 'light' as const,
+  };
+
   const theme = createTheme({
-    settingsState: settings.state,
+    settingsState: forcedSettings,
     themeOverrides,
   });
 
   return (
-    <ThemeVarsProvider disableTransitionOnChange theme={theme} {...other}>
+    <ThemeVarsProvider disableTransitionOnChange theme={theme} defaultMode="light" {...other}>
       <CssBaseline />
       <Rtl direction={settings.state.direction!}>{children}</Rtl>
     </ThemeVarsProvider>

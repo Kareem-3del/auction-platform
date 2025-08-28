@@ -74,6 +74,9 @@ export async function GET(request: NextRequest) {
       case 'nameDesc':
         orderBy = { name: 'desc' };
         break;
+      default:
+        orderBy = { name: 'asc' };
+        break;
     }
 
     const [brands, totalCount] = await Promise.all([

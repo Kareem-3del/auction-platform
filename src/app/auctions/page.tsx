@@ -248,12 +248,12 @@ export default function AuctionsPage() {
     setFilters(newFilters);
     
     const queryParams = new URLSearchParams();
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value && value !== 'ALL' && value !== 'all') {
-        const paramKey = key === 'sortBy' ? 'sort' : 
-                         key === 'categoryId' ? 'category' : 
-                         key === 'auctionType' ? 'type' : key;
-        queryParams.set(paramKey, value);
+    Object.entries(newFilters).forEach(([filterKey, filterValue]) => {
+      if (filterValue && filterValue !== 'ALL' && filterValue !== 'all') {
+        const paramKey = filterKey === 'sortBy' ? 'sort' : 
+                         filterKey === 'categoryId' ? 'category' : 
+                         filterKey === 'auctionType' ? 'type' : filterKey;
+        queryParams.set(paramKey, filterValue);
       }
     });
     

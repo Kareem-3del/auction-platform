@@ -37,7 +37,7 @@ export const baseTheme: ThemeOptions = {
   shape: { borderRadius: 8 },
   direction: themeConfig.direction,
   cssVariables: themeConfig.cssVariables,
-  defaultColorScheme: themeConfig.defaultMode,
+  defaultColorScheme: 'light',
 };
 
 // ----------------------------------------------------------------------

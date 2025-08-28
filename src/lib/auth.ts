@@ -285,6 +285,7 @@ export async function registerUser(userData: {
     await prisma.auditLog.create({
       data: {
         userId: user.id,
+        targetId: user.id,
         entityType: 'user',
         entityId: user.id,
         action: 'user_registered',
@@ -293,6 +294,7 @@ export async function registerUser(userData: {
           userType: user.userType,
         },
         ipAddress: '127.0.0.1', // TODO: Get actual IP
+        userAgent: 'Unknown', // TODO: Get actual user agent
       },
     });
 

@@ -137,7 +137,7 @@ export default function AboutPage() {
                 lineHeight: 1.4,
               }}
             >
-              We're revolutionizing the auction experience with cutting-edge technology,
+              We&apos;re revolutionizing the auction experience with cutting-edge technology,
               transparent processes, and a community-first approach.
             </Typography>
             <Button
@@ -217,7 +217,7 @@ export default function AboutPage() {
                 Founded in 2020, Sassy has grown from a small startup to a leading 
                 auction platform trusted by thousands of users worldwide. We believe 
                 that everyone deserves access to fair, transparent, and exciting 
-                auction experiences, whether you're a seasoned collector or just 
+                auction experiences, whether you&apos;re a seasoned collector or just 
                 starting your journey.
               </Typography>
             </Grid>
@@ -259,7 +259,7 @@ export default function AboutPage() {
             Why Choose Sassy?
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-            We've built our platform with the features that matter most to auction enthusiasts.
+            We&apos;ve built our platform with the features that matter most to auction enthusiasts.
           </Typography>
         </Box>
         
@@ -324,7 +324,7 @@ export default function AboutPage() {
               Meet Our Team
             </Typography>
             <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-              The passionate individuals behind Sassy's success.
+              The passionate individuals behind Sassy&apos;s success.
             </Typography>
           </Box>
           

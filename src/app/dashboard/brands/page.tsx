@@ -66,9 +66,8 @@ export default function BrandsPage() {
         setLoading(true);
         const data = await apiClient.get('/api/brands');
 
-        if (data.success || data.data) {
-          const brandsArray = data.success ? data.data : (data.data || []);
-          setBrands(Array.isArray(brandsArray) ? brandsArray : []);
+        if (data.success) {
+          setBrands(data.data?.data || []);
         } else {
           setError(data.error?.message || 'Failed to load brands');
         }

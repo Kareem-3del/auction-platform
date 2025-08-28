@@ -63,7 +63,7 @@ export default function TagsPage() {
         const data = await apiClient.get('/api/tags');
 
         if (data.success) {
-          setTags(data.data || []);
+          setTags(data.data?.data || []);
         } else {
           setError(data.error?.message || 'Failed to load tags');
           setTags([]);

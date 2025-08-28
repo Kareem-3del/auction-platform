@@ -31,6 +31,9 @@ const mockUser: User = {
   lastLoginIP: null,
   loginAttempts: 0,
   lockedUntil: null,
+  notificationSoundEnabled: true,
+  emailNotificationsEnabled: true,
+  pushNotificationsEnabled: true,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

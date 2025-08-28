@@ -65,7 +65,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <InitColorSchemeScript
           modeStorageKey={themeConfig.modeStorageKey}
           attribute={themeConfig.cssVariables.colorSchemeSelector}
-          defaultMode={themeConfig.enableSystemMode ? 'system' : themeConfig.defaultMode}
+          defaultMode="light"
         />
 
         <AuthProvider>

@@ -104,6 +104,8 @@ export const PUT = withAuth(async (request, { params }: RouteParams) => {
         case 'SUBTRACT':
           newRealBalance -= validatedData.balanceReal;
           break;
+        default:
+          throw new Error(`Invalid adjustment type: ${validatedData.adjustmentType}`);
       }
     }
 
@@ -118,6 +120,8 @@ export const PUT = withAuth(async (request, { params }: RouteParams) => {
         case 'SUBTRACT':
           newVirtualBalance -= validatedData.balanceVirtual;
           break;
+        default:
+          throw new Error(`Invalid adjustment type: ${validatedData.adjustmentType}`);
       }
     } else if (validatedData.balanceReal !== undefined && validatedData.adjustmentType === 'SET') {
       // If only real balance is being set, automatically calculate virtual balance (3x real)

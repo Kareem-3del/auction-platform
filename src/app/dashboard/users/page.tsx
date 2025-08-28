@@ -82,7 +82,7 @@ export default function UsersPage() {
         const data = await apiClient.get('/api/users?includeStats=true');
 
         if (data.success) {
-          setUsers(data.data || []);
+          setUsers(data.data?.data || data.data || []);
         } else {
           setError(data.error?.message || 'Failed to load users');
         }

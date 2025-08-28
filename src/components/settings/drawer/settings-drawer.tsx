@@ -1,8 +1,6 @@
 'use client';
 
-import type { ThemeColorScheme } from 'src/theme/types';
-
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { hasKeys, varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
@@ -12,7 +10,6 @@ import SvgIcon from '@mui/material/SvgIcon';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { useColorScheme } from '@mui/material/styles';
 
 import { themeConfig } from 'src/theme/theme-config';
 import { primaryColorPresets } from 'src/theme/with-settings';
@@ -35,15 +32,6 @@ import type { SettingsState, SettingsDrawerProps } from '../types';
 export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
   const settings = useSettingsContext();
 
-  const { mode, setMode, systemMode } = useColorScheme();
-
-  useEffect(() => {
-    if (mode === 'system' && systemMode) {
-      settings.setState({ colorScheme: systemMode });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, systemMode]);
-
   // Visible options by default settings
   const isFontFamilyVisible = hasKeys(defaultSettings, ['fontFamily']);
   const isCompactLayoutVisible = hasKeys(defaultSettings, ['compactLayout']);
@@ -57,8 +45,7 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
 
   const handleReset = useCallback(() => {
     settings.onReset();
-    setMode(defaultSettings.colorScheme as ThemeColorScheme);
-  }, [defaultSettings.colorScheme, setMode, settings]);
+  }, [settings]);
 
   const renderHead = () => (
     <Box
@@ -92,17 +79,6 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
     </Box>
   );
 
-  const renderMode = () => (
-    <BaseOption
-      label="Dark mode"
-      selected={settings.state.colorScheme === 'dark'}
-      icon={<SvgIcon>{settingIcons.moon}</SvgIcon>}
-      onChangeOption={() => {
-        setMode(mode === 'light' ? 'dark' : 'light');
-        settings.setState({ colorScheme: mode === 'light' ? 'dark' : 'light' });
-      }}
-    />
-  );
 
   const renderContrast = () => (
     <BaseOption
@@ -288,7 +264,6 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
           }}
         >
           <Box sx={{ gap: 2, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
-            {isColorSchemeVisible && renderMode()}
             {isContrastVisible && renderContrast()}
             {isDirectionVisible && renderRtl()}
             {isCompactLayoutVisible && renderCompact()}

@@ -104,15 +104,16 @@ export function useRealtimeBidding({
           console.log('✅ WebSocket authenticated');
           break;
 
-        case 'auction_joined':
+        case 'auction_joined': {
           const joinedMessage = message as AuctionJoined;
           setCurrentBid(joinedMessage.product.currentBid);
           setBidCount(joinedMessage.product.bidCount);
           setAuctionStatus(joinedMessage.product.auctionStatus);
           console.log('🎯 Joined auction:', joinedMessage.productId);
           break;
+        }
 
-        case 'bid_update':
+        case 'bid_update': {
           const bidUpdate = message as BidUpdate;
           if (bidUpdate.productId === productId) {
             setCurrentBid(bidUpdate.currentBid);
@@ -122,8 +123,9 @@ export function useRealtimeBidding({
             console.log('💰 Bid update:', bidUpdate.bid.amount);
           }
           break;
+        }
 
-        case 'auction_status':
+        case 'auction_status': {
           const statusUpdate = message as AuctionStatus;
           if (statusUpdate.productId === productId) {
             setAuctionStatus(statusUpdate.status);
@@ -131,14 +133,16 @@ export function useRealtimeBidding({
             console.log('🎪 Auction status:', statusUpdate.status);
           }
           break;
+        }
 
         case 'error':
-        case 'auth_error':
+        case 'auth_error': {
           const errorMessage = message.message || 'WebSocket error';
           setConnectionError(errorMessage);
           onError?.(errorMessage);
           console.error('❌ WebSocket error:', errorMessage);
           break;
+        }
 
         case 'auction_left':
           console.log('👋 Left auction');

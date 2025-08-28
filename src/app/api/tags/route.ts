@@ -77,6 +77,9 @@ export async function GET(request: NextRequest) {
         // Order by product count (most used tags first)
         orderBy = { productTags: { _count: 'desc' } };
         break;
+      default:
+        orderBy = { name: 'asc' };
+        break;
     }
 
     const [tags, totalCount] = await Promise.all([

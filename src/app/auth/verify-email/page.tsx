@@ -52,14 +52,14 @@ export default function VerifyEmailPage() {
     }
   }, [token, email]);
 
-  const verifyEmail = async (token: string, email: string) => {
+  const verifyEmail = async (verifyToken: string, userEmail: string) => {
     try {
       const response = await fetch('/api/auth/verify-email', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ token, email }),
+        body: JSON.stringify({ token: verifyToken, email: userEmail }),
       });
 
       const data = await response.json();
@@ -186,7 +186,7 @@ export default function VerifyEmailPage() {
 
             <Alert severity="success" sx={{ mb: 3, textAlign: 'left' }}>
               <Typography variant="body2">
-                <strong>What's next?</strong>
+                <strong>What&apos;s next?</strong>
                 <ul style={{ marginTop: '8px', marginBottom: 0 }}>
                   <li>Complete your profile setup</li>
                   <li>Add funds to your wallet</li>
