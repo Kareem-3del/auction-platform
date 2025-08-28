@@ -1,0 +1,758 @@
+// Refactored Prisma Schema for Unified Auction Platform
+// Merges auction functionality directly into Product model
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER MANAGEMENT
+// ============================================================================
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  phone        String? @unique
+  passwordHash String  @map("password_hash")
+
+  // Personal Information
+  firstName String  @map("first_name")
+  lastName  String  @map("last_name")
+  avatarUrl String? @map("avatar_url")
+
+  // Anonymity Settings
+  isAnonymousDisplay   Boolean @default(true) @map("is_anonymous_display")
+  anonymousDisplayName String  @map("anonymous_display_name")
+  anonymousAvatarUrl   String  @map("anonymous_avatar_url")
+
+  // User Type and Status
+  userType UserType @default(BUYER) @map("user_type")
+  isActive Boolean  @default(true) @map("is_active")
+
+  // Balance Management
+  balanceReal       Decimal @default(0) @map("balance_real") @db.Decimal(12, 2)
+  balanceVirtual    Decimal @default(0) @map("balance_virtual") @db.Decimal(12, 2)
+  virtualMultiplier Decimal @default(3.0) @map("virtual_multiplier") @db.Decimal(4, 2)
+
+  // KYC Verification
+  kycStatus      KYCStatus @default(PENDING) @map("kyc_status")
+  kycDocuments   Json?     @map("kyc_documents")
+  kycSubmittedAt DateTime? @map("kyc_submitted_at")
+  kycVerifiedAt  DateTime? @map("kyc_verified_at")
+
+  // Account Verification
+  emailVerified   Boolean   @default(false) @map("email_verified")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  phoneVerified   Boolean   @default(false) @map("phone_verified")
+  phoneVerifiedAt DateTime? @map("phone_verified_at")
+
+  // Security
+  lastLoginAt   DateTime? @map("last_login_at")
+  lastLoginIP   String?   @map("last_login_ip")
+  loginAttempts Int       @default(0) @map("login_attempts")
+  lockedUntil   DateTime? @map("locked_until")
+
+  // Notification Preferences
+  notificationSoundEnabled  Boolean @default(true) @map("notification_sound_enabled")
+  emailNotificationsEnabled Boolean @default(true) @map("email_notifications_enabled")
+  pushNotificationsEnabled  Boolean @default(true) @map("push_notifications_enabled")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  agent              Agent?
+  bids               Bid[]
+  transactions       Transaction[]
+  notifications      Notification[]
+  sessions           UserSession[]
+  favorites          UserFavorite[]
+  paymentMethods     PaymentMethod[]
+  autoBids           AutoBid[]
+  reviews            AgentReview[]       @relation("ReviewAuthor")
+  emailVerifications EmailVerification[]
+  uploadedFiles      File[]              @relation("FileUploader")
+  wonProducts        Product[]           @relation("ProductWinner")
+  highestBidProducts Product[]           @relation("ProductHighestBidder")
+
+  // Audit Relations
+  createdAudits  AuditLog[] @relation("AuditPerformedBy")
+  targetedAudits AuditLog[] @relation("AuditTarget")
+
+  @@map("users")
+}
+
+model Agent {
+  id     String @id @default(cuid())
+  userId String @unique @map("user_id")
+
+  // Business Information
+  businessName   String  @map("business_name")
+  displayName    String  @map("display_name")
+  bio            String?
+  logoUrl        String? @map("logo_url")
+  bannerImageUrl String? @map("banner_image_url")
+  websiteUrl     String? @map("website_url")
+
+  // Business Details
+  businessType       BusinessType @map("business_type")
+  licenseNumber      String?      @map("license_number")
+  registrationNumber String?      @map("registration_number")
+  taxId              String?      @map("tax_id")
+
+  // Status and Performance
+  status              AgentStatus @default(PENDING)
+  commissionRate      Decimal     @default(0.05) @map("commission_rate") @db.Decimal(4, 4)
+  totalSales          Decimal     @default(0) @map("total_sales") @db.Decimal(15, 2)
+  totalCommissions    Decimal     @default(0) @map("total_commissions") @db.Decimal(15, 2)
+  totalAuctions       Int         @default(0) @map("total_auctions")
+  successfulAuctions  Int         @default(0) @map("successful_auctions")
+  averageAuctionValue Decimal     @default(0) @map("average_auction_value") @db.Decimal(12, 2)
+  rating              Decimal     @default(0) @db.Decimal(3, 2)
+  reviewCount         Int         @default(0) @map("review_count")
+
+  // Settings
+  autoApprovalLimit Decimal @default(1000) @map("auto_approval_limit") @db.Decimal(10, 2)
+  requiresApproval  Boolean @default(true) @map("requires_approval")
+
+  // Verification
+  verificationDocuments Json? @map("verification_documents")
+  backgroundCheckData   Json? @map("background_check_data")
+  complianceScore       Int   @default(100) @map("compliance_score")
+
+  // Approval Data
+  approvedAt      DateTime? @map("approved_at")
+  approvedBy      String?   @map("approved_by")
+  rejectedAt      DateTime? @map("rejected_at")
+  rejectionReason String?   @map("rejection_reason")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products    Product[]
+  commissions Commission[]
+  reviews     AgentReview[] @relation("AgentReviews")
+
+  @@map("agents")
+}
+
+// ============================================================================
+// PRODUCT & CATEGORY MANAGEMENT
+// ============================================================================
+
+model Category {
+  id          String   @id @default(cuid())
+  parentId    String?  @map("parent_id")
+  name        String
+  slug        String   @unique
+  description String?
+  iconUrl     String?  @map("icon_url")
+  imageUrl    String?  @map("image_url")
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  isFeatured  Boolean  @default(false) @map("is_featured")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  logoUrl     String?  @map("logo_url")
+  websiteUrl  String?  @map("website_url")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  products Product[]
+
+  @@map("brands")
+}
+
+model Tag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  color       String?  @default("#1976d2")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  productTags ProductTag[]
+
+  @@map("tags")
+}
+
+model ProductTag {
+  id        String   @id @default(cuid())
+  productId String   @map("product_id")
+  tagId     String   @map("tag_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, tagId])
+  @@map("product_tags")
+}
+
+model Product {
+  id                    String           @id @default(cuid())
+  agentId               String           @map("agent_id")
+  categoryId            String           @map("category_id")
+  brandId               String?          @map("brand_id")
+  
+  // Basic Information
+  title                 String
+  description           String           @db.Text
+  shortDescription      String?          @map("short_description")
+  condition             ProductCondition
+  location              String
+  
+  // Images and Media
+  images                Json             @default("[]")
+  videos                Json?            @default("[]")
+  documents             Json?            @default("[]")
+  thumbnailIndex        Int              @default(0) @map("thumbnail_index")
+  
+  // Specifications
+  specifications        Json?            @default("{}")
+  customFields          Json?            @default("[]") @map("custom_fields")
+  
+  // Valuation & Auction Pricing
+  estimatedValueMin     Decimal?         @db.Decimal(12, 2) @map("estimated_value_min")
+  estimatedValueMax     Decimal?         @db.Decimal(12, 2) @map("estimated_value_max")
+  startingBid           Decimal          @default(0) @db.Decimal(12, 2) @map("starting_bid")
+  reservePrice          Decimal?         @db.Decimal(12, 2) @map("reserve_price")
+  buyNowPrice           Decimal?         @db.Decimal(12, 2) @map("buy_now_price")
+  currentBid            Decimal          @default(0) @db.Decimal(12, 2) @map("current_bid")
+  bidIncrement          Decimal          @default(5) @db.Decimal(10, 2) @map("bid_increment")
+  
+  // Auction Timing
+  auctionType           AuctionType      @default(LIVE) @map("auction_type")
+  auctionStatus         AuctionStatus    @default(SCHEDULED) @map("auction_status")
+  startTime             DateTime?        @map("start_time")
+  endTime               DateTime?        @map("end_time")
+  timezone              String           @default("UTC")
+  duration              Int?             @map("duration_minutes")
+  
+  // Bidding Stats
+  highestBidderId       String?          @map("highest_bidder_id")
+  bidCount              Int              @default(0) @map("bid_count")
+  uniqueBidders         Int              @default(0) @map("unique_bidders")
+  
+  // Auto-Extension
+  autoExtend            Boolean          @default(true) @map("auto_extend")
+  extensionTriggerMinutes Int            @default(2) @map("extension_trigger_minutes")
+  extensionDurationMinutes Int           @default(5) @map("extension_duration_minutes")
+  maxExtensions         Int              @default(3) @map("max_extensions")
+  extensionsUsed        Int              @default(0) @map("extensions_used")
+  
+  // Display Settings
+  showBidderNames       Boolean          @default(true) @map("show_bidder_names")
+  showBidCount          Boolean          @default(true) @map("show_bid_count")
+  showWatcherCount      Boolean          @default(true) @map("show_watcher_count")
+  
+  // Auction Results
+  winnerId              String?          @map("winner_id")
+  finalPrice            Decimal?         @db.Decimal(12, 2) @map("final_price")
+  soldAt                DateTime?        @map("sold_at")
+  
+  // Actual Timing
+  actualStartTime       DateTime?        @map("actual_start_time")
+  actualEndTime         DateTime?        @map("actual_end_time")
+  lastBidAt             DateTime?        @map("last_bid_at")
+  extendedAt            DateTime?        @map("extended_at")
+  
+  // Logistics
+  shippingInfo          Json?            @map("shipping_info")
+  pickupAvailable       Boolean          @default(false) @map("pickup_available")
+  pickupAddress         String?          @map("pickup_address")
+  
+  // Status and Analytics
+  status                ProductStatus    @default(DRAFT)
+  rejectionReason       String?          @map("rejection_reason")
+  viewCount             Int              @default(0) @map("view_count")
+  favoriteCount         Int              @default(0) @map("favorite_count")
+  watcherCount          Int              @default(0) @map("watcher_count")
+  
+  // Approval Data
+  approvedAt            DateTime?        @map("approved_at")
+  approvedBy            String?          @map("approved_by")
+  
+  // Timestamps
+  createdAt             DateTime         @default(now()) @map("created_at")
+  updatedAt             DateTime         @updatedAt @map("updated_at")
+  
+  // Relations
+  agent                 Agent            @relation(fields: [agentId], references: [id])
+  category              Category         @relation(fields: [categoryId], references: [id])
+  brand                 Brand?           @relation(fields: [brandId], references: [id])
+  winner                User?            @relation("ProductWinner", fields: [winnerId], references: [id])
+  highestBidder         User?            @relation("ProductHighestBidder", fields: [highestBidderId], references: [id])
+  bids                  Bid[]
+  autoBids              AutoBid[]
+  favorites             UserFavorite[]
+  commissions           Commission[]
+  files                 File[]
+  productTags           ProductTag[]
+  
+  @@map("products")
+}
+
+// ============================================================================
+// BIDDING SYSTEM
+// ============================================================================
+
+model Bid {
+  id        String @id @default(cuid())
+  productId String @map("product_id")
+  userId    String @map("user_id")
+
+  // Bid Information
+  amount    Decimal   @db.Decimal(12, 2)
+  maxAmount Decimal?  @map("max_amount") @db.Decimal(12, 2)
+  bidType   BidType   @default(MANUAL) @map("bid_type")
+  status    BidStatus @default(ACTIVE)
+
+  // Metadata
+  userAgent String? @map("user_agent")
+  ipAddress String? @map("ip_address")
+
+  // Timing
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  outbidAt  DateTime? @map("outbid_at")
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([productId, amount(sort: Desc)])
+  @@index([userId, createdAt])
+  @@map("bids")
+}
+
+model AutoBid {
+  id        String @id @default(cuid())
+  productId String @map("product_id")
+  userId    String @map("user_id")
+
+  maxAmount Decimal @map("max_amount") @db.Decimal(12, 2)
+  increment Decimal @default(5) @db.Decimal(10, 2)
+  isActive  Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([productId, userId])
+  @@map("auto_bids")
+}
+
+// ============================================================================
+// FINANCIAL SYSTEM
+// ============================================================================
+
+model Transaction {
+  id          String  @id @default(cuid())
+  userId      String  @map("user_id")
+  relatedId   String? @map("related_id")
+  relatedType String? @map("related_type")
+
+  // Transaction Details
+  transactionType TransactionType @map("transaction_type")
+  amountReal      Decimal         @map("amount_real") @db.Decimal(12, 2)
+  amountVirtual   Decimal         @map("amount_virtual") @db.Decimal(12, 2)
+  fee             Decimal         @default(0) @db.Decimal(12, 2)
+  currency        String          @default("USD")
+
+  // Status
+  status TransactionStatus @default(PENDING)
+
+  // Payment Details
+  paymentMethod     String? @map("payment_method")
+  externalReference String? @map("external_reference")
+  paymentDetails    Json?   @map("payment_details")
+
+  // Processing
+  processedAt   DateTime? @map("processed_at")
+  processedBy   String?   @map("processed_by")
+  failureReason String?   @map("failure_reason")
+
+  // Description
+  description String
+  metadata    Json?  @default("{}")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([transactionType, status])
+  @@map("transactions")
+}
+
+model PaymentMethod {
+  id     String @id @default(cuid())
+  userId String @map("user_id")
+
+  methodType  PaymentMethodType @map("method_type")
+  provider    String
+  credentials Json              @default("{}")
+  isDefault   Boolean           @default(false) @map("is_default")
+  isVerified  Boolean           @default(false) @map("is_verified")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("payment_methods")
+}
+
+model Commission {
+  id        String @id @default(cuid())
+  agentId   String @map("agent_id")
+  productId String @map("product_id")
+
+  saleAmount       Decimal @map("sale_amount") @db.Decimal(12, 2)
+  commissionRate   Decimal @map("commission_rate") @db.Decimal(4, 4)
+  commissionAmount Decimal @map("commission_amount") @db.Decimal(12, 2)
+  platformFee      Decimal @map("platform_fee") @db.Decimal(12, 2)
+  agentPayout      Decimal @map("agent_payout") @db.Decimal(12, 2)
+
+  status CommissionStatus @default(PENDING)
+  paidAt DateTime?        @map("paid_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  agent   Agent   @relation(fields: [agentId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("commissions")
+}
+
+// ============================================================================
+// NOTIFICATION SYSTEM
+// ============================================================================
+
+model Notification {
+  id          String  @id @default(cuid())
+  userId      String  @map("user_id")
+  relatedId   String? @map("related_id")
+  relatedType String? @map("related_type")
+
+  notificationType NotificationType @map("notification_type")
+  title            String
+  message          String           @db.Text
+  data             Json?            @default("{}")
+
+  isRead         Boolean        @default(false) @map("is_read")
+  deliveryMethod DeliveryMethod @map("delivery_method")
+
+  sentAt    DateTime? @map("sent_at")
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+// ============================================================================
+// SESSION & FAVORITES
+// ============================================================================
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_sessions")
+}
+
+model UserFavorite {
+  id        String @id @default(cuid())
+  userId    String @map("user_id")
+  productId String @map("product_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("user_favorites")
+}
+
+// ============================================================================
+// FILE MANAGEMENT
+// ============================================================================
+
+model File {
+  id          String  @id @default(cuid())
+  filename    String
+  originalName String @map("original_name")
+  path        String
+  mimeType    String  @map("mime_type")
+  size        Int
+  uploadedBy  String  @map("uploaded_by")
+  productId   String? @map("product_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  uploader User     @relation("FileUploader", fields: [uploadedBy], references: [id])
+  product  Product? @relation(fields: [productId], references: [id])
+
+  @@map("files")
+}
+
+// ============================================================================
+// REVIEWS & RATINGS
+// ============================================================================
+
+model AgentReview {
+  id      String @id @default(cuid())
+  agentId String @map("agent_id")
+  userId  String @map("user_id")
+
+  rating  Decimal @db.Decimal(2, 1)
+  title   String?
+  comment String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  agent Agent @relation("AgentReviews", fields: [agentId], references: [id])
+  user  User  @relation("ReviewAuthor", fields: [userId], references: [id])
+
+  @@unique([agentId, userId])
+  @@map("agent_reviews")
+}
+
+// ============================================================================
+// EMAIL VERIFICATION
+// ============================================================================
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_verifications")
+}
+
+// ============================================================================
+// AUDIT LOG
+// ============================================================================
+
+model AuditLog {
+  id         String @id @default(cuid())
+  userId     String @map("user_id")
+  targetId   String @map("target_id")
+  entityType String @map("entity_type")
+  entityId   String @map("entity_id")
+  action     String
+  oldValues  Json?  @map("old_values")
+  newValues  Json?  @map("new_values")
+  ipAddress  String @map("ip_address")
+  userAgent  String @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  performedBy User @relation("AuditPerformedBy", fields: [userId], references: [id])
+  target      User @relation("AuditTarget", fields: [targetId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId, createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserType {
+  BUYER
+  AGENT
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum KYCStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum AgentStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+  REJECTED
+}
+
+enum BusinessType {
+  INDIVIDUAL
+  LLC
+  CORPORATION
+  PARTNERSHIP
+  NON_PROFIT
+}
+
+enum ProductCondition {
+  NEW
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  SOLD
+  ARCHIVED
+}
+
+enum AuctionType {
+  LIVE
+  SEALED_BID
+  BUY_NOW
+  HYBRID
+}
+
+enum AuctionStatus {
+  SCHEDULED
+  LIVE
+  PAUSED
+  ENDED
+  CANCELLED
+}
+
+enum BidType {
+  MANUAL
+  AUTOMATIC
+}
+
+enum BidStatus {
+  ACTIVE
+  OUTBID
+  WINNING
+  WON
+  LOST
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  BID_PLACEMENT
+  AUCTION_WIN
+  REFUND
+  COMMISSION
+  FEE
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum PaymentMethodType {
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  PAYPAL
+  STRIPE
+  CRYPTO
+}
+
+enum CommissionStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum NotificationType {
+  BID_PLACED
+  BID_OUTBID
+  AUCTION_STARTING
+  AUCTION_ENDING
+  AUCTION_WON
+  AUCTION_LOST
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  AGENT_APPROVED
+  AGENT_REJECTED
+  PRODUCT_APPROVED
+  PRODUCT_REJECTED
+  SYSTEM_ALERT
+}
+
+enum DeliveryMethod {
+  EMAIL
+  PUSH
+  SMS
+  IN_APP
+}

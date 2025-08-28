@@ -1,0 +1,65 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Testing
+coverage
+
+# Next.js
+.next
+.swc
+_static
+out
+dist
+build
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+
+# Misc
+.DS_Store
+.vercel
+.netlify
+.vscode
+.idea
+tsconfig.tsbuildinfo
+.ncurc.js
+*.pem
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Prisma
+prisma/migrations/dev.db*
+
+# Redis dump
+dump.rdb
+
+# SSL certificates
+ssl/*
+!ssl/.gitkeep
