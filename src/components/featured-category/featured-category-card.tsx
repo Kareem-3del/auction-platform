@@ -98,7 +98,7 @@ export const FeaturedCategoryCard: FC<FeaturedCategoryCardProps> = ({
     >
       <Box>
         <CategoryIcon>
-          <Iconify icon={icon} width={24} sx={{ color: 'common.white' }} />
+          <Iconify icon={icon as any} width={24} sx={{ color: 'common.white' }} />
         </CategoryIcon>
         
         <Stack spacing={1}>
@@ -129,7 +129,7 @@ export const FeaturedCategoryCard: FC<FeaturedCategoryCardProps> = ({
       </Box>
 
       <ViewAllButton
-        endIcon={<Iconify icon="eva:arrow-forward-outline" width={16} />}
+        endIcon={<Iconify icon={"eva:arrow-forward-outline" as any} width={16} />}
         onClick={(e) => {
           e.stopPropagation();
           onClick?.();

@@ -410,7 +410,7 @@ export default function BiddingInterface({
                   label="Display Name (Optional)"
                   value={customBidderName}
                   onChange={(e) => setCustomBidderName(e.target.value)}
-                  placeholder={user?.displayName || 'Your Name'}
+                  placeholder={`${user?.firstName} ${user?.lastName}`.trim() || 'Your Name'}
                   helperText="Leave empty to use your account name"
                   InputProps={{
                     startAdornment: <InputAdornment position="start"><PersonIcon fontSize="small" /></InputAdornment>,

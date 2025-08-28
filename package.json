@@ -28,6 +28,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "test": "jest",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma db push && next build",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false"

@@ -62,7 +62,7 @@ export function FeaturedCategoriesSection() {
         productCount: category.productCount || category._count?.products || 0,
       })));
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Error fetching featured categories:', error);
       }
       setFeaturedCategories([]);

@@ -67,7 +67,7 @@ export function OptimizedFeaturedSection() {
         setProducts(productsData.slice(0, 4));
       }
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Failed to fetch products:', error);
         setProducts([]);
       }

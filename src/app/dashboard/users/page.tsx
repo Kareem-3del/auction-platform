@@ -382,7 +382,7 @@ export default function UsersPage() {
                           </Typography>
                           {user.emailVerified && (
                             <Tooltip title="Email verified">
-                              <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
+                              <VerifyIcon sx={{ fontSize: 14, color: 'success.main' }} />
                             </Tooltip>
                           )}
                         </Stack>

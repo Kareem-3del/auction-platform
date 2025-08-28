@@ -33,7 +33,7 @@ export function RealtimeBidding({
   estimatedValueMin = 0,
   estimatedValueMax = 0,
 }: RealtimeBiddingProps) {
-  const { user } = useAuth();
+  const { user, tokens } = useAuth();
   const [bidAmount, setBidAmount] = useState('');
   const [isPlacingBid, setIsPlacingBid] = useState(false);
   const [bidError, setBidError] = useState<string | null>(null);
@@ -96,7 +96,7 @@ export function RealtimeBidding({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.tokens?.accessToken}`,
+          'Authorization': `Bearer ${tokens?.accessToken}`,
         },
         body: JSON.stringify({
           amount,

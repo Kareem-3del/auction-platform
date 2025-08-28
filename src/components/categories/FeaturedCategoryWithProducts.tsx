@@ -69,7 +69,7 @@ export function FeaturedCategoryWithProducts({ category }: FeaturedCategoryWithP
           setProducts(productsData.slice(0, 4)); // Show max 4 products
         }
       } catch (error) {
-        if (isMounted && error.name !== 'AbortError') {
+        if (isMounted && error instanceof Error && error.name !== 'AbortError') {
           console.error(`Error fetching products for ${category.name}:`, error);
           setProducts([]);
         }
