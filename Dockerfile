@@ -18,8 +18,9 @@ CMD ["yarn", "dev"]
 
 # Dependencies stage for production
 FROM base AS deps
-# Install dependencies based on the preferred package manager
+# Copy package files and Prisma schema for proper installation
 COPY package*.json yarn.lock* ./
+COPY prisma/ ./prisma/
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
