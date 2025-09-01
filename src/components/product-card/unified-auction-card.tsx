@@ -307,6 +307,7 @@ export const UnifiedAuctionCard: FC<UnifiedAuctionCardProps> = ({
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   const endTime = auction?.endTime;
   const startTime = auction?.startTime;
@@ -452,6 +453,7 @@ export const UnifiedAuctionCard: FC<UnifiedAuctionCardProps> = ({
                 className="overlay-content"
                 onClick={(e) => {
                   e.stopPropagation();
+                  setIsFavorited(!isFavorited);
                   onFavorite();
                 }}
                 sx={{ 
