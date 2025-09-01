@@ -290,6 +290,22 @@ const MetricItem = styled(Box)(({ theme }) => ({
   fontWeight: 500,
 }));
 
+const QuickViewButton = styled(IconButton)(({ theme }) => ({
+  position: 'absolute',
+  bottom: 12,
+  right: 12,
+  width: 40,
+  height: 40,
+  backgroundColor: '#CE0E2D',
+  color: 'white',
+  opacity: 0,
+  transform: 'translateY(8px)',
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    backgroundColor: '#a10e24',
+  },
+}));
+
 // ----------------------------------------------------------------------
 
 interface PremiumAuctionCardProps {
@@ -406,102 +422,48 @@ export function PremiumAuctionCard({
   const badgeContent = getBadgeContent();
 
   return (
-    <Grow in timeout={600} style={{ transformOrigin: '0 0 0' }}>
-      <StyledCard onClick={onClick}>
-        <ImageContainer>
-          {/* Image Loading Skeleton */}
-          {imageLoading && (
-            <ImageSkeleton>
-              <Typography variant="body2" sx={{ opacity: 0.6 }}>
-                Loading image...
-              </Typography>
-            </ImageSkeleton>
-          )}
-          
-          {/* Product Image */}
-          {!imageError ? (
-            <ProductImage
-              className="card-image"
-              src={primaryImage}
-              alt={product.title}
-              loading="lazy"
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              style={{ 
-                display: imageLoading ? 'none' : 'block',
-                opacity: imageLoaded ? 1 : 0,
-                transition: 'opacity 0.3s ease'
-              }}
-            />
-          ) : (
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
-                background: 'linear-gradient(135deg, #f1f3f4 0%, #e8eaed 100%)',
-                color: 'text.secondary',
-                gap: 2,
-              }}
-            >
-              <ViewIcon sx={{ fontSize: 48, opacity: 0.4 }} />
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Image unavailable
-              </Typography>
-            </Box>
-          )}
+    <StyledCard onClick={onClick}>
+      <ImageContainer>
+        {/* Simple Image Display */}
+        <ProductImage
+          className="card-image"
+          src={primaryImage}
+          alt={product.title}
+          onError={(e) => {
+            e.currentTarget.src = 'https://via.placeholder.com/400x240/f1f5f9/64748b?text=No+Image';
+          }}
+        />
 
-          {/* Status Badge */}
-          <StatusBadge
-            variant={variant}
-            icon={badgeContent.icon}
-            label={badgeContent.text}
-          />
+        {/* Status Badge */}
+        <StatusBadge
+          variant={variant}
+          label={getBadgeContent().text}
+        />
 
-          {/* Favorite Button */}
-          {onFavorite && (
-            <FavoriteButton
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsFavorited(!isFavorited);
-                onFavorite();
-              }}
-              sx={{ color: isFavorited ? '#CE0E2D' : 'text.secondary' }}
-            >
-              <Zoom in={imageLoaded} timeout={300}>
-                {isFavorited ? <FavoriteIcon /> : <FavoriteOutlineIcon />}
-              </Zoom>
-            </FavoriteButton>
-          )}
+        {/* Favorite Button */}
+        {onFavorite && (
+          <FavoriteButton
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsFavorited(!isFavorited);
+              onFavorite();
+            }}
+          >
+            {isFavorited ? <FavoriteIcon sx={{ color: '#CE0E2D' }} /> : <FavoriteOutlineIcon />}
+          </FavoriteButton>
+        )}
 
-          {/* Image Overlay with Actions */}
-          <ImageOverlay className="card-image-overlay">
-            <Box />
-            <HoverActions className="hover-actions">
-              <IconButton
-                sx={{
-                  bgcolor: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
-                  '&:hover': { 
-                    bgcolor: 'white', 
-                    transform: 'scale(1.15) rotate(5deg)',
-                    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.2)',
-                  },
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onQuickView?.();
-                }}
-              >
-                <LaunchIcon sx={{ color: '#CE0E2D', fontSize: 20 }} />
-              </IconButton>
-            </HoverActions>
-          </ImageOverlay>
-        </ImageContainer>
+        {/* Quick View Button */}
+        <QuickViewButton
+          className="quick-view-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onQuickView?.();
+          }}
+        >
+          <LaunchIcon sx={{ fontSize: 20 }} />
+        </QuickViewButton>
+      </ImageContainer>
 
         <ContentContainer className="card-content">
           <Box>

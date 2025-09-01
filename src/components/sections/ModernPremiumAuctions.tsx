@@ -22,7 +22,7 @@ import {
   ArrowForward as ArrowIcon,
 } from '@mui/icons-material';
 
-import { PremiumAuctionCard } from '../product-card/PremiumAuctionCard';
+import { SimplePremiumCard } from '../product-card/SimplePremiumCard';
 import { productsAPI, isSuccessResponse } from 'src/lib/api-client';
 import type { ProductCard } from 'src/types/common';
 
@@ -462,7 +462,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
                         <Grid item xs={12} sm={6} lg={4} xl={3} key={product.id}>
                           <Fade in timeout={600 + index * 100}>
                             <div>
-                              <PremiumAuctionCard
+                              <SimplePremiumCard
                                 product={{
                                   id: product.id,
                                   title: product.title,
@@ -625,7 +625,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
                     <Grid item xs={12} sm={6} lg={4} xl={3} key={product.id}>
                       <Fade in timeout={600 + index * 100}>
                         <div>
-                          <PremiumAuctionCard
+                          <SimplePremiumCard
                             product={{
                               id: product.id,
                               title: product.title,
