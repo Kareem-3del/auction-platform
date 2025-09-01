@@ -295,15 +295,41 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
       const apiSection = section === 'ending' ? 'ending-soon' : section;
       console.log(`Fetching ${section} products from API:`, apiSection);
       
-      const response = await productsAPI.getShowcaseProducts(apiSection, limit);
+      // Try showcase API first
+      let response = await productsAPI.getShowcaseProducts(apiSection, limit);
+      
+      // If showcase API fails or returns empty, try general products API as fallback
+      if (!isSuccessResponse(response) || !response.data?.data?.length) {
+        console.log(`Showcase API failed for ${section}, trying general products API`);
+        const generalResponse = await fetch(`/api/products?limit=${limit}&status=APPROVED`);
+        if (generalResponse.ok) {
+          const generalData = await generalResponse.json();
+          if (generalData.success && generalData.data?.length) {
+            console.log(`Found ${generalData.data.length} products from general API`);
+            setProducts(prev => ({
+              ...prev,
+              [section]: generalData.data.slice(0, limit)
+            }));
+            return;
+          }
+        }
+      }
       
       if (isSuccessResponse(response)) {
         const fetchedProducts = response.data.data || [];
-        console.log(`Successfully fetched ${section} products:`, fetchedProducts.length);
-        setProducts(prev => ({
-          ...prev,
-          [section]: Array.isArray(fetchedProducts) ? fetchedProducts : []
-        }));
+        console.log(`Successfully fetched ${section} products:`, fetchedProducts.length, fetchedProducts);
+        if (fetchedProducts.length === 0) {
+          console.log(`No products found for ${section}, using mock data`);
+          setProducts(prev => ({
+            ...prev,
+            [section]: createMockProducts(section, limit)
+          }));
+        } else {
+          setProducts(prev => ({
+            ...prev,
+            [section]: Array.isArray(fetchedProducts) ? fetchedProducts : []
+          }));
+        }
       } else {
         console.warn(`API error for ${section}:`, response.error);
         // Use mock data as fallback for demo
@@ -315,6 +341,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
       }
     } catch (err) {
       console.error(`Error fetching ${section} products:`, err);
+      console.log(`Error details for ${section}:`, err.message);
       // Use mock data as fallback
       console.log(`Using mock data fallback for ${section} due to error`);
       setProducts(prev => ({

@@ -81,10 +81,9 @@ export async function GET(request: NextRequest) {
       }
 
       case 'trending': {
-        // Simplified trending query - just get recent live auctions
+        // Get any approved products for trending (not just live auctions)
         whereClause = {
           ...whereClause,
-          auctionStatus: 'LIVE',
         };
         orderBy = { createdAt: 'desc' };
         sectionTitle = 'Trending Now';
@@ -92,11 +91,9 @@ export async function GET(request: NextRequest) {
       }
 
       case 'recent': {
-        // Recently added products
-        const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        // Get any approved products for recent section
         whereClause = {
           ...whereClause,
-          createdAt: { gte: lastWeek },
         };
         orderBy = { createdAt: 'desc' };
         sectionTitle = 'Recently Added';
@@ -105,17 +102,19 @@ export async function GET(request: NextRequest) {
 
       case 'featured':
       default: {
-        // Simplified featured query - just get approved products
+        // Get any approved products for featured section
         whereClause = {
           ...whereClause,
-          estimatedValueMax: { gte: 1000 },
+          // Remove value restriction to show all approved products
         };
-        orderBy = { estimatedValueMax: 'desc' };
+        orderBy = { createdAt: 'desc' };
         sectionTitle = 'Featured Products';
         break;
       }
     }
 
+    console.log('Showcase API - whereClause:', JSON.stringify(whereClause, null, 2));
+    
     const products = await prisma.product.findMany({
       where: whereClause,
       include: {
@@ -154,6 +153,8 @@ export async function GET(request: NextRequest) {
       orderBy,
       take: limit,
     });
+
+    console.log(`Showcase API - Found ${products.length} products for section ${section}`);
 
     const productsData = products.map((product: any) => ({
       ...product,
