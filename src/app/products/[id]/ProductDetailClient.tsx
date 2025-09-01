@@ -317,15 +317,59 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           </Breadcrumbs>
         </Box>
 
-        {/* MAIN LAYOUT: LEFT SIDEBAR + RIGHT CONTENT */}
-        <Box display="flex" gap={3} sx={{ flexDirection: { xs: 'column', lg: 'row' } }}>
+        {/* NEW 3-COLUMN LAYOUT: Left Info | Center Image | Right Info & Bids */}
+        <Grid container spacing={3} sx={{ minHeight: 'calc(100vh - 200px)' }}>
           
-          {/* LEFT SIDEBAR: Auction Status, Bidding, and Actions */}
-          <Box sx={{ width: { xs: '100%', lg: '350px' }, flexShrink: 0 }}>
+          {/* LEFT COLUMN: Product Info & Seller Details */}
+          <Grid item xs={12} lg={3} sx={{ display: 'flex', flexDirection: 'column' }}>
             
+            {/* PRODUCT TITLE & BASIC INFO */}
+            <Card sx={{ 
+              mb: 2,
+              p: 3,
+              backgroundColor: '#ffffff',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+              flex: '0 0 auto'
+            }}>
+              <Typography 
+                variant="h4" 
+                component="h1"
+                sx={{
+                  fontWeight: 'bold',
+                  color: '#0F1419',
+                  fontSize: { xs: '1.5rem', md: '2rem' },
+                  lineHeight: 1.2,
+                  mb: 2
+                }}
+              >
+                {product.title}
+              </Typography>
+              <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                <Chip 
+                  label={product.condition} 
+                  size="medium"
+                  variant="outlined"
+                  sx={{ 
+                    borderColor: '#CE0E2D',
+                    color: '#CE0E2D',
+                    fontWeight: 'bold'
+                  }}
+                />
+                <Typography variant="body1" color="text.secondary" sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  gap: 0.5 
+                }}>
+                  <LocationIcon fontSize="small" /> {product.location}
+                </Typography>
+              </Stack>
+            </Card>
+
             {/* AUCTION STATUS CARD */}
             <Card sx={{ 
-              mb: 3,
+              mb: 2,
               background: product.auctionStatus === 'LIVE' 
                 ? 'linear-gradient(135deg, #CE0E2D, #FF4444)' 
                 : product.auctionStatus === 'ENDED' 
@@ -333,9 +377,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   : 'linear-gradient(135deg, #6c757d, #495057)',
               color: 'white',
               boxShadow: '0 8px 32px rgba(206, 14, 45, 0.3)',
+              flex: '0 0 auto'
             }}>
-              <Box p={3}>
-                <Typography variant="h5" fontWeight="bold" mb={2} sx={{ textAlign: 'center' }}>
+              <Box p={2}>
+                <Typography variant="h6" fontWeight="bold" mb={1} sx={{ textAlign: 'center' }}>
                   {product.auctionStatus === 'LIVE' && '🔴 LIVE AUCTION'}
                   {product.auctionStatus === 'ENDED' && '👑 AUCTION ENDED'}  
                   {product.auctionStatus === 'SCHEDULED' && '📅 UPCOMING'}
@@ -343,31 +388,31 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 
                 {/* Timer Display */}
                 {product.auctionStatus === 'LIVE' && timeLeft && (
-                  <Box textAlign="center" mb={2}>
-                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                  <Box textAlign="center">
+                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 0.5 }}>
                       Time Remaining:
                     </Typography>
-                    <Typography variant="h4" fontWeight="bold">
+                    <Typography variant="h6" fontWeight="bold">
                       ⏰ {timeLeft}
                     </Typography>
                   </Box>
                 )}
                 {product.auctionStatus === 'SCHEDULED' && product.startTime && (
-                  <Box textAlign="center" mb={2}>
-                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                  <Box textAlign="center">
+                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 0.5 }}>
                       Starts:
                     </Typography>
-                    <Typography variant="h6" fontWeight="bold">
+                    <Typography variant="body1" fontWeight="bold">
                       {formatDate(product.startTime)}
                     </Typography>
                   </Box>
                 )}
                 {product.auctionStatus === 'ENDED' && product.endTime && (
-                  <Box textAlign="center" mb={2}>
-                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                  <Box textAlign="center">
+                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 0.5 }}>
                       Ended:
                     </Typography>
-                    <Typography variant="h6" fontWeight="bold">
+                    <Typography variant="body1" fontWeight="bold">
                       {formatDate(product.endTime)}
                     </Typography>
                   </Box>
@@ -375,142 +420,170 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               </Box>
             </Card>
 
-            {/* CURRENT BID CARD */}
+            {/* Seller Information */}
             <Card sx={{ 
-              mb: 3,
-              p: 3, 
+              mb: 2,
+              p: 2,
               backgroundColor: '#ffffff',
-              border: '3px solid',
-              borderColor: product.auctionStatus === 'LIVE' ? '#CE0E2D' : 
-                          product.auctionStatus === 'ENDED' ? '#FFD700' : '#e0e0e0',
-              borderRadius: 3,
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
-              textAlign: 'center'
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+              flex: '0 0 auto'
             }}>
-              {/* Live Connection Status */}
-              {product.auctionStatus === 'LIVE' && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 15,
-                    right: 15,
-                    backgroundColor: isConnected ? '#4CAF50' : '#f44336',
-                    color: 'white',
-                    px: 2,
-                    py: 0.5,
-                    borderRadius: 2,
-                    fontSize: '0.75rem',
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0.5,
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                    cursor: !isConnected ? 'pointer' : 'default'
-                  }}
-                  onClick={!isConnected ? reconnect : undefined}
-                >
-                  <Box
-                    sx={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: '50%',
-                      backgroundColor: 'white',
-                    }}
-                  />
-                  {isConnected ? 'LIVE' : 'OFFLINE'}
-                </Box>
-              )}
-              
               <Typography 
-                variant="body1" 
-                color="text.secondary" 
-                mb={2} 
+                variant="h6" 
+                gutterBottom
                 sx={{ 
-                  fontSize: '1rem', 
+                  color: '#0F1419', 
                   fontWeight: 'bold',
-                  mt: product.auctionStatus === 'LIVE' ? 3 : 0
-                }}
-              >
-                {product.auctionStatus === 'ENDED' ? '👑 WINNING BID' : 
-                 product.auctionStatus === 'LIVE' ? '💰 CURRENT BID' : '💵 STARTING BID'}
-              </Typography>
-              <Typography 
-                variant="h2" 
-                sx={{ 
-                  color: product.auctionStatus === 'ENDED' ? '#FFD700' : '#CE0E2D', 
-                  fontWeight: 'bold',
-                  fontSize: { xs: '2.5rem', md: '3rem' },
                   mb: 2
                 }}
               >
-                {formatCurrency(displayCurrentBid)}
+                🏢 Seller Info
               </Typography>
-            </Card>
-
-            {/* TOTAL BIDS CARD */}
-            <Card sx={{ 
-              mb: 3,
-              p: 3, 
-              backgroundColor: '#f8f9fa',
-              border: '2px solid #1976d2',
-              borderRadius: 3,
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
-              textAlign: 'center'
-            }}>
-              <Typography variant="h2" sx={{ color: '#1976d2', fontWeight: 'bold', mb: 1 }}>
-                {displayBidCount}
-              </Typography>
-              <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                TOTAL BIDS
-              </Typography>
-              {product.auctionStatus === 'LIVE' && lastBid && (
-                <Box sx={{ mt: 3, pt: 2, borderTop: '2px solid #e9ecef' }}>
-                  <Typography variant="body1" color="text.primary" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                    Last: {lastBid.bidderName}
+              
+              <Box display="flex" alignItems="center" mb={2}>
+                <Avatar 
+                  src={product.agent.logoUrl} 
+                  alt={product.agent.displayName}
+                  sx={{ 
+                    width: 40, 
+                    height: 40, 
+                    mr: 2,
+                    border: '2px solid #e0e0e0'
+                  }}
+                />
+                <Box>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: '#0F1419', 
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {product.agent.displayName}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {new Date(lastBid.bidTime).toLocaleTimeString()}
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                  >
+                    {product.agent.businessName}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {product.agent.rating && (
+                <Box display="flex" alignItems="center" mb={1}>
+                  <Rating 
+                    value={product.agent.rating} 
+                    readOnly 
+                    size="small"
+                    sx={{
+                      '& .MuiRating-iconFilled': {
+                        color: '#CE0E2D',
+                      }
+                    }}
+                  />
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      ml: 1,
+                      color: '#6c757d'
+                    }}
+                  >
+                    ({product.agent.reviewCount})
                   </Typography>
                 </Box>
               )}
+
+              <Grid container spacing={1}>
+                <Grid item xs={4}>
+                  <Box textAlign="center" p={0.5}>
+                    <Typography variant="body1" sx={{ color: '#CE0E2D', fontWeight: 'bold' }}>
+                      {product.agent.totalSales}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Sales
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={4}>
+                  <Box textAlign="center" p={0.5}>
+                    <Typography variant="body1" sx={{ color: '#CE0E2D', fontWeight: 'bold' }}>
+                      {product.agent.totalAuctions}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Auctions
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={4}>
+                  <Box textAlign="center" p={0.5}>
+                    <Typography variant="body1" sx={{ color: '#CE0E2D', fontWeight: 'bold' }}>
+                      {product.agent.successfulAuctions}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Success
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
             </Card>
 
-            {/* QUICK BID INTERFACE */}
-            {product.auctionStatus === 'LIVE' && (
-              <Card sx={{
-                p: 3,
-                backgroundColor: '#ffffff',
-                border: '2px solid #CE0E2D',
-                borderRadius: 2,
-                boxShadow: '0 8px 24px rgba(206, 14, 45, 0.2)',
-                mb: 3
-              }}>
-                <QuickBidDialog
-                  productId={product.id}
-                  currentBid={displayCurrentBid}
-                  bidIncrement={product.bidIncrement || 1}
-                  timeLeft={timeLeft}
-                  auctionStatus={product.auctionStatus}
-                  onBidPlaced={handleBidPlaced}
-                  isConnected={isConnected}
-                  connectionError={connectionError}
-                  onReconnect={reconnect}
-                  bidButtonDisabled={bidButtonDisabled}
-                  bidCooldownTime={bidCooldownTime}
-                  lastBidUpdate={lastBid ? {
-                    id: lastBid.id || 'unknown',
-                    amount: lastBid.amount,
-                    bidderName: lastBid.bidderName,
-                    bidTime: lastBid.bidTime
-                  } : undefined}
-                  liveCurrentBid={liveCurrentBid}
-                  liveBidCount={liveBidCount}
-                />
-              </Card>
-            )}
+            {/* Auction Information */}
+            <Card sx={{ 
+              mb: 2,
+              p: 2,
+              backgroundColor: '#ffffff',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+              flex: '1 1 auto'
+            }}>
+              <Typography 
+                variant="h6" 
+                gutterBottom
+                sx={{ 
+                  color: '#0F1419', 
+                  fontWeight: 'bold',
+                  mb: 2
+                }}
+              >
+                📈 Auction Info
+              </Typography>
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                    ESTIMATED VALUE
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#0F1419', fontWeight: 'bold' }}>
+                    {product.estimatedValueMin && product.estimatedValueMax 
+                      ? `${formatCurrency(product.estimatedValueMin)} - ${formatCurrency(product.estimatedValueMax)}`
+                      : 'Contact Agent'
+                    }
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                    BID INCREMENT
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#0F1419', fontWeight: 'bold' }}>
+                    {formatCurrency(product.bidIncrement || 1)}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                    RESERVE PRICE
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#0F1419', fontWeight: 'bold' }}>
+                    {product.reservePrice ? formatCurrency(product.reservePrice) : 'Not disclosed'}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Card>
 
             {/* Quick Actions */}
-            <Stack direction="row" spacing={2} mb={3} justifyContent="center">
+            <Stack direction="row" spacing={2} justifyContent="center" sx={{ flex: '0 0 auto' }}>
               <IconButton
                 onClick={() => setIsFavorite(!isFavorite)}
                 sx={{
@@ -554,17 +627,17 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 <ShareIcon />
               </IconButton>
             </Stack>
-          </Box>
+          </Grid>
 
-          {/* RIGHT CONTENT: Images and Details */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+          {/* CENTER COLUMN: Product Images */}
+          <Grid item xs={12} lg={6}>
             
             {/* PRODUCT IMAGES */}
             <Paper sx={{ 
               position: 'relative', 
               aspectRatio: '4/3', 
               overflow: 'hidden', 
-              mb: 3,
+              mb: 2,
               borderRadius: 2,
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
               border: '1px solid #e0e0e0'
@@ -647,7 +720,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <Stack direction="row" spacing={1} sx={{ 
                 overflowX: 'auto', 
                 pb: 1,
-                mb: 3,
+                mb: 2,
+                justifyContent: 'center',
                 '&::-webkit-scrollbar': { height: 4 },
                 '&::-webkit-scrollbar-thumb': { backgroundColor: '#CE0E2D', borderRadius: 2 }
               }}>
@@ -658,8 +732,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     src={image}
                     alt={`${product.title} ${index + 1}`}
                     sx={{
-                      width: 80,
-                      height: 80,
+                      width: 60,
+                      height: 60,
                       objectFit: 'cover',
                       borderRadius: 1,
                       cursor: 'pointer',
@@ -677,241 +751,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   />
                 ))}
               </Stack>
-            )}
-
-            {/* PRODUCT TITLE & INFO */}
-            <Box sx={{ mb: 4 }}>
-              <Typography 
-                variant="h3" 
-                component="h1"
-                sx={{
-                  fontWeight: 'bold',
-                  color: '#0F1419',
-                  fontSize: { xs: '1.75rem', md: '2.5rem' },
-                  lineHeight: 1.2,
-                  mb: 2
-                }}
-              >
-                {product.title}
-              </Typography>
-              <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-                <Chip 
-                  label={product.condition} 
-                  size="medium"
-                  variant="outlined"
-                  sx={{ 
-                    borderColor: '#CE0E2D',
-                    color: '#CE0E2D',
-                    fontWeight: 'bold'
-                  }}
-                />
-                <Typography variant="h6" color="text.secondary" sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  gap: 0.5 
-                }}>
-                  <LocationIcon fontSize="small" /> {product.location}
-                </Typography>
-              </Stack>
-            </Box>
-
-            {/* ADDITIONAL INFO GRID */}
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                {/* Seller Information */}
-                <Card sx={{ 
-                  mb: 3,
-                  p: 3,
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: 2,
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
-                }}>
-                  <Typography 
-                    variant="h6" 
-                    gutterBottom
-                    sx={{ 
-                      color: '#0F1419', 
-                      fontWeight: 'bold',
-                      mb: 2
-                    }}
-                  >
-                    🏢 Seller Info
-                  </Typography>
-                  
-                  <Box display="flex" alignItems="center" mb={2}>
-                    <Avatar 
-                      src={product.agent.logoUrl} 
-                      alt={product.agent.displayName}
-                      sx={{ 
-                        width: 50, 
-                        height: 50, 
-                        mr: 2,
-                        border: '2px solid #e0e0e0'
-                      }}
-                    />
-                    <Box>
-                      <Typography 
-                        variant="body1" 
-                        sx={{ 
-                          color: '#0F1419', 
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        {product.agent.displayName}
-                      </Typography>
-                      <Typography 
-                        variant="body2" 
-                        color="text.secondary"
-                      >
-                        {product.agent.businessName}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {product.agent.rating && (
-                    <Box display="flex" alignItems="center" mb={2}>
-                      <Rating 
-                        value={product.agent.rating} 
-                        readOnly 
-                        size="small"
-                        sx={{
-                          '& .MuiRating-iconFilled': {
-                            color: '#CE0E2D',
-                          }
-                        }}
-                      />
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          ml: 1,
-                          color: '#6c757d'
-                        }}
-                      >
-                        ({product.agent.reviewCount} reviews)
-                      </Typography>
-                    </Box>
-                  )}
-
-                  <Grid container spacing={2}>
-                    <Grid item xs={4}>
-                      <Box textAlign="center" p={1}>
-                        <Typography variant="h6" sx={{ color: '#CE0E2D', fontWeight: 'bold' }}>
-                          {product.agent.totalSales}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Sales
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Box textAlign="center" p={1}>
-                        <Typography variant="h6" sx={{ color: '#CE0E2D', fontWeight: 'bold' }}>
-                          {product.agent.totalAuctions}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Auctions
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Box textAlign="center" p={1}>
-                        <Typography variant="h6" sx={{ color: '#CE0E2D', fontWeight: 'bold' }}>
-                          {product.agent.successfulAuctions}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Success
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                {/* Auction Information */}
-                <Card sx={{ 
-                  mb: 3,
-                  p: 3,
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: 2,
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
-                }}>
-                  <Typography 
-                    variant="h6" 
-                    gutterBottom
-                    sx={{ 
-                      color: '#0F1419', 
-                      fontWeight: 'bold',
-                      mb: 2
-                    }}
-                  >
-                    📈 Auction Info
-                  </Typography>
-                  <Stack spacing={2}>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                        ESTIMATED VALUE
-                      </Typography>
-                      <Typography variant="body1" sx={{ color: '#0F1419', fontWeight: 'bold' }}>
-                        {product.estimatedValueMin && product.estimatedValueMax 
-                          ? `${formatCurrency(product.estimatedValueMin)} - ${formatCurrency(product.estimatedValueMax)}`
-                          : 'Contact Agent'
-                        }
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                        BID INCREMENT
-                      </Typography>
-                      <Typography variant="body1" sx={{ color: '#0F1419', fontWeight: 'bold' }}>
-                        {formatCurrency(product.bidIncrement || 1)}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                        RESERVE PRICE
-                      </Typography>
-                      <Typography variant="body1" sx={{ color: '#0F1419', fontWeight: 'bold' }}>
-                        {product.reservePrice ? formatCurrency(product.reservePrice) : 'Not disclosed'}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Card>
-              </Grid>
-            </Grid>
-
-            {/* BID HISTORY */}
-            {product.auctionStatus && (
-              <Card sx={{
-                mb: 3,
-                backgroundColor: '#ffffff',
-                borderRadius: 2,
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
-                border: '1px solid #e0e0e0',
-                maxHeight: '400px',
-                overflow: 'hidden'
-              }}>
-                <Box sx={{
-                  p: 2,
-                  backgroundColor: '#0F1419',
-                  color: 'white'
-                }}>
-                  <Typography variant="h6" fontWeight="bold">
-                    📊 Recent Bids
-                  </Typography>
-                </Box>
-                <Box sx={{ maxHeight: '350px', overflow: 'auto' }}>
-                  <BidHistory
-                    auctionId={product.id}
-                    currentBid={displayCurrentBid}
-                    refreshTrigger={bidRefreshTrigger}
-                    isLive={product.auctionStatus === 'LIVE'}
-                    isConnected={isConnected}
-                  />
-                </Box>
-              </Card>
             )}
 
             {/* PRODUCT DESCRIPTION */}
@@ -947,8 +786,144 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 {product.description}
               </Typography>
             </Card>
-          </Box>
-        </Box>
+          </Grid>
+
+          {/* RIGHT COLUMN: Bidding Info & History */}
+          <Grid item xs={12} lg={3} sx={{ display: 'flex', flexDirection: 'column' }}>
+            
+            {/* CURRENT BID CARD */}
+            <Card sx={{ 
+              mb: 2,
+              p: 3, 
+              backgroundColor: '#ffffff',
+              border: '3px solid',
+              borderColor: product.auctionStatus === 'LIVE' ? '#CE0E2D' : 
+                          product.auctionStatus === 'ENDED' ? '#FFD700' : '#e0e0e0',
+              borderRadius: 3,
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
+              textAlign: 'center',
+              position: 'relative',
+              flex: '0 0 auto'
+            }}>
+              {/* Live Connection Status */}
+              {product.auctionStatus === 'LIVE' && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 15,
+                    right: 15,
+                    backgroundColor: isConnected ? '#4CAF50' : '#f44336',
+                    color: 'white',
+                    px: 2,
+                    py: 0.5,
+                    borderRadius: 2,
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                    cursor: !isConnected ? 'pointer' : 'default'
+                  }}
+                  onClick={!isConnected ? reconnect : undefined}
+                >
+                  <Box
+                    sx={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      backgroundColor: 'white',
+                    }}
+                  />
+                  {isConnected ? 'LIVE' : 'OFFLINE'}
+                </Box>
+              )}
+              
+              <Typography 
+                variant="body1" 
+                color="text.secondary" 
+                mb={2} 
+                sx={{ 
+                  fontSize: '1rem', 
+                  fontWeight: 'bold',
+                  mt: product.auctionStatus === 'LIVE' ? 3 : 0
+                }}
+              >
+                {product.auctionStatus === 'ENDED' ? '👑 WINNING BID' : 
+                 product.auctionStatus === 'LIVE' ? '💰 CURRENT BID' : '💵 STARTING BID'}
+              </Typography>
+              <Typography 
+                variant="h2" 
+                sx={{ 
+                  color: product.auctionStatus === 'ENDED' ? '#FFD700' : '#CE0E2D', 
+                  fontWeight: 'bold',
+                  fontSize: { xs: '2rem', md: '2.5rem' },
+                  mb: 2
+                }}
+              >
+                {formatCurrency(displayCurrentBid)}
+              </Typography>
+            </Card>
+
+            {/* BID HISTORY */}
+            {product.auctionStatus && (
+              <Card sx={{
+                backgroundColor: '#ffffff',
+                borderRadius: 2,
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+                border: '1px solid #e0e0e0',
+                maxHeight: '300px',
+                overflow: 'hidden',
+                flex: '1 1 auto',
+                mb: 2
+              }}>
+                <Box sx={{ height: '100%', overflow: 'auto' }}>
+                  <BidHistory
+                    auctionId={product.id}
+                    currentBid={displayCurrentBid}
+                    refreshTrigger={bidRefreshTrigger}
+                    isLive={product.auctionStatus === 'LIVE'}
+                    isConnected={isConnected}
+                  />
+                </Box>
+              </Card>
+            )}
+
+            {/* QUICK BID INTERFACE */}
+            {product.auctionStatus === 'LIVE' && (
+              <Card sx={{
+                p: 2,
+                backgroundColor: '#ffffff',
+                border: '2px solid #CE0E2D',
+                borderRadius: 2,
+                boxShadow: '0 8px 24px rgba(206, 14, 45, 0.2)',
+                flex: '0 0 auto'
+              }}>
+                <QuickBidDialog
+                  productId={product.id}
+                  currentBid={displayCurrentBid}
+                  bidIncrement={product.bidIncrement || 1}
+                  timeLeft={timeLeft}
+                  auctionStatus={product.auctionStatus}
+                  onBidPlaced={handleBidPlaced}
+                  isConnected={isConnected}
+                  connectionError={connectionError}
+                  onReconnect={reconnect}
+                  bidButtonDisabled={bidButtonDisabled}
+                  bidCooldownTime={bidCooldownTime}
+                  lastBidUpdate={lastBid ? {
+                    id: lastBid.id || 'unknown',
+                    amount: lastBid.amount,
+                    bidderName: lastBid.bidderName,
+                    bidTime: lastBid.bidTime
+                  } : undefined}
+                  liveCurrentBid={liveCurrentBid}
+                  liveBidCount={liveBidCount}
+                />
+              </Card>
+            )}
+          </Grid>
+        </Grid>
       </Box>
     </Box>
   );

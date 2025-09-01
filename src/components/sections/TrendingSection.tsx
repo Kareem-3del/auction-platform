@@ -20,7 +20,7 @@ import {
   TrendingUp as TrendingIcon,
 } from '@mui/icons-material';
 
-import { FeaturedCard } from 'src/components/product-card/featured-card';
+import { UnifiedAuctionCard } from 'src/components/product-card/unified-auction-card';
 import { useLocale } from 'src/hooks/useLocale';
 import { productsAPI, isSuccessResponse } from 'src/lib/api-client';
 import type { ProductCard } from 'src/types/common';
@@ -240,24 +240,25 @@ export const TrendingSection: FC<TrendingSectionProps> = ({
         <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
           {products.map((product) => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
-              <FeaturedCard
-                id={product.id}
-                title={product.title}
-                category={product.category.name}
-                image={Array.isArray(product.images) ? product.images[0] : product.images}
-                estimatedValueMin={typeof product.estimatedValueMin === 'string' ? parseFloat(product.estimatedValueMin) : (product.estimatedValueMin || 0)}
-                estimatedValueMax={typeof product.estimatedValueMax === 'string' ? parseFloat(product.estimatedValueMax) : (product.estimatedValueMax || 0)}
-                currentBid={typeof product.currentBid === 'string' ? parseFloat(product.currentBid) : product.currentBid}
-                agent={{
-                  name: product.agent.businessName || product.agent.displayName,
-                  avatar: product.agent.logoUrl,
-                  rating: typeof product.agent.rating === 'string' ? parseFloat(product.agent.rating) : (product.agent.rating || 4.5),
-                  isVerified: true, // Mock verification status
+              <UnifiedAuctionCard
+                product={{
+                  id: product.id,
+                  title: product.title,
+                  category: { name: product.category.name },
+                  images: Array.isArray(product.images) ? product.images : [product.images],
+                  estimatedValueMin: typeof product.estimatedValueMin === 'string' ? parseFloat(product.estimatedValueMin) : (product.estimatedValueMin || 0),
+                  estimatedValueMax: typeof product.estimatedValueMax === 'string' ? parseFloat(product.estimatedValueMax) : (product.estimatedValueMax || 0),
+                  currentBid: typeof product.currentBid === 'string' ? parseFloat(product.currentBid) : product.currentBid,
+                  agent: {
+                    displayName: product.agent.displayName,
+                    businessName: product.agent.businessName,
+                    logoUrl: product.agent.logoUrl,
+                    rating: typeof product.agent.rating === 'string' ? parseFloat(product.agent.rating) : (product.agent.rating || 4.5),
+                  },
+                  viewCount: product.viewCount,
+                  favoriteCount: product.favoriteCount,
                 }}
-                viewCount={product.viewCount}
-                favoriteCount={product.favoriteCount}
-                isFavorited={false} // Mock favorite status
-                isTrending={section === 'trending'}
+                variant={section === 'trending' ? 'trending' : 'featured'}
                 onClick={() => handleProductClick(product.id)}
                 onFavorite={() => handleFavorite(product.id)}
               />

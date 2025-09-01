@@ -103,84 +103,87 @@ export default function BidHistory({
 
   if (loading) {
     return (
-      <Card sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Bid History
-        </Typography>
-        {[...Array(3)].map((_, index) => (
-          <Box key={index} display="flex" alignItems="center" mb={2}>
-            <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
-            <Box flexGrow={1}>
-              <Skeleton variant="text" width="60%" />
-              <Skeleton variant="text" width="40%" />
+      <Box sx={{ position: 'relative' }}>
+        <Box sx={{ 
+          px: 2, 
+          py: 1.5,
+          backgroundColor: '#0F1419',
+          borderTopLeftRadius: 2,
+          borderTopRightRadius: 2
+        }}>
+          <Skeleton variant="text" width={120} height={20} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+        </Box>
+        <Box sx={{ backgroundColor: '#ffffff', borderBottomLeftRadius: 2, borderBottomRightRadius: 2 }}>
+          {[...Array(3)].map((_, index) => (
+            <Box key={index} display="flex" alignItems="center" px={1.5} py={1}>
+              <Skeleton variant="circular" width={32} height={32} sx={{ mr: 1.5 }} />
+              <Box flexGrow={1}>
+                <Skeleton variant="text" width="70%" height={16} />
+                <Skeleton variant="text" width="50%" height={12} />
+              </Box>
+              <Skeleton variant="text" width="15%" height={16} />
             </Box>
-            <Skeleton variant="text" width="20%" />
-          </Box>
-        ))}
-      </Card>
+          ))}
+        </Box>
+      </Box>
     );
   }
 
-  const displayBids = expanded ? bids : bids.slice(0, 5);
+  const displayBids = expanded ? bids : bids.slice(0, 3);
 
   return (
-    <Card sx={{ 
-      p: 3, 
-      backgroundColor: '#ffffff',
-      border: '1px solid #e0e0e0',
-      borderRadius: 3,
-      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
-      position: 'relative'
-    }}>
-      {/* Enhanced Header with Live Status */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Typography variant="h6" sx={{ color: '#0F1419', fontWeight: 'bold', fontSize: '1.1rem' }}>
-{t('auction.bidHistory')} ({bids.length})
+    <Box sx={{ position: 'relative' }}>
+      {/* Compact Header */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ 
+        px: 2, 
+        py: 1.5,
+        backgroundColor: '#0F1419',
+        color: 'white',
+        borderTopLeftRadius: 2,
+        borderTopRightRadius: 2
+      }}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
+            📊 Recent Bids ({bids.length})
           </Typography>
           {isLive && (
             <Box display="flex" alignItems="center" gap={0.5}>
               <Box
                 sx={{
-                  width: 8,
-                  height: 8,
+                  width: 6,
+                  height: 6,
                   borderRadius: '50%',
-                  backgroundColor: isConnected ? '#00ff00' : '#ff0000',
-                  boxShadow: isConnected ? '0 0 6px #00ff00' : '0 0 6px #ff0000',
-                  animation: isConnected ? 'blink 1.5s infinite' : 'flash 0.5s infinite',
-                  '@keyframes blink': {
+                  backgroundColor: isConnected ? '#4CAF50' : '#f44336',
+                  animation: 'pulse 1.5s infinite',
+                  '@keyframes pulse': {
                     '0%': { opacity: 1 },
-                    '50%': { opacity: 0.3 },
-                    '100%': { opacity: 1 },
-                  },
-                  '@keyframes flash': {
-                    '0%': { opacity: 1 },
-                    '50%': { opacity: 0.3 },
+                    '50%': { opacity: 0.5 },
                     '100%': { opacity: 1 },
                   },
                 }}
               />
               <Typography variant="caption" sx={{ 
-                color: isConnected ? '#2E7D32' : '#d32f2f',
+                color: isConnected ? '#4CAF50' : '#f44336',
                 fontWeight: 'bold',
-                fontSize: '0.7rem'
+                fontSize: '0.65rem'
               }}>
-                {isConnected ? t('auction.live') : t('auction.disconnected')}
+                {isConnected ? 'LIVE' : 'OFFLINE'}
               </Typography>
             </Box>
           )}
         </Box>
-        {bids.length > 5 && (
+        {bids.length > 3 && (
           <IconButton 
             onClick={() => setExpanded(!expanded)}
+            size="small"
             sx={{
-              color: '#CE0E2D',
+              color: 'white',
               '&:hover': {
-                backgroundColor: 'rgba(206, 14, 45, 0.04)'
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
               }
             }}
           >
-            {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </IconButton>
         )}
       </Box>
@@ -188,165 +191,143 @@ export default function BidHistory({
       {bids.length === 0 ? (
         <Box 
           textAlign="center" 
-          py={6} 
+          py={3} 
           sx={{
             backgroundColor: '#f8f9fa',
-            borderRadius: 2,
-            border: '1px dashed #e0e0e0'
+            borderBottomLeftRadius: 2,
+            borderBottomRightRadius: 2
           }}
         >
           <GavelIcon sx={{ 
-            fontSize: 64, 
-            mb: 2, 
+            fontSize: 36, 
+            mb: 1, 
             opacity: 0.3,
             color: '#CE0E2D'
           }} />
-          <Typography variant="h6" sx={{ color: '#666', mb: 1 }}>
-            {t('auction.noBidsYet')}
+          <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+            No bids yet
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t('auction.beFirstToBid')}
+          <Typography variant="caption" color="text.secondary">
+            Be the first to bid!
           </Typography>
         </Box>
       ) : (
-        <List sx={{ p: 0 }}>
+        <List sx={{ p: 0, backgroundColor: '#ffffff', borderBottomLeftRadius: 2, borderBottomRightRadius: 2 }}>
           {displayBids.map((bid, index) => (
             <ListItem
               key={bid.id}
               sx={{
-                px: 2,
-                py: 2,
-                mb: index < displayBids.length - 1 ? 1 : 0,
+                px: 1.5,
+                py: 1,
+                borderBottom: index < displayBids.length - 1 ? '1px solid #f0f0f0' : 'none',
                 backgroundColor: newBidAnimation === bid.id 
                   ? 'rgba(206, 14, 45, 0.1)' 
                   : bid.isWinning 
                   ? 'rgba(76, 175, 80, 0.05)'
                   : '#ffffff',
-                border: bid.isWinning ? '1px solid rgba(76, 175, 80, 0.3)' : '1px solid #f0f0f0',
-                borderRadius: 2,
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                transform: newBidAnimation === bid.id ? 'scale(1.02)' : 'scale(1)',
-                boxShadow: newBidAnimation === bid.id 
-                  ? '0 4px 12px rgba(206, 14, 45, 0.15)' 
-                  : bid.isWinning
-                  ? '0 2px 8px rgba(76, 175, 80, 0.1)'
-                  : '0 1px 3px rgba(0, 0, 0, 0.05)',
+                transition: 'all 0.3s ease',
                 '&:hover': {
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  transform: 'translateY(-1px)'
+                  backgroundColor: '#f8f9fa'
                 }
               }}
             >
-              <ListItemAvatar>
+              <ListItemAvatar sx={{ minWidth: 40 }}>
                 <Avatar
                   src={getBidderAvatar(bid.bidder)}
                   sx={{
                     bgcolor: bid.isWinning ? '#4CAF50' : '#CE0E2D',
-                    border: bid.isWinning ? '2px solid #4CAF50' : '2px solid #CE0E2D',
-                    borderColor: bid.isWinning ? '#4CAF50' : '#CE0E2D',
-                    width: 48,
-                    height: 48,
-                    boxShadow: bid.isWinning ? '0 2px 8px rgba(76, 175, 80, 0.3)' : '0 2px 8px rgba(206, 14, 45, 0.2)'
+                    width: 32,
+                    height: 32,
+                    fontSize: '0.8rem'
                   }}
                 >
-                  <GavelIcon sx={{ fontSize: 24 }} />
+                  <GavelIcon sx={{ fontSize: 16 }} />
                 </Avatar>
               </ListItemAvatar>
               
               <ListItemText
                 primary={
-                  <Box display="flex" alignItems="center" gap={1}>
+                  <Box display="flex" alignItems="center" gap={0.5}>
                     <Typography 
-                      variant="subtitle2"
+                      variant="body2"
                       sx={{ 
-                        fontWeight: bid.isWinning ? 'bold' : 600,
+                        fontWeight: bid.isWinning ? 'bold' : 500,
                         color: '#0F1419',
-                        fontSize: '0.95rem'
+                        fontSize: '0.85rem'
                       }}
                     >
                       {getBidderDisplay(bid.bidder)}
                     </Typography>
-                    <Box display="flex" gap={0.5} mt={0.5}>
-                      {bid.isWinning && (
-                        <Chip
-                          label={`🏆 ${t('auction.winning')}`}
-                          size="small"
-                          sx={{ 
-                            height: 20, 
-                            fontSize: '0.65rem',
-                            fontWeight: 'bold',
-                            backgroundColor: '#4CAF50',
-                            color: 'white',
-                            '& .MuiChip-label': {
-                              px: 1
-                            }
-                          }}
-                        />
-                      )}
-                      {bid.isAutomatic && (
-                        <Chip
-                          label={`🤖 ${t('auction.auto')}`}
-                          size="small"
-                          variant="outlined"
-                          sx={{ 
-                            height: 20, 
-                            fontSize: '0.65rem',
-                            borderColor: '#666',
-                            color: '#666',
-                            '& .MuiChip-label': {
-                              px: 1
-                            }
-                          }}
-                        />
-                      )}
-                    </Box>
+                    {bid.isWinning && (
+                      <Chip
+                        label="🏆"
+                        size="small"
+                        sx={{ 
+                          height: 16, 
+                          fontSize: '0.6rem',
+                          backgroundColor: '#4CAF50',
+                          color: 'white',
+                          '& .MuiChip-label': { px: 0.5 }
+                        }}
+                      />
+                    )}
+                    {bid.isAutomatic && (
+                      <Chip
+                        label="🤖"
+                        size="small"
+                        variant="outlined"
+                        sx={{ 
+                          height: 16, 
+                          fontSize: '0.6rem',
+                          borderColor: '#666',
+                          color: '#666',
+                          '& .MuiChip-label': { px: 0.5 }
+                        }}
+                      />
+                    )}
                   </Box>
                 }
                 secondary={
                   <Typography 
                     variant="caption" 
                     color="text.secondary"
-                    sx={{ fontSize: '0.75rem' }}
+                    sx={{ fontSize: '0.7rem' }}
                   >
-                    {formatDate(bid.timestamp)}
+                    {new Date(bid.timestamp).toLocaleTimeString()}
                   </Typography>
                 }
               />
               
               <Box textAlign="right">
                 <Typography
-                  variant="h6"
+                  variant="subtitle2"
                   color={bid.isWinning ? 'success.main' : '#CE0E2D'}
-                  fontWeight={bid.isWinning ? 'bold' : 600}
-                  sx={{
-                    fontSize: '1.1rem',
-                    transition: 'all 0.3s ease'
-                  }}
+                  fontWeight="bold"
+                  sx={{ fontSize: '0.9rem' }}
                 >
                   {formatCurrency(bid.amount)}
                 </Typography>
                 {newBidAnimation === bid.id && (
                   <Typography variant="caption" sx={{ 
                     color: '#CE0E2D',
-                    fontWeight: 'bold',
-                    fontSize: '0.6rem'
+                    fontSize: '0.55rem'
                   }}>
-                    ✨ {t('auction.newBid')}
+                    ✨ NEW
                   </Typography>
                 )}
               </Box>
             </ListItem>
           ))}
           
-          {!expanded && bids.length > 5 && (
-            <ListItem sx={{ px: 0, justifyContent: 'center' }}>
+          {!expanded && bids.length > 3 && (
+            <ListItem sx={{ px: 1.5, py: 0.5, justifyContent: 'center' }}>
               <Typography
-                variant="button"
+                variant="caption"
                 color="primary"
-                sx={{ cursor: 'pointer' }}
+                sx={{ cursor: 'pointer', fontSize: '0.75rem' }}
                 onClick={() => setExpanded(true)}
               >
-                {t('common.show')} {bids.length - 5} {t('auction.bids')}
+                +{bids.length - 3} more bids
               </Typography>
             </ListItem>
           )}
@@ -354,17 +335,17 @@ export default function BidHistory({
       )}
       
       <Collapse in={expanded}>
-        <Box mt={2} textAlign="center">
+        <Box p={1} textAlign="center" sx={{ backgroundColor: '#ffffff', borderBottomLeftRadius: 2, borderBottomRightRadius: 2 }}>
           <Typography
-            variant="button"
+            variant="caption"
             color="primary"
-            sx={{ cursor: 'pointer' }}
+            sx={{ cursor: 'pointer', fontSize: '0.75rem' }}
             onClick={() => setExpanded(false)}
           >
-            {t('common.showLess')}
+            Show less
           </Typography>
         </Box>
       </Collapse>
-    </Card>
+    </Box>
   );
 }

@@ -19,7 +19,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import { CompactCard } from 'src/components/product-card/compact-card';
+import { UnifiedAuctionCard } from 'src/components/product-card/unified-auction-card';
 import { useLocale } from 'src/hooks/useLocale';
 
 interface Product {
@@ -224,18 +224,27 @@ export const RecentAdditionsSection: FC<RecentAdditionsSectionProps> = ({
         <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
           {products.map((product) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-              <CompactCard
-                id={product.id}
-                title={product.title}
-                category={product.category.name}
-                image={Array.isArray(product.images) ? product.images[0] : product.images}
-                estimatedValue={(
-                  (typeof product.estimatedValueMin === 'string' ? parseFloat(product.estimatedValueMin) : (product.estimatedValueMin || 0)) +
-                  (typeof product.estimatedValueMax === 'string' ? parseFloat(product.estimatedValueMax) : (product.estimatedValueMax || 0))
-                ) / 2}
-                viewCount={typeof product.viewCount === 'string' ? parseInt(product.viewCount) : (product.viewCount || 0)}
-                isNew={isNewProduct(product.createdAt)}
+              <UnifiedAuctionCard
+                product={{
+                  id: product.id,
+                  title: product.title,
+                  category: { name: product.category.name },
+                  images: Array.isArray(product.images) ? product.images : [product.images],
+                  estimatedValueMin: typeof product.estimatedValueMin === 'string' ? parseFloat(product.estimatedValueMin) : (product.estimatedValueMin || 0),
+                  estimatedValueMax: typeof product.estimatedValueMax === 'string' ? parseFloat(product.estimatedValueMax) : (product.estimatedValueMax || 0),
+                  currentBid: undefined,
+                  agent: {
+                    displayName: 'Auction House',
+                    businessName: 'Auction House',
+                    logoUrl: '',
+                    rating: 4.5,
+                  },
+                  viewCount: typeof product.viewCount === 'string' ? parseInt(product.viewCount) : (product.viewCount || 0),
+                  favoriteCount: Math.floor((typeof product.viewCount === 'string' ? parseInt(product.viewCount) : (product.viewCount || 0)) / 3),
+                }}
+                variant="recent"
                 onClick={() => handleProductClick(product.id)}
+                onFavorite={() => console.log('Toggle favorite for product:', product.id)}
               />
             </Grid>
           ))}

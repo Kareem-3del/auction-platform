@@ -21,7 +21,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import { EndingSoonCard } from 'src/components/product-card/ending-soon-card';
+import { UnifiedAuctionCard } from 'src/components/product-card/unified-auction-card';
 
 // Use Product type from API types
 
@@ -115,51 +115,68 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
   }
 
   return (
-    <Box sx={{ py: { xs: 6, md: 8 }, bgcolor: '#f8f9fa' }}>
-      <Container maxWidth={containerMaxWidth as any}>
+    <Box sx={{ 
+      py: { xs: 8, md: 12 }, 
+      background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.02) 0%, rgba(255, 68, 68, 0.02) 100%)',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 30% 20%, rgba(206, 14, 45, 0.04) 0%, transparent 50%)',
+        pointerEvents: 'none',
+      }
+    }}>
+      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 4 }, position: 'relative', zIndex: 1 }}>
         {showHeader && (
-          <Box sx={{ mb: { xs: 3, md: 6 } }}>
+          <Box sx={{ mb: { xs: 4, md: 8 } }}>
             <Box sx={{ 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'space-between',
               flexWrap: 'wrap',
-              gap: 2,
+              gap: 3,
               mb: 2,
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                 <Box
                   sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '12px',
+                    width: { xs: 56, md: 64 },
+                    height: { xs: 56, md: 64 },
+                    borderRadius: '20px',
                     background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 16px rgba(206, 14, 45, 0.3)',
+                    boxShadow: '0 8px 32px rgba(206, 14, 45, 0.3)',
+                    border: '2px solid rgba(255, 255, 255, 0.2)',
                   }}
                 >
-                  <TimeIcon sx={{ color: 'white', fontSize: 24 }} />
+                  <TimeIcon sx={{ color: 'white', fontSize: { xs: 28, md: 32 } }} />
                 </Box>
                 <Box>
                   <Typography
-                    variant="h3"
+                    variant="h2"
                     component="h2"
                     sx={{
-                      fontWeight: 'bold',
-                      fontSize: { xs: '1.75rem', md: '2.25rem' },
+                      fontWeight: 800,
+                      fontSize: { xs: '2rem', md: '2.75rem' },
                       color: '#0F1419',
-                      mb: 0.5,
+                      mb: 1,
+                      lineHeight: 1.2,
                     }}
                   >
                     Ending Soon
                   </Typography>
                   <Typography
-                    variant="body1"
+                    variant="h6"
                     color="text.secondary"
                     sx={{ 
-                      fontSize: { xs: '1rem', md: '1.1rem' },
+                      fontSize: { xs: '1rem', md: '1.25rem' },
+                      fontWeight: 500,
                     }}
                   >
                     Don&apos;t miss these final opportunities
@@ -174,14 +191,19 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
                 sx={{
                   borderColor: '#CE0E2D',
                   color: '#CE0E2D',
-                  fontWeight: 500,
-                  px: 4,
-                  py: 1,
+                  fontWeight: 600,
+                  px: { xs: 3, md: 5 },
+                  py: { xs: 1, md: 1.5 },
                   textTransform: 'none',
-                  borderRadius: 2,
+                  borderRadius: 3,
+                  borderWidth: 2,
+                  fontSize: { xs: '0.9rem', md: '1rem' },
                   '&:hover': {
                     borderColor: '#CE0E2D',
-                    backgroundColor: 'rgba(206, 14, 45, 0.04)',
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(206, 14, 45, 0.06)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 20px rgba(206, 14, 45, 0.2)',
                   },
                 }}
               >
@@ -191,43 +213,61 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
           </Box>
         )}
 
-        <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
+        <Grid container spacing={{ xs: 3, md: 4 }}>
           {Array.isArray(products) ? products.map((product) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-              <EndingSoonCard
-                id={product.id}
-                title={product.title}
-                category={product.category.name}
-                image={Array.isArray(product.images) ? product.images[0] : product.images}
-                endTime={product.endTime || product.timeRemaining?.endTime}
-                currentBid={typeof product.currentBid === 'string' ? parseFloat(product.currentBid) : (product.currentBid || 0)}
-                bidCount={typeof product.bidCount === 'string' ? parseInt(product.bidCount) : (product.bidCount || product._count?.bids || 0)}
-                viewCount={typeof product.viewCount === 'string' ? parseInt(product.viewCount) : (product.viewCount || 0)}
+            <Grid item xs={12} sm={6} lg={4} xl={3} key={product.id}>
+              <UnifiedAuctionCard
+                product={{
+                  id: product.id,
+                  title: product.title,
+                  category: { name: product.category.name },
+                  images: Array.isArray(product.images) ? product.images : [product.images],
+                  estimatedValueMin: typeof product.estimatedValueMin === 'string' ? parseFloat(product.estimatedValueMin) : (product.estimatedValueMin || 0),
+                  estimatedValueMax: typeof product.estimatedValueMax === 'string' ? parseFloat(product.estimatedValueMax) : (product.estimatedValueMax || 0),
+                  currentBid: typeof product.currentBid === 'string' ? parseFloat(product.currentBid) : product.currentBid,
+                  agent: {
+                    displayName: product.agent?.displayName || 'Agent',
+                    businessName: product.agent?.businessName,
+                    logoUrl: product.agent?.logoUrl || '',
+                    rating: typeof product.agent?.rating === 'string' ? parseFloat(product.agent.rating) : (product.agent?.rating || 4.5),
+                  },
+                  viewCount: typeof product.viewCount === 'string' ? parseInt(product.viewCount) : (product.viewCount || 0),
+                  favoriteCount: typeof product.favoriteCount === 'string' ? parseInt(product.favoriteCount) : (product.favoriteCount || 0),
+                  auction: {
+                    startTime: product.startTime || new Date().toISOString(),
+                    endTime: product.endTime || product.timeRemaining?.endTime || new Date().toISOString(),
+                    status: 'LIVE',
+                  },
+                }}
+                variant="ending"
                 onClick={() => handleProductClick(product.id)}
+                onFavorite={() => console.log('Toggle favorite for product:', product.id)}
               />
             </Grid>
           )) : null}
         </Grid>
 
         {Array.isArray(products) && products.length >= limit && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 4, md: 6 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 6, md: 10 } }}>
             <Button
               variant="contained"
               size="large"
               endIcon={<ArrowIcon />}
               onClick={handleViewAll}
               sx={{
-                backgroundColor: '#CE0E2D',
+                background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
                 color: 'white',
-                fontWeight: 600,
-                px: 6,
-                py: 1.5,
+                fontWeight: 700,
+                px: { xs: 6, md: 8 },
+                py: { xs: 1.5, md: 2 },
                 textTransform: 'none',
-                borderRadius: 2,
-                boxShadow: 'none',
+                borderRadius: 4,
+                boxShadow: '0 6px 24px rgba(206, 14, 45, 0.3)',
+                fontSize: { xs: '1rem', md: '1.1rem' },
                 '&:hover': {
-                  backgroundColor: '#B00C24',
-                  boxShadow: 'none',
+                  background: 'linear-gradient(135deg, #b00c26, #e63939)',
+                  boxShadow: '0 8px 32px rgba(206, 14, 45, 0.4)',
+                  transform: 'translateY(-3px)',
                 },
               }}
             >

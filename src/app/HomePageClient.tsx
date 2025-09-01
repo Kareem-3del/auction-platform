@@ -105,176 +105,272 @@ export default function HomePageClient() {
 
         {/* Recent Additions Section */}
         <ErrorBoundary>
-          <RecentAdditionsSection limit={8} />
+          <RecentAdditionsSection limit={6} />
         </ErrorBoundary>
 
-        <Container maxWidth={false} sx={{ maxWidth: '1536px', px: 3 }}>
-          {/* Call to Action */}
+        {/* Enhanced Call to Action Section */}
+        <Container maxWidth="xl" sx={{ px: { xs: 2, md: 4 }, py: { xs: 4, md: 6 } }}>
           <Box sx={{ 
-            py: { xs: 6, md: 10 }, 
+            py: { xs: 8, md: 12 }, 
             textAlign: 'center',
-            background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.05), rgba(25, 118, 210, 0.05))',
-            borderRadius: 4,
-            my: 4,
+            background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.03), rgba(25, 118, 210, 0.03))',
+            borderRadius: { xs: 3, md: 6 },
             border: '1px solid',
             borderColor: 'divider',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'radial-gradient(circle at 50% 50%, rgba(206, 14, 45, 0.05) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            },
           }}>
-            <Typography 
-              variant="h3" 
-              component="h2" 
-              gutterBottom
-              sx={{
-                fontWeight: 800,
-                background: 'linear-gradient(135deg, #CE0E2D, #1976D2)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              {t('homepage.hero.title')}
-            </Typography>
-            <Typography variant="h6" color="text.secondary" paragraph sx={{ mb: 6, maxWidth: 600, mx: 'auto' }}>
-              {t('homepage.hero.subtitle')}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button 
-                variant="contained" 
-                size="large" 
-                onClick={() => router.push('/products')}
-                sx={{ 
-                  px: 6, 
-                  py: 2,
-                  background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  boxShadow: '0 4px 16px rgba(206, 14, 45, 0.3)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #b00c26, #e63939)',
-                    boxShadow: '0 6px 20px rgba(206, 14, 45, 0.4)',
-                    transform: 'translateY(-2px)',
-                  },
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Typography 
+                variant="h2" 
+                component="h2" 
+                gutterBottom
+                sx={{
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #CE0E2D, #1976D2)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  fontSize: { xs: '2rem', md: '3rem' },
+                  lineHeight: 1.2,
                 }}
               >
-                {t('navigation.products')}
-              </Button>
-              <Button 
-                variant="outlined" 
-                size="large" 
-                onClick={() => router.push('/auctions')}
+                {t('homepage.hero.title')}
+              </Typography>
+              <Typography 
+                variant="h5" 
+                color="text.secondary" 
+                paragraph 
                 sx={{ 
-                  px: 6, 
-                  py: 2,
-                  borderColor: '#1976D2',
-                  color: '#1976D2',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  '&:hover': {
+                  mb: 6, 
+                  maxWidth: 700, 
+                  mx: 'auto',
+                  fontSize: { xs: '1rem', md: '1.25rem' },
+                  lineHeight: 1.6,
+                }}
+              >
+                {t('homepage.hero.subtitle')}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Button 
+                  variant="contained" 
+                  size="large" 
+                  onClick={() => router.push('/products')}
+                  sx={{ 
+                    px: { xs: 4, md: 8 }, 
+                    py: { xs: 1.5, md: 2 },
+                    background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
+                    fontWeight: 700,
+                    borderRadius: 4,
+                    boxShadow: '0 6px 24px rgba(206, 14, 45, 0.3)',
+                    fontSize: { xs: '0.9rem', md: '1rem' },
+                    minWidth: { xs: 140, md: 160 },
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #b00c26, #e63939)',
+                      boxShadow: '0 8px 32px rgba(206, 14, 45, 0.4)',
+                      transform: 'translateY(-3px)',
+                    },
+                  }}
+                >
+                  {t('navigation.products')}
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  size="large" 
+                  onClick={() => router.push('/auctions')}
+                  sx={{ 
+                    px: { xs: 4, md: 8 }, 
+                    py: { xs: 1.5, md: 2 },
                     borderColor: '#1976D2',
-                    backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                  },
-                }}
-              >
-                {t('navigation.auctions')}
-              </Button>
+                    color: '#1976D2',
+                    fontWeight: 700,
+                    borderRadius: 4,
+                    borderWidth: 2,
+                    fontSize: { xs: '0.9rem', md: '1rem' },
+                    minWidth: { xs: 140, md: 160 },
+                    '&:hover': {
+                      borderColor: '#1976D2',
+                      borderWidth: 2,
+                      backgroundColor: 'rgba(25, 118, 210, 0.06)',
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 6px 24px rgba(25, 118, 210, 0.2)',
+                    },
+                  }}
+                >
+                  {t('navigation.auctions')}
+                </Button>
+              </Box>
             </Box>
           </Box>
+        </Container>
 
-          {/* Features Section */}
+        {/* Enhanced Features Section */}
+        <Container maxWidth="xl" sx={{ px: { xs: 2, md: 4 }, py: { xs: 6, md: 8 } }}>
           <Box ref={featuresRef} sx={{ 
             bgcolor: 'background.neutral', 
-            py: 8, 
-            px: 4,
-            borderRadius: 3, 
-            my: 4 
+            py: { xs: 6, md: 10 }, 
+            px: { xs: 3, md: 6 },
+            borderRadius: { xs: 3, md: 6 },
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(45deg, rgba(206, 14, 45, 0.02) 0%, rgba(25, 118, 210, 0.02) 100%)',
+              pointerEvents: 'none',
+            },
           }}>
-            <Typography variant="h3" component="h2" textAlign="center" gutterBottom>
-              {t('homepage.whyChoose.title')}
-            </Typography>
-            <Typography variant="h6" textAlign="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
-              {t('homepage.whyChoose.subtitle')}
-            </Typography>
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Typography 
+                variant="h2" 
+                component="h2" 
+                textAlign="center" 
+                gutterBottom
+                sx={{
+                  fontWeight: 800,
+                  fontSize: { xs: '2rem', md: '2.5rem' },
+                  mb: 2,
+                }}
+              >
+                {t('homepage.whyChoose.title')}
+              </Typography>
+              <Typography 
+                variant="h5" 
+                textAlign="center" 
+                color="text.secondary" 
+                paragraph 
+                sx={{ 
+                  mb: 8, 
+                  maxWidth: 600, 
+                  mx: 'auto',
+                  fontSize: { xs: '1rem', md: '1.25rem' },
+                }}
+              >
+                {t('homepage.whyChoose.subtitle')}
+              </Typography>
 
-            <Grid container spacing={4}>
-              {[
-                {
-                  icon: '🛡️',
-                  title: t('homepage.whyChoose.features.secureTransactions.title'),
-                  description: t('homepage.whyChoose.features.secureTransactions.description'),
-                  action: () => router.push('/help?section=security')
-                },
-                {
-                  icon: '🎯',
-                  title: t('homepage.whyChoose.features.expertAuthentication.title'),
-                  description: t('homepage.whyChoose.features.expertAuthentication.description'),
-                  action: () => router.push('/help?section=authentication')
-                },
-                {
-                  icon: '🌍',
-                  title: t('homepage.whyChoose.features.globalMarketplace.title'),
-                  description: t('homepage.whyChoose.features.globalMarketplace.description'),
-                  action: () => router.push('/categories')
-                },
-                {
-                  icon: '📱',
-                  title: t('homepage.whyChoose.features.mobileFriendly.title'),
-                  description: t('homepage.whyChoose.features.mobileFriendly.description'),
-                  action: () => router.push('/help?section=mobile')
-                },
-                {
-                  icon: '💰',
-                  title: t('homepage.whyChoose.features.competitiveFees.title'),
-                  description: t('homepage.whyChoose.features.competitiveFees.description'),
-                  action: () => router.push('/help?section=fees')
-                },
-                {
-                  icon: '🏆',
-                  title: t('homepage.whyChoose.features.awardWinning.title'),
-                  description: t('homepage.whyChoose.features.awardWinning.description'),
-                  action: () => router.push('/about')
-                },
-              ].map((feature, index) => (
-                <Grid item xs={12} sm={6} md={4} key={index}>
-                  <Paper 
-                    component="button"
-                    onClick={feature.action}
-                    sx={{ 
-                      p: 4, 
-                      textAlign: 'center', 
-                      height: '100%',
-                      width: '100%',
-                      bgcolor: 'background.paper',
-                      boxShadow: (theme) => theme.palette.mode === 'dark' 
-                        ? '0 4px 12px rgba(0, 0, 0, 0.3)'
-                        : '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease-in-out',
-                      '&:hover': {
-                        boxShadow: (theme) => theme.palette.mode === 'dark' 
-                          ? '0 8px 24px rgba(0, 0, 0, 0.4)'
-                          : '0 8px 24px rgba(0, 0, 0, 0.15)',
-                        transform: 'translateY(-2px)',
-                        bgcolor: 'rgba(206, 14, 45, 0.02)',
-                        borderColor: 'primary.main',
-                      },
-                      '&:active': {
-                        transform: 'translateY(0px)',
-                      }
-                    }}>
-                    <Typography variant="h2" sx={{ mb: 2 }}>
-                      {feature.icon}
-                    </Typography>
-                    <Typography variant="h5" gutterBottom color="text.primary">
-                      {feature.title}
-                    </Typography>
-                    <Typography color="text.secondary">
-                      {feature.description}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
+              <Grid container spacing={{ xs: 3, md: 4 }}>
+                {[
+                  {
+                    icon: '🛡️',
+                    title: t('homepage.whyChoose.features.secureTransactions.title'),
+                    description: t('homepage.whyChoose.features.secureTransactions.description'),
+                  },
+                  {
+                    icon: '🎯',
+                    title: t('homepage.whyChoose.features.expertAuthentication.title'),
+                    description: t('homepage.whyChoose.features.expertAuthentication.description'),
+                  },
+                  {
+                    icon: '🌍',
+                    title: t('homepage.whyChoose.features.globalMarketplace.title'),
+                    description: t('homepage.whyChoose.features.globalMarketplace.description'),
+                  },
+                  {
+                    icon: '📱',
+                    title: t('homepage.whyChoose.features.mobileFriendly.title'),
+                    description: t('homepage.whyChoose.features.mobileFriendly.description'),
+                  },
+                  {
+                    icon: '💰',
+                    title: t('homepage.whyChoose.features.competitiveFees.title'),
+                    description: t('homepage.whyChoose.features.competitiveFees.description'),
+                  },
+                  {
+                    icon: '🏆',
+                    title: t('homepage.whyChoose.features.awardWinning.title'),
+                    description: t('homepage.whyChoose.features.awardWinning.description'),
+                  },
+                ].map((feature, index) => (
+                  <Grid item xs={12} sm={6} lg={4} key={index}>
+                    <Paper 
+                      sx={{ 
+                        p: { xs: 3, md: 4 }, 
+                        textAlign: 'center', 
+                        height: '100%',
+                        bgcolor: 'background.paper',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 3,
+                        cursor: 'default',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&:hover': {
+                          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12)',
+                          transform: 'translateY(-8px)',
+                          bgcolor: 'rgba(206, 14, 45, 0.02)',
+                          borderColor: 'primary.main',
+                          '&::before': {
+                            opacity: 1,
+                          },
+                        },
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.03), rgba(25, 118, 210, 0.03))',
+                          opacity: 0,
+                          transition: 'opacity 0.3s ease',
+                          pointerEvents: 'none',
+                        },
+                      }}>
+                      <Box sx={{ position: 'relative', zIndex: 1 }}>
+                        <Typography 
+                          variant="h1" 
+                          sx={{ 
+                            mb: 3,
+                            fontSize: { xs: '3rem', md: '4rem' },
+                            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                          }}
+                        >
+                          {feature.icon}
+                        </Typography>
+                        <Typography 
+                          variant="h5" 
+                          gutterBottom 
+                          color="text.primary"
+                          sx={{
+                            fontWeight: 700,
+                            mb: 2,
+                            fontSize: { xs: '1.25rem', md: '1.5rem' },
+                          }}
+                        >
+                          {feature.title}
+                        </Typography>
+                        <Typography 
+                          color="text.secondary"
+                          sx={{
+                            fontSize: { xs: '0.875rem', md: '1rem' },
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          {feature.description}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
           </Box>
         </Container>
 

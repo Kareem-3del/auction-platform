@@ -20,7 +20,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import { ComingSoonCard } from 'src/components/product-card/coming-soon-card';
+import { UnifiedAuctionCard } from 'src/components/product-card/unified-auction-card';
 import { useLocale } from 'src/hooks/useLocale';
 
 interface Product {
@@ -220,17 +220,32 @@ export const ComingSoonSection: FC<ComingSoonSectionProps> = ({
         <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
           {products.map((product) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-              <ComingSoonCard
-                id={product.id}
-                title={product.title}
-                category={product.category.name}
-                image={Array.isArray(product.images) ? product.images[0] : product.images}
-                startTime={product.startTime}
-                estimatedValueMin={typeof product.estimatedValueMin === 'string' ? parseFloat(product.estimatedValueMin) : (product.estimatedValueMin || 0)}
-                estimatedValueMax={typeof product.estimatedValueMax === 'string' ? parseFloat(product.estimatedValueMax) : (product.estimatedValueMax || 0)}
-                interestCount={Math.floor((typeof product.viewCount === 'string' ? parseInt(product.viewCount) : (product.viewCount || 0)) / 2)}
+              <UnifiedAuctionCard
+                product={{
+                  id: product.id,
+                  title: product.title,
+                  category: { name: product.category.name },
+                  images: Array.isArray(product.images) ? product.images : [product.images],
+                  estimatedValueMin: typeof product.estimatedValueMin === 'string' ? parseFloat(product.estimatedValueMin) : (product.estimatedValueMin || 0),
+                  estimatedValueMax: typeof product.estimatedValueMax === 'string' ? parseFloat(product.estimatedValueMax) : (product.estimatedValueMax || 0),
+                  currentBid: undefined,
+                  agent: {
+                    displayName: 'Auction House',
+                    businessName: 'Auction House',
+                    logoUrl: '',
+                    rating: 4.5,
+                  },
+                  viewCount: typeof product.viewCount === 'string' ? parseInt(product.viewCount) : (product.viewCount || 0),
+                  favoriteCount: Math.floor((typeof product.viewCount === 'string' ? parseInt(product.viewCount) : (product.viewCount || 0)) / 2),
+                  auction: {
+                    startTime: product.startTime,
+                    endTime: new Date(new Date(product.startTime).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    status: 'SCHEDULED',
+                  },
+                }}
+                variant="upcoming"
                 onClick={() => handleProductClick(product.id)}
-                onNotify={() => handleNotifyMe(product.id)}
+                onFavorite={() => handleNotifyMe(product.id)}
               />
             </Grid>
           ))}

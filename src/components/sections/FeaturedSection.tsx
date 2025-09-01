@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 
 import { CountdownTimer } from '../common/CountdownTimer';
+import { UnifiedAuctionCard } from 'src/components/product-card/unified-auction-card';
 import { useLocale } from 'src/hooks/useLocale';
 
 interface Product {
@@ -204,9 +205,25 @@ export function FeaturedSection() {
                     {category.products.length > 0 ? (
                       category.products.map((product) => (
                         <Grid item xs={6} key={product.id} sx={{ height: { xs: 200, md: '50%' } }}>
-                          <ProductCard 
-                            product={product} 
+                          <UnifiedAuctionCard 
+                            product={{
+                              id: product.id,
+                              title: product.title,
+                              category: { name: 'Featured' },
+                              images: Array.isArray(product.images) ? product.images : [product.images],
+                              estimatedValueMin: product.estimatedValueMin,
+                              estimatedValueMax: product.estimatedValueMax,
+                              currentBid: product.currentBid,
+                              agent: product.agent,
+                              viewCount: product.viewCount,
+                              favoriteCount: product.favoriteCount,
+                              auction: product.auction,
+                              auctionStatus: product.auctionStatus,
+                            }}
+                            variant="featured"
+                            size="compact"
                             onClick={() => router.push(`/products/${product.id}`)}
+                            onFavorite={() => console.log('Toggle favorite for product:', product.id)}
                           />
                         </Grid>
                       ))
