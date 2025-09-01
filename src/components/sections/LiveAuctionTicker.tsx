@@ -212,9 +212,9 @@ export function LiveAuctionTicker() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 2,
-                    minWidth: '400px',
-                    px: 3,
-                    py: 1.5,
+                    minWidth: '450px',
+                    px: 4,
+                    py: 2,
                     borderRadius: '16px',
                     background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
                     backdropFilter: 'blur(20px)',
@@ -255,13 +255,14 @@ export function LiveAuctionTicker() {
                   {/* Auction Image */}
                   <Box
                     sx={{
-                      width: 48,
-                      height: 32,
-                      borderRadius: '8px',
+                      width: 60,
+                      height: 45,
+                      borderRadius: '12px',
                       backgroundImage: `url(${auction.image})`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                       flexShrink: 0,
+                      border: '2px solid rgba(255, 255, 255, 0.1)',
                     }}
                   />
 

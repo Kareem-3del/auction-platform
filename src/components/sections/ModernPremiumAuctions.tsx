@@ -33,7 +33,7 @@ interface ModernPremiumAuctionsProps {
 
 // Mock data generator for demonstration
 const createMockProducts = (section: string, count: number): ProductCard[] => {
-  const mockProducts = [
+  const baseProducts = [
     {
       id: '1',
       title: '1955 Mercedes-Benz 300SL Gullwing',
@@ -178,12 +178,67 @@ const createMockProducts = (section: string, count: number): ProductCard[] => {
         status: 'LIVE',
       },
     },
+    {
+      id: '7',
+      title: 'Van Gogh Starry Night Sketch',
+      category: { name: 'Fine Art' },
+      images: ['/api/placeholder/400/300'],
+      estimatedValueMin: 850000,
+      estimatedValueMax: 1200000,
+      currentBid: 975000,
+      agent: {
+        displayName: 'Elite Art Gallery',
+        businessName: 'Renaissance Auctions',
+        logoUrl: '/api/placeholder/80/80',
+        rating: 4.9,
+      },
+      viewCount: 1890,
+      favoriteCount: 312,
+      startTime: new Date().toISOString(),
+      endTime: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
+      auction: {
+        startTime: new Date().toISOString(),
+        endTime: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
+        status: 'LIVE',
+      },
+    },
+    {
+      id: '8',
+      title: 'Cartier Panthère Diamond Necklace',
+      category: { name: 'Fine Jewelry' },
+      images: ['/api/placeholder/400/300'],
+      estimatedValueMin: 320000,
+      estimatedValueMax: 450000,
+      currentBid: 385000,
+      agent: {
+        displayName: 'Luxury Jewelry House',
+        businessName: 'Brilliant Collections',
+        logoUrl: '/api/placeholder/80/80',
+        rating: 4.8,
+      },
+      viewCount: 1456,
+      favoriteCount: 198,
+      startTime: new Date().toISOString(),
+      endTime: new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString(),
+      auction: {
+        startTime: new Date().toISOString(),
+        endTime: new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString(),
+        status: 'LIVE',
+      },
+    }
   ];
 
-  return mockProducts.slice(0, count).map((product, index) => ({
-    ...product,
-    id: `${section}-${product.id}-${index}`,
-  })) as ProductCard[];
+  // Extend the array if we need more items
+  const extendedProducts = [];
+  for (let i = 0; i < count; i++) {
+    const baseIndex = i % baseProducts.length;
+    extendedProducts.push({
+      ...baseProducts[baseIndex],
+      id: `${section}-${baseProducts[baseIndex].id}-${i}`,
+    });
+  }
+
+  return extendedProducts as ProductCard[];
 };
 
 const SECTION_CONFIGS = {
@@ -224,12 +279,15 @@ const SECTION_CONFIGS = {
 export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPremiumAuctionsProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
-  const [products, setProducts] = useState<{ [key: string]: ProductCard[] }>({
-    // Initialize with mock data to ensure cards are visible immediately
-    ending: createMockProducts('ending', limit),
-    trending: createMockProducts('trending', limit), 
-    featured: createMockProducts('featured', limit),
-    recent: createMockProducts('recent', limit),
+  const [products, setProducts] = useState<{ [key: string]: ProductCard[] }>(() => {
+    // Initialize with mock data to ensure cards are always visible
+    console.log('Initializing ModernPremiumAuctions with mock data', { limit, showTabs });
+    return {
+      ending: createMockProducts('ending', limit),
+      trending: createMockProducts('trending', limit), 
+      featured: createMockProducts('featured', limit),
+      recent: createMockProducts('recent', limit),
+    };
   });
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
   const [error, setError] = useState<{ [key: string]: string | null }>({});
@@ -271,24 +329,6 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
     sections.forEach(section => {
       fetchProducts(section);
     });
-    
-    // Add mock data if APIs fail to ensure cards are visible
-    const addMockData = setTimeout(() => {
-      const hasAnyData = Object.values(products).some(productList => productList.length > 0);
-      if (!hasAnyData && Object.keys(loading).length > 0) {
-        console.log('Adding mock data for demo purposes');
-        setProducts({
-          ending: createMockProducts('ending', 6),
-          trending: createMockProducts('trending', 6),
-          featured: createMockProducts('featured', 6),
-          recent: createMockProducts('recent', 6),
-        });
-        setLoading({});
-        setError({});
-      }
-    }, 3000);
-
-    return () => clearTimeout(addMockData);
   }, [limit]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
