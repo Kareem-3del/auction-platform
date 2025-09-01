@@ -27,6 +27,7 @@ import {
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface SystemSettings {
   general: {
@@ -44,11 +45,11 @@ interface SystemSettings {
     enableAutoBid: boolean;
   };
   payment: {
-    enablePaypal: boolean;
-    enableStripe: boolean;
-    enableCrypto: boolean;
+    enableBinance: boolean;
+    enableWishMoney: boolean;
     paymentFeePercentage: number;
     minimumWithdrawal: number;
+    virtualBalanceMultiplier: number;
   };
   email: {
     smtpHost: string;
@@ -62,6 +63,7 @@ interface SystemSettings {
 }
 
 export default function SettingsPage() {
+  const { t } = useLocale();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,11 +85,11 @@ export default function SettingsPage() {
       enableAutoBid: true,
     },
     payment: {
-      enablePaypal: true,
-      enableStripe: true,
-      enableCrypto: false,
+      enableBinance: true,
+      enableWishMoney: true,
       paymentFeePercentage: 2.5,
       minimumWithdrawal: 10,
+      virtualBalanceMultiplier: 3.0,
     },
     email: {
       smtpHost: '',
@@ -241,46 +243,101 @@ export default function SettingsPage() {
 
   const renderPaymentSettings = () => (
     <Stack spacing={3}>
-      <FormControlLabel
-        control={
-          <Switch
-            checked={settings.payment.enablePaypal}
-            onChange={(e) => handleInputChange('payment', 'enablePaypal', e.target.checked)}
+      <Typography variant="h6" gutterBottom>
+        {t('settings.paymentMethods')}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        {t('settings.paymentMethodsDescription')}
+      </Typography>
+      
+      {/* Binance Option */}
+      <Card sx={{ p: 2, backgroundColor: settings.payment.enableBinance ? 'action.selected' : 'background.paper' }}>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Box
+            component="img"
+            src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png"
+            alt="Binance"
+            sx={{ width: 32, height: 32 }}
           />
-        }
-        label="Enable PayPal"
-      />
-      <FormControlLabel
-        control={
-          <Switch
-            checked={settings.payment.enableStripe}
-            onChange={(e) => handleInputChange('payment', 'enableStripe', e.target.checked)}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="subtitle1" fontWeight="medium">
+              {t('settings.binance')}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t('settings.binanceDescription')}
+            </Typography>
+          </Box>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={settings.payment.enableBinance}
+                onChange={(e) => handleInputChange('payment', 'enableBinance', e.target.checked)}
+                color="primary"
+              />
+            }
+            label=""
+            sx={{ m: 0 }}
           />
-        }
-        label="Enable Stripe"
-      />
-      <FormControlLabel
-        control={
-          <Switch
-            checked={settings.payment.enableCrypto}
-            onChange={(e) => handleInputChange('payment', 'enableCrypto', e.target.checked)}
+        </Stack>
+      </Card>
+
+      {/* WishMoney Option */}
+      <Card sx={{ p: 2, backgroundColor: settings.payment.enableWishMoney ? 'action.selected' : 'background.paper' }}>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Box
+            component="img"
+            src="https://wishmoney.io/wp-content/uploads/2023/01/logo.png"
+            alt="WishMoney"
+            sx={{ width: 32, height: 32 }}
           />
-        }
-        label="Enable Cryptocurrency"
-      />
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="subtitle1" fontWeight="medium">
+              {t('settings.wishMoney')}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t('settings.wishMoneyDescription')}
+            </Typography>
+          </Box>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={settings.payment.enableWishMoney}
+                onChange={(e) => handleInputChange('payment', 'enableWishMoney', e.target.checked)}
+                color="primary"
+              />
+            }
+            label=""
+            sx={{ m: 0 }}
+          />
+        </Stack>
+      </Card>
+
       <TextField
         fullWidth
-        label="Payment Fee Percentage (%)"
+        label={t('settings.paymentFeePercentage')}
         type="number"
+        inputProps={{ min: 0, max: 10, step: 0.1 }}
         value={settings.payment.paymentFeePercentage}
         onChange={(e) => handleInputChange('payment', 'paymentFeePercentage', parseFloat(e.target.value))}
+        helperText={t('settings.paymentFeeHelp')}
       />
       <TextField
         fullWidth
-        label="Minimum Withdrawal Amount ($)"
+        label={t('settings.minimumWithdrawal')}
         type="number"
+        inputProps={{ min: 1, step: 1 }}
         value={settings.payment.minimumWithdrawal}
         onChange={(e) => handleInputChange('payment', 'minimumWithdrawal', parseFloat(e.target.value))}
+        helperText={t('settings.minimumWithdrawalHelp')}
+      />
+      <TextField
+        fullWidth
+        label={t('settings.virtualBalanceMultiplier')}
+        type="number"
+        inputProps={{ min: 1, max: 10, step: 0.1 }}
+        value={settings.payment.virtualBalanceMultiplier}
+        onChange={(e) => handleInputChange('payment', 'virtualBalanceMultiplier', parseFloat(e.target.value))}
+        helperText={t('settings.virtualBalanceMultiplierHelp')}
       />
     </Stack>
   );

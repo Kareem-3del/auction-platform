@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { authenticateUser } from '@/lib/auth';
+import { authenticateUser } from 'src/lib/auth';
 import { 
   ErrorCodes, 
   errorResponse, 
@@ -10,7 +10,7 @@ import {
   successResponse,
   validateContentType,
   validateRequiredFields
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // Validation schema
 const loginSchema = z.object({

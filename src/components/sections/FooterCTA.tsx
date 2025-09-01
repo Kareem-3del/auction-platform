@@ -14,9 +14,12 @@ import {
   InputAdornment,
 } from '@mui/material';
 
+import { useLocale } from 'src/hooks/useLocale';
+
 export function FooterCTA() {
   const theme = useTheme();
   const router = useRouter();
+  const { t } = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = () => {
@@ -77,10 +80,10 @@ export function FooterCTA() {
             }}
           >
             {[
-              { number: '1000+', label: 'Items Sold', icon: 'mdi:gavel' },
-              { number: '500+', label: 'Happy Bidders', icon: 'mdi:account-group' },
-              { number: '50+', label: 'Categories', icon: 'mdi:view-grid' },
-              { number: '24/7', label: 'Support', icon: 'mdi:headset' },
+              { number: '1000+', label: t('homepage.stats.itemsSold'), icon: 'mdi:gavel' },
+              { number: '500+', label: t('homepage.stats.happyBidders'), icon: 'mdi:account-group' },
+              { number: '50+', label: t('homepage.stats.categories'), icon: 'mdi:view-grid' },
+              { number: '24/7', label: t('homepage.stats.support'), icon: 'mdi:headset' },
             ].map((stat, index) => (
               <Box key={index} sx={{ textAlign: 'center' }}>
                 <Icon 
@@ -135,7 +138,7 @@ export function FooterCTA() {
               lineHeight: 1.1,
             }}
           >
-            Start Your Collection Journey
+            {t('homepage.startJourney.title')}
           </Typography>
 
           {/* Subtitle */}
@@ -152,7 +155,7 @@ export function FooterCTA() {
               lineHeight: 1.6,
             }}
           >
-            Discover rare finds, exclusive items, and exceptional deals in Lebanon&apos;s most trusted auction house
+            {t('homepage.startJourney.description')}
           </Typography>
 
           {/* Enhanced Search Bar */}
@@ -169,7 +172,7 @@ export function FooterCTA() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Search luxury cars, properties, jewelry, collectibles..."
+              placeholder={t('homepage.hero.searchPlaceholder')}
               variant="outlined"
               InputProps={{
                 startAdornment: (
@@ -202,7 +205,7 @@ export function FooterCTA() {
                         },
                       }}
                     >
-                      Search
+                      {t('common.search')}
                     </Button>
                   </InputAdornment>
                 ),
@@ -267,7 +270,7 @@ export function FooterCTA() {
                 transition: 'all 0.3s ease',
               }}
             >
-              Browse Live Auctions
+              {t('navigation.auctions')}
             </Button>
             
             <Button
@@ -295,7 +298,7 @@ export function FooterCTA() {
                 transition: 'all 0.3s ease',
               }}
             >
-              Explore Categories
+              {t('navigation.categories')}
             </Button>
 
             <Button
@@ -319,7 +322,7 @@ export function FooterCTA() {
                 transition: 'all 0.3s ease',
               }}
             >
-              Join Community
+              {t('auth.signUp')}
             </Button>
           </Box>
 
@@ -334,13 +337,35 @@ export function FooterCTA() {
             }}
           >
             {[
-              { icon: 'mdi:shield-check-outline', text: 'Licensed & Secure', desc: 'Government Regulated' },
-              { icon: 'mdi:clock-fast', text: 'Real-time Bidding', desc: 'Instant Updates' },
-              { icon: 'mdi:certificate-outline', text: 'Verified Items', desc: 'Expert Authentication' },
-              { icon: 'mdi:handshake-outline', text: 'Trusted by 10K+', desc: 'Happy Customers' },
+              { 
+                icon: 'mdi:shield-check-outline', 
+                text: t('homepage.trustBadges.licensedSecure'), 
+                desc: t('homepage.trustBadges.governmentRegulated'),
+                action: () => router.push('/help?section=security')
+              },
+              { 
+                icon: 'mdi:clock-fast', 
+                text: t('homepage.trustBadges.realTimeBidding'), 
+                desc: t('homepage.trustBadges.instantUpdates'),
+                action: () => router.push('/auctions')
+              },
+              { 
+                icon: 'mdi:certificate-outline', 
+                text: t('homepage.trustBadges.verifiedItems'), 
+                desc: t('homepage.trustBadges.expertAuthentication'),
+                action: () => router.push('/help?section=authentication')
+              },
+              { 
+                icon: 'mdi:handshake-outline', 
+                text: t('homepage.trustBadges.trustedBy'), 
+                desc: t('homepage.trustBadges.happyCustomers'),
+                action: () => router.push('/about')
+              },
             ].map((badge, index) => (
               <Box
                 key={index}
+                component="button"
+                onClick={badge.action}
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -348,6 +373,19 @@ export function FooterCTA() {
                   gap: 1,
                   textAlign: 'center',
                   maxWidth: 140,
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 2,
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    transform: 'translateY(-2px)',
+                  },
+                  '&:active': {
+                    transform: 'translateY(0px)',
+                  }
                 }}
               >
                 <Icon 

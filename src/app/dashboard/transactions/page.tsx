@@ -35,16 +35,20 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 interface Transaction {
   id: string;
-  type: string;
-  amount: number;
+  transactionType: string;
+  amountReal: number;
+  amountVirtual: number;
+  currency: string;
   status: string;
   description: string;
   userId: string;
   userEmail?: string;
   auctionId?: string;
   auctionTitle?: string;
-  paymentMethod: string;
+  paymentMethod?: string;
+  externalReference?: string;
   createdAt: string;
+  processedAt?: string;
 }
 
 export default function TransactionsPage() {
@@ -85,49 +89,54 @@ export default function TransactionsPage() {
       (transaction.userEmail || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (transaction.auctionTitle || '').toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesType = typeFilter === 'all' || transaction.type === typeFilter;
-    const matchesStatus = statusFilter === 'all' || transaction.status === statusFilter;
+    const matchesType = typeFilter === 'all' || transaction.transactionType.toLowerCase() === typeFilter.toLowerCase();
+    const matchesStatus = statusFilter === 'all' || transaction.status.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesType && matchesStatus;
   }) : [];
 
   const getTransactionIcon = (type: string) => {
-    switch (type) {
-      case 'bid':
-      case 'payment':
-        return <TrendingDownIcon />;
-      case 'refund':
-      case 'payout':
+    switch (type.toUpperCase()) {
+      case 'DEPOSIT':
         return <TrendingUpIcon />;
-      case 'transfer':
-        return <TransferIcon />;
+      case 'WITHDRAWAL':
+        return <TrendingDownIcon />;
+      case 'BID_PLACEMENT':
+      case 'AUCTION_WIN':
+        return <TrendingDownIcon />;
+      case 'REFUND':
+        return <TrendingUpIcon />;
+      case 'COMMISSION':
+      case 'FEE':
+        return <TrendingDownIcon />;
       default:
         return <WalletIcon />;
     }
   };
 
   const getTransactionColor = (type: string) => {
-    switch (type) {
-      case 'bid':
-      case 'payment':
-        return 'error';
-      case 'refund':
-      case 'payout':
+    switch (type.toUpperCase()) {
+      case 'DEPOSIT':
+      case 'REFUND':
         return 'success';
-      case 'transfer':
-        return 'info';
+      case 'WITHDRAWAL':
+      case 'BID_PLACEMENT':
+      case 'AUCTION_WIN':
+      case 'COMMISSION':
+      case 'FEE':
+        return 'error';
       default:
         return 'default';
     }
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
+    switch (status.toUpperCase()) {
+      case 'COMPLETED':
         return 'success';
-      case 'pending':
+      case 'PENDING':
         return 'warning';
-      case 'failed':
+      case 'FAILED':
         return 'error';
       default:
         return 'default';
@@ -184,11 +193,13 @@ export default function TransactionsPage() {
                 onChange={(e) => setTypeFilter(e.target.value)}
               >
                 <MenuItem value="all">All Types</MenuItem>
-                <MenuItem value="bid">Bid</MenuItem>
-                <MenuItem value="payment">Payment</MenuItem>
-                <MenuItem value="refund">Refund</MenuItem>
-                <MenuItem value="payout">Payout</MenuItem>
-                <MenuItem value="transfer">Transfer</MenuItem>
+                <MenuItem value="DEPOSIT">Deposit</MenuItem>
+                <MenuItem value="WITHDRAWAL">Withdrawal</MenuItem>
+                <MenuItem value="BID_PLACEMENT">Bid Placement</MenuItem>
+                <MenuItem value="AUCTION_WIN">Auction Win</MenuItem>
+                <MenuItem value="REFUND">Refund</MenuItem>
+                <MenuItem value="COMMISSION">Commission</MenuItem>
+                <MenuItem value="FEE">Fee</MenuItem>
               </Select>
             </FormControl>
 
@@ -200,9 +211,9 @@ export default function TransactionsPage() {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <MenuItem value="all">All Status</MenuItem>
-                <MenuItem value="completed">Completed</MenuItem>
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="failed">Failed</MenuItem>
+                <MenuItem value="COMPLETED">Completed</MenuItem>
+                <MenuItem value="PENDING">Pending</MenuItem>
+                <MenuItem value="FAILED">Failed</MenuItem>
               </Select>
             </FormControl>
           </Stack>
@@ -216,7 +227,8 @@ export default function TransactionsPage() {
                 <TableRow>
                   <TableCell>Transaction</TableCell>
                   <TableCell>User</TableCell>
-                  <TableCell>Amount</TableCell>
+                  <TableCell>Real Amount</TableCell>
+                  <TableCell>Virtual Amount</TableCell>
                   <TableCell>Type</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Payment Method</TableCell>
@@ -232,10 +244,10 @@ export default function TransactionsPage() {
                           sx={{ 
                             width: 40, 
                             height: 40,
-                            backgroundColor: `${getTransactionColor(transaction.type)}.light`
+                            backgroundColor: `${getTransactionColor(transaction.transactionType)}.light`
                           }}
                         >
-                          {getTransactionIcon(transaction.type)}
+                          {getTransactionIcon(transaction.transactionType)}
                         </Avatar>
                         <Box>
                           <Typography variant="subtitle2" fontWeight="medium">
@@ -244,6 +256,11 @@ export default function TransactionsPage() {
                           {transaction.auctionTitle && (
                             <Typography variant="caption" color="text.secondary">
                               Auction: {transaction.auctionTitle}
+                            </Typography>
+                          )}
+                          {transaction.externalReference && (
+                            <Typography variant="caption" color="text.secondary" display="block">
+                              Ref: {transaction.externalReference}
                             </Typography>
                           )}
                         </Box>
@@ -255,20 +272,38 @@ export default function TransactionsPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography 
-                        variant="body2" 
-                        fontWeight="medium"
-                        color={getTransactionColor(transaction.type) + '.main'}
-                      >
-                        {transaction.type === 'refund' || transaction.type === 'payout' ? '+' : '-'}
-                        {formatCurrency(transaction.amount)}
-                      </Typography>
+                      {transaction.amountReal !== 0 ? (
+                        <Typography 
+                          variant="body2" 
+                          fontWeight="medium"
+                          color={getTransactionColor(transaction.transactionType) + '.main'}
+                        >
+                          {transaction.amountReal > 0 ? '+' : ''}
+                          {formatCurrency(transaction.amountReal)}
+                        </Typography>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">-</Typography>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {transaction.amountVirtual !== 0 ? (
+                        <Typography 
+                          variant="body2" 
+                          fontWeight="medium"
+                          color="primary.main"
+                        >
+                          {transaction.amountVirtual > 0 ? '+' : ''}
+                          {formatCurrency(transaction.amountVirtual)}
+                        </Typography>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">-</Typography>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={transaction.type}
+                        label={transaction.transactionType.replace('_', ' ')}
                         size="small"
-                        color={getTransactionColor(transaction.type) as any}
+                        color={getTransactionColor(transaction.transactionType) as any}
                         variant="outlined"
                       />
                     </TableCell>
@@ -282,7 +317,7 @@ export default function TransactionsPage() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" color="text.secondary">
-                        {transaction.paymentMethod}
+                        {transaction.paymentMethod || '-'}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -294,7 +329,7 @@ export default function TransactionsPage() {
                 ))}
                 {loading && (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                       <Typography color="text.secondary">
                         Loading transactions...
                       </Typography>
@@ -303,7 +338,7 @@ export default function TransactionsPage() {
                 )}
                 {!loading && filteredTransactions.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                       <Typography color="text.secondary">
                         {searchQuery ? 'No transactions match your search' : 'No transactions found'}
                       </Typography>

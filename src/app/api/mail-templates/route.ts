@@ -1,12 +1,12 @@
 
 import { z } from 'zod';
-import { withAuth } from '@/lib/middleware/auth';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse,
   validateContentType 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 const mailTemplateSchema = z.object({
   name: z.string().min(1, 'Template name is required'),

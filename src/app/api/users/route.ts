@@ -1,13 +1,13 @@
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/middleware/auth';
+import { prisma } from 'src/lib/prisma';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse, 
   validateContentType 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // GET /api/users - Get all users (Admin only)
 export const GET = withAuth(async (request) => {
@@ -45,8 +45,11 @@ export const GET = withAuth(async (request) => {
     if (includeStats) {
       includeClause._count = {
         select: {
-          products: true,
           bids: true,
+          transactions: true,
+          favorites: true,
+          wonProducts: true,
+          highestBidProducts: true,
         },
       };
     }
@@ -64,8 +67,11 @@ export const GET = withAuth(async (request) => {
 
     const usersWithStats = users.map((user: any) => ({
       ...user,
-      productCount: user._count?.products || 0,
       bidCount: user._count?.bids || 0,
+      transactionCount: user._count?.transactions || 0,
+      favoriteCount: user._count?.favorites || 0,
+      wonProductCount: user._count?.wonProducts || 0,
+      highestBidProductCount: user._count?.highestBidProducts || 0,
       _count: undefined,
     }));
 

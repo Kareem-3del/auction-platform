@@ -1,14 +1,14 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { sendVerificationEmail } from '@/lib/email';
+import { prisma } from 'src/lib/prisma';
+import { sendVerificationEmail } from 'src/lib/email';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse, 
   validateContentType 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 import { generateRandomString } from 'src/lib/utils';
 

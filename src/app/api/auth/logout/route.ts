@@ -1,14 +1,14 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { logoutUser, logoutAllSessions } from '@/lib/auth';
+import { logoutUser, logoutAllSessions } from 'src/lib/auth';
 import { 
   ErrorCodes, 
   errorResponse, 
   handleAPIError, 
   validateMethod,
   successResponse
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // Validation schema
 const logoutSchema = z.object({
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       // For logout all, we need to extract user ID from the refresh token
       // This is a simplified approach - in production, you might want to verify the token first
       try {
-        const { verifyRefreshToken } = await import('@/lib/auth');
+        const { verifyRefreshToken } = await import('src/lib/auth');
         const payload = verifyRefreshToken(validatedData.refreshToken!);
         await logoutAllSessions(payload.sub);
       } catch (error) {

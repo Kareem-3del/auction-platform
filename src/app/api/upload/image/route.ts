@@ -4,6 +4,11 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { NextResponse } from 'next/server';
 import { mkdir, writeFile } from 'fs/promises';
+import { 
+  errorResponse, 
+  successResponse, 
+  ErrorCodes 
+} from 'src/lib/api-response';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,46 +17,19 @@ export async function POST(request: NextRequest) {
     const type = formData.get('type') as string; // 'profile', 'product', etc.
 
     if (!file) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
-            code: 'MISSING_FILE', 
-            message: 'No image file provided' 
-          } 
-        },
-        { status: 400 }
-      );
+      return errorResponse(ErrorCodes.VALIDATION_FAILED, 'No image file provided', 400);
     }
 
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
-            code: 'INVALID_FILE_TYPE', 
-            message: 'Only JPEG, PNG, and WebP images are allowed' 
-          } 
-        },
-        { status: 400 }
-      );
+      return errorResponse(ErrorCodes.INVALID_FILE_TYPE, 'Only JPEG, PNG, and WebP images are allowed', 400);
     }
 
     // Validate file size (5MB max)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
-            code: 'FILE_TOO_LARGE', 
-            message: 'Image file must be smaller than 5MB' 
-          } 
-        },
-        { status: 400 }
-      );
+      return errorResponse(ErrorCodes.FILE_TOO_LARGE, 'Image file must be smaller than 5MB', 400);
     }
 
     // Create upload directory if it doesn't exist
@@ -81,28 +59,16 @@ export async function POST(request: NextRequest) {
     // 4. Store file metadata in database
     // 5. Implement proper authentication/authorization
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        url: publicUrl,
-        filename,
-        size: file.size,
-        type: file.type,
-        uploadedAt: new Date().toISOString(),
-      },
+    return successResponse({
+      url: publicUrl,
+      filename,
+      size: file.size,
+      type: file.type,
+      uploadedAt: new Date().toISOString(),
     });
 
   } catch (error) {
     console.error('Image upload error:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: { 
-          code: 'UPLOAD_FAILED', 
-          message: 'Failed to upload image' 
-        } 
-      },
-      { status: 500 }
-    );
+    return errorResponse(ErrorCodes.INTERNAL_SERVER_ERROR, 'Failed to upload image', 500);
   }
 }

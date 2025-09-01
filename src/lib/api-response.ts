@@ -1,27 +1,5 @@
 import { NextResponse } from 'next/server';
 
-// Standard API response types
-export interface SuccessResponse<T = any> {
-  success: true;
-  data: T;
-  meta?: {
-    pagination?: PaginationMeta;
-    total?: number;
-    filters?: any;
-    [key: string]: any;
-  };
-}
-
-export interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-    details?: any;
-    timestamp: string;
-  };
-}
-
 export interface PaginationMeta {
   page: number;
   limit: number;
@@ -29,6 +7,30 @@ export interface PaginationMeta {
   totalPages: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+}
+
+export interface APIMetaData {
+  pagination?: PaginationMeta;
+  total?: number;
+  filters?: Record<string, string | number | boolean>;
+  [key: string]: unknown;
+}
+
+// Standard API response types
+export interface SuccessResponse<T> {
+  success: true;
+  data: T;
+  meta?: APIMetaData;
+}
+
+export interface ErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown> | string[] | string;
+    timestamp: string;
+  };
 }
 
 // Standard error codes
@@ -55,7 +57,6 @@ export const ErrorCodes = {
 
   // Business Logic Errors (400)
   AUCTION_NOT_LIVE: 'AUCTION_NOT_LIVE',
-  SELF_BID_NOT_ALLOWED: 'SELF_BID_NOT_ALLOWED',
   PAYMENT_FAILED: 'PAYMENT_FAILED',
   FILE_TOO_LARGE: 'FILE_TOO_LARGE',
   INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
@@ -81,13 +82,13 @@ export type ErrorCode = typeof ErrorCodes[keyof typeof ErrorCodes];
 export class APIError extends Error {
   public readonly code: ErrorCode;
   public readonly statusCode: number;
-  public readonly details?: any;
+  public readonly details?: Record<string, unknown> | string[] | string;
 
   constructor(
     code: ErrorCode,
     message: string,
     statusCode: number = 500,
-    details?: any
+    details?: Record<string, unknown> | string[] | string
   ) {
     super(message);
     this.name = 'APIError';
@@ -120,7 +121,7 @@ export function successResponse<T>(
 export function createErrorResponse(
   code: ErrorCode,
   message: string,
-  details?: any
+  details?: Record<string, unknown> | string[] | string
 ): ErrorResponse {
   return {
     success: false,
@@ -137,7 +138,7 @@ export function errorResponse(
   code: ErrorCode,
   message: string,
   statusCode: number = 500,
-  details?: any
+  details?: Record<string, unknown> | string[] | string
 ): NextResponse<ErrorResponse> {
   return NextResponse.json(
     createErrorResponse(code, message, details),
@@ -146,7 +147,7 @@ export function errorResponse(
 }
 
 // Specific error response helpers
-export function validationErrorResponse(message: string, details?: any) {
+export function validationErrorResponse(message: string, details?: Record<string, unknown> | string[] | string) {
   return errorResponse(ErrorCodes.VALIDATION_FAILED, message, 422, details);
 }
 
@@ -169,6 +170,17 @@ export function rateLimitResponse(message: string = 'Too many requests') {
 export function internalErrorResponse(message: string = 'Internal server error') {
   return errorResponse(ErrorCodes.INTERNAL_SERVER_ERROR, message, 500);
 }
+
+// Simple API response helpers (backward compatibility)
+export const apiResponse = {
+  success: successResponse,
+  error: errorResponse,
+  unauthorized: unauthorizedResponse,
+  forbidden: forbiddenResponse,
+  notFound: notFoundResponse,
+  badRequest: validationErrorResponse,
+  internalError: internalErrorResponse,
+};
 
 // Pagination helper
 export function createPaginationMeta(
@@ -233,7 +245,7 @@ export function handleAPIError(error: unknown): NextResponse<ErrorResponse> {
 
 // Request validation helper
 export function validateRequiredFields(
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   requiredFields: string[]
 ): { isValid: boolean; missingFields: string[] } {
   const missingFields = requiredFields.filter(field => {

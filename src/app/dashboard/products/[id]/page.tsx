@@ -35,6 +35,7 @@ import {
 import { apiClient } from 'src/lib/axios';
 import { formatCurrency } from 'src/lib/utils';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Category {
   id: string;
@@ -85,6 +86,7 @@ export default function ViewProductPage() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
+  const { t } = useLocale();
   
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
@@ -100,11 +102,11 @@ export default function ViewProductPage() {
           const productData = data.data.product || data.data;
           setProduct(productData);
         } else {
-          setError(data.error?.message || 'Failed to load product');
+          setError(data.error?.message || t('products.loadProductError'));
         }
       } catch (error) {
         console.error('Error loading product:', error);
-        setError('An unexpected error occurred');
+        setError(t('products.unexpectedError'));
       } finally {
         setLoading(false);
       }
@@ -122,7 +124,7 @@ export default function ViewProductPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this product?')) {
+    if (!confirm(t('products.confirmDeleteProduct'))) {
       return;
     }
 
@@ -132,11 +134,11 @@ export default function ViewProductPage() {
       if (data.success) {
         router.push('/dashboard/products');
       } else {
-        setError(data.error?.message || 'Failed to delete product');
+        setError(data.error?.message || t('products.deleteProductError'));
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      setError('An unexpected error occurred');
+      setError(t('products.unexpectedError'));
     }
   };
 
@@ -209,10 +211,10 @@ export default function ViewProductPage() {
       <DashboardContent>
         <Box sx={{ py: 3 }}>
           <Alert severity="error" sx={{ mb: 3 }}>
-            {error || 'Product not found'}
+            {error || t('products.productNotFound')}
           </Alert>
           <Button startIcon={<ArrowBackIcon />} onClick={handleBack}>
-            Back to Products
+            {t('products.backToProducts')}
           </Button>
         </Box>
       </DashboardContent>
@@ -255,7 +257,7 @@ export default function ViewProductPage() {
               startIcon={<EditIcon />}
               onClick={handleEdit}
             >
-              Edit
+              {t('common.edit')}
             </Button>
             <Button
               variant="outlined"
@@ -263,7 +265,7 @@ export default function ViewProductPage() {
               startIcon={<DeleteIcon />}
               onClick={handleDelete}
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </Stack>
         </Stack>
@@ -275,7 +277,7 @@ export default function ViewProductPage() {
               {/* Description */}
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Description
+                  {t('products.description')}
                 </Typography>
                 <Typography variant="body1" paragraph>
                   {product.description}
@@ -283,7 +285,7 @@ export default function ViewProductPage() {
                 {product.shortDescription && (
                   <>
                     <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
-                      Short Description
+                      {t('products.shortDescription')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {product.shortDescription}
@@ -295,7 +297,7 @@ export default function ViewProductPage() {
               {/* Images */}
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Images
+                  {t('products.images')}
                 </Typography>
                 {product.images && product.images.length > 0 ? (
                   <Grid container spacing={2}>
@@ -319,7 +321,7 @@ export default function ViewProductPage() {
                   </Grid>
                 ) : (
                   <Typography variant="body2" color="text.secondary">
-                    No images uploaded
+                    {t('products.noImagesUploaded')}
                   </Typography>
                 )}
               </Card>
@@ -328,7 +330,7 @@ export default function ViewProductPage() {
               {specifications.length > 0 && (
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Specifications
+                    {t('products.specifications')}
                   </Typography>
                   <TableContainer>
                     <Table size="small">
@@ -355,12 +357,12 @@ export default function ViewProductPage() {
               {/* Basic Info */}
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Product Details
+                  {t('products.productDetails')}
                 </Typography>
                 <Stack spacing={2}>
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary">
-                      Product ID
+                      {t('products.productId')}
                     </Typography>
                     <Typography variant="body2" fontFamily="monospace">
                       {product.id}
@@ -370,7 +372,7 @@ export default function ViewProductPage() {
                   {product.category && (
                     <Box>
                       <Typography variant="subtitle2" color="text.secondary">
-                        Category
+                        {t('products.category')}
                       </Typography>
                       <Typography variant="body2">
                         {product.category.name}
@@ -381,7 +383,7 @@ export default function ViewProductPage() {
                   {product.location && (
                     <Box>
                       <Typography variant="subtitle2" color="text.secondary">
-                        Location
+                        {t('products.location')}
                       </Typography>
                       <Typography variant="body2">
                         {product.location}
@@ -391,7 +393,7 @@ export default function ViewProductPage() {
 
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary">
-                      Condition
+                      {t('products.condition')}
                     </Typography>
                     <Chip
                       label={product.condition}
@@ -406,20 +408,20 @@ export default function ViewProductPage() {
               {(product.estimatedValueMin || product.estimatedValueMax || product.reservePrice) && (
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Valuation
+                    {t('products.valuation')}
                   </Typography>
                   <Stack spacing={2}>
                     {(product.estimatedValueMin || product.estimatedValueMax) && (
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Estimated Value
+                          {t('products.estimatedValue')}
                         </Typography>
                         <Typography variant="body1" fontWeight="medium">
                           {product.estimatedValueMin && product.estimatedValueMax
                             ? `${formatCurrency(product.estimatedValueMin)} - ${formatCurrency(product.estimatedValueMax)}`
                             : product.estimatedValueMin
-                            ? `From ${formatCurrency(product.estimatedValueMin)}`
-                            : `Up to ${formatCurrency(product.estimatedValueMax!)}`}
+                            ? t('products.fromValue', { value: formatCurrency(product.estimatedValueMin) })
+                            : t('products.upToValue', { value: formatCurrency(product.estimatedValueMax!) })}
                         </Typography>
                       </Box>
                     )}
@@ -427,7 +429,7 @@ export default function ViewProductPage() {
                     {product.reservePrice && (
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Reserve Price
+                          {t('products.reservePrice')}
                         </Typography>
                         <Typography variant="body1" fontWeight="medium" color="primary.main">
                           {formatCurrency(product.reservePrice)}
@@ -442,7 +444,7 @@ export default function ViewProductPage() {
               {product.agent && (
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Listed by
+                    {t('products.listedBy')}
                   </Typography>
                   <Stack direction="row" spacing={2} alignItems="center">
                     <Avatar
@@ -458,7 +460,7 @@ export default function ViewProductPage() {
                       </Typography>
                       {product.agent.rating && (
                         <Typography variant="body2" color="text.secondary">
-                          ⭐ {product.agent.rating.toFixed(1)} ({product.agent.reviewCount} reviews)
+                          ⭐ {product.agent.rating.toFixed(1)} ({product.agent.reviewCount} {t('products.reviews')})
                         </Typography>
                       )}
                     </Box>
@@ -469,12 +471,12 @@ export default function ViewProductPage() {
               {/* Statistics */}
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Statistics
+                  {t('products.statistics')}
                 </Typography>
                 <Stack spacing={2}>
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      Views
+                      {t('products.views')}
                     </Typography>
                     <Typography variant="body2" fontWeight="medium">
                       {product.viewCount || 0}
@@ -482,7 +484,7 @@ export default function ViewProductPage() {
                   </Box>
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      Favorites
+                      {t('products.favorites')}
                     </Typography>
                     <Typography variant="body2" fontWeight="medium">
                       {product.favoriteCount || 0}
@@ -491,7 +493,7 @@ export default function ViewProductPage() {
                   <Divider />
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      Created
+                      {t('products.created')}
                     </Typography>
                     <Typography variant="body2">
                       {formatDate(product.createdAt)}
@@ -499,7 +501,7 @@ export default function ViewProductPage() {
                   </Box>
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      Updated
+                      {t('products.updated')}
                     </Typography>
                     <Typography variant="body2">
                       {formatDate(product.updatedAt)}
@@ -508,7 +510,7 @@ export default function ViewProductPage() {
                   {product.approvedAt && (
                     <Box display="flex" justifyContent="space-between">
                       <Typography variant="body2" color="text.secondary">
-                        Approved
+                        {t('products.approved')}
                       </Typography>
                       <Typography variant="body2">
                         {formatDate(product.approvedAt)}
@@ -522,7 +524,7 @@ export default function ViewProductPage() {
               {product.status === 'REJECTED' && product.rejectionReason && (
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom color="error.main">
-                    Rejection Reason
+                    {t('products.rejectionReason')}
                   </Typography>
                   <Typography variant="body2">
                     {product.rejectionReason}

@@ -11,6 +11,7 @@ import { CONFIG } from 'src/global-config';
 import { primary } from 'src/theme/core/palette';
 import { themeConfig, ThemeProvider } from 'src/theme';
 import { NotificationProvider } from 'src/contexts/NotificationContext';
+import { LocaleProvider } from 'src/contexts/LocaleContext';
 
 import { ProgressBar } from 'src/components/progress-bar';
 import { MotionLazy } from 'src/components/animate/motion-lazy';
@@ -61,6 +62,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html lang="en" dir={appConfig.dir} suppressHydrationWarning>
+      <head>
+        <script src="https://accounts.google.com/gsi/client" async defer />
+      </head>
       <body>
         <InitColorSchemeScript
           modeStorageKey={themeConfig.modeStorageKey}
@@ -68,24 +72,26 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           defaultMode="light"
         />
 
-        <AuthProvider>
-          <NotificationProvider>
-            <SettingsProvider
-              cookieSettings={appConfig.cookieSettings}
-              defaultSettings={defaultSettings}
-            >
-              <AppRouterCacheProvider options={{ key: 'css' }}>
-                <ThemeProvider>
-                  <MotionLazy>
-                    <ProgressBar />
-                    <SettingsDrawer defaultSettings={defaultSettings} />
-                    {children}
-                  </MotionLazy>
-                </ThemeProvider>
-              </AppRouterCacheProvider>
-            </SettingsProvider>
-          </NotificationProvider>
-        </AuthProvider>
+        <LocaleProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <SettingsProvider
+                cookieSettings={appConfig.cookieSettings}
+                defaultSettings={defaultSettings}
+              >
+                <AppRouterCacheProvider options={{ key: 'css' }}>
+                  <ThemeProvider>
+                    <MotionLazy>
+                      <ProgressBar />
+                      <SettingsDrawer defaultSettings={defaultSettings} />
+                      {children}
+                    </MotionLazy>
+                  </ThemeProvider>
+                </AppRouterCacheProvider>
+              </SettingsProvider>
+            </NotificationProvider>
+          </AuthProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

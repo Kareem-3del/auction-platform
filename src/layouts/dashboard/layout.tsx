@@ -12,8 +12,10 @@ import { useTheme } from '@mui/material/styles';
 import { iconButtonClasses } from '@mui/material/IconButton';
 
 import { useAuth } from 'src/hooks/useAuth';
+import { useLocale } from 'src/hooks/useLocale';
+import { useNotificationContext } from 'src/contexts/NotificationContext';
 
-import { _contacts, _notifications } from 'src/_mock';
+import { _contacts } from 'src/_mock';
 
 import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
@@ -35,7 +37,7 @@ import { SettingsButton } from '../components/settings-button';
 import { LanguagePopover } from '../components/language-popover';
 import { ContactsPopover } from '../components/contacts-popover';
 import { WorkspacesPopover } from '../components/workspaces-popover';
-import { navData as dashboardNavData } from '../nav-config-dashboard';
+import { getNavData } from '../nav-config-dashboard';
 import { dashboardLayoutVars, dashboardNavColorVars } from './css-vars';
 import { NotificationsDrawer } from '../components/notifications-drawer';
 
@@ -68,6 +70,8 @@ export function DashboardLayout({
   const theme = useTheme();
 
   const { user } = useAuth();
+  const { t } = useLocale();
+  const { notifications } = useNotificationContext();
 
   const settings = useSettingsContext();
 
@@ -75,7 +79,7 @@ export function DashboardLayout({
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
-  const navData = slotProps?.nav?.data ?? dashboardNavData;
+  const navData = slotProps?.nav?.data ?? getNavData(t);
 
   const isNavMini = settings.state.navLayout === 'mini';
   const isNavHorizontal = settings.state.navLayout === 'horizontal';
@@ -167,7 +171,15 @@ export function DashboardLayout({
           />
 
           {/** @slot Notifications popover */}
-          <NotificationsDrawer data={_notifications} />
+          <NotificationsDrawer data={notifications.map(notif => ({
+            id: notif.id,
+            title: notif.title,
+            description: notif.message,
+            type: notif.notificationType || notif.type,
+            avatarUrl: '/logo.png',
+            isUnRead: !notif.isRead,
+            postedAt: notif.createdAt,
+          }))} />
 
           {/** @slot Contacts popover */}
           <ContactsPopover data={_contacts} />

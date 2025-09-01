@@ -22,7 +22,10 @@ export function initializeWebSocket() {
       console.error('❌ Failed to initialize WebSocket server:', error);
     }
   } else {
-    console.log('⚠️ WebSocket server not started in production mode - use separate service');
+    // In production, we connect to the external WebSocket server
+    // but don't start our own server
+    console.log('⚠️ WebSocket server not started in production mode - using external service on port 8081');
+    isInitialized = true; // Mark as initialized to allow connections
   }
 }
 

@@ -35,6 +35,7 @@ import {
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Category {
   id: string;
@@ -52,6 +53,7 @@ interface Category {
 
 export default function CategoriesPage() {
   const router = useRouter();
+  const { t } = useLocale();
   
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,11 +73,11 @@ export default function CategoriesPage() {
           const categoriesArray = data.success ? (data.data?.data || data.data) : data.data;
           setCategories(Array.isArray(categoriesArray) ? categoriesArray : []);
         } else {
-          setError(data.error?.message || 'Failed to load categories');
+          setError(data.error?.message || t('categories.loadError'));
         }
       } catch (error) {
         console.error('Error loading categories:', error);
-        setError('An unexpected error occurred');
+        setError(t('messages.unexpectedError'));
       } finally {
         setLoading(false);
       }
@@ -104,7 +106,7 @@ export default function CategoriesPage() {
   };
 
   const handleDeleteCategory = async (category: Category) => {
-    if (confirm(`Are you sure you want to delete "${category.name}"?`)) {
+    if (confirm(t('categories.confirmDelete', { name: category.name }))) {
       try {
         const data = await apiClient.delete(`/api/categories/${category.id}`);
 
@@ -112,11 +114,11 @@ export default function CategoriesPage() {
         if (data.success) {
           setCategories(prev => prev.filter(c => c.id !== category.id));
         } else {
-          setError(data.error?.message || 'Failed to delete category');
+          setError(data.error?.message || t('categories.deleteError'));
         }
       } catch (error) {
         console.error('Error deleting category:', error);
-        setError('An unexpected error occurred');
+        setError(t('messages.unexpectedError'));
       }
     }
     setMenuAnchor(null);
@@ -135,11 +137,11 @@ export default function CategoriesPage() {
             : c
         ));
       } else {
-        setError(data.error?.message || 'Failed to update category');
+        setError(data.error?.message || t('categories.updateError'));
       }
     } catch (error) {
       console.error('Error updating category:', error);
-      setError('An unexpected error occurred');
+      setError(t('messages.unexpectedError'));
     }
     setMenuAnchor(null);
   };
@@ -172,10 +174,10 @@ export default function CategoriesPage() {
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
           <Box>
             <Typography variant="h4" gutterBottom>
-              Categories
+              {t('navigation.categories')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Manage product categories and subcategories
+              {t('categories.pageDescription')}
             </Typography>
           </Box>
           <Button
@@ -183,7 +185,7 @@ export default function CategoriesPage() {
             startIcon={<AddIcon />}
             onClick={handleCreateCategory}
           >
-            Add Category
+            {t('navigation.addCategory')}
           </Button>
         </Stack>
 
@@ -198,7 +200,7 @@ export default function CategoriesPage() {
         <Card sx={{ mb: 3, p: 2 }}>
           <TextField
             fullWidth
-            placeholder="Search categories..."
+            placeholder={t('categories.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
@@ -213,12 +215,12 @@ export default function CategoriesPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Category</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Products</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell>{t('categories.category')}</TableCell>
+                  <TableCell>{t('common.description')}</TableCell>
+                  <TableCell>{t('navigation.products')}</TableCell>
+                  <TableCell>{t('common.status')}</TableCell>
+                  <TableCell>{t('categories.created')}</TableCell>
+                  <TableCell align="right">{t('common.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -254,7 +256,7 @@ export default function CategoriesPage() {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={category.isActive ? 'Active' : 'Inactive'}
+                        label={category.isActive ? t('common.active') : t('common.inactive')}
                         size="small"
                         color={category.isActive ? 'success' : 'default'}
                         variant={category.isActive ? 'filled' : 'outlined'}
@@ -279,7 +281,7 @@ export default function CategoriesPage() {
                   <TableRow>
                     <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                       <Typography color="text.secondary">
-                        Loading categories...
+                        {t('categories.loading')}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -288,7 +290,7 @@ export default function CategoriesPage() {
                   <TableRow>
                     <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                       <Typography color="text.secondary">
-                        {searchQuery ? 'No categories match your search' : 'No categories found'}
+                        {searchQuery ? t('categories.noSearchResults') : t('categories.noCategories')}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -308,22 +310,22 @@ export default function CategoriesPage() {
         >
           <MenuItem onClick={() => actionMenuCategory && handleViewCategory(actionMenuCategory)}>
             <ViewIcon sx={{ mr: 1 }} fontSize="small" />
-            View
+            {t('common.view')}
           </MenuItem>
           <MenuItem onClick={() => actionMenuCategory && handleEditCategory(actionMenuCategory)}>
             <EditIcon sx={{ mr: 1 }} fontSize="small" />
-            Edit
+            {t('common.edit')}
           </MenuItem>
           <MenuItem onClick={() => actionMenuCategory && handleToggleStatus(actionMenuCategory)}>
             <FolderIcon sx={{ mr: 1 }} fontSize="small" />
-            {actionMenuCategory?.isActive ? 'Deactivate' : 'Activate'}
+            {actionMenuCategory?.isActive ? t('categories.deactivate') : t('categories.activate')}
           </MenuItem>
           <MenuItem 
             onClick={() => actionMenuCategory && handleDeleteCategory(actionMenuCategory)}
             sx={{ color: 'error.main' }}
           >
             <DeleteIcon sx={{ mr: 1 }} fontSize="small" />
-            Delete
+            {t('common.delete')}
           </MenuItem>
         </Menu>
       </Box>

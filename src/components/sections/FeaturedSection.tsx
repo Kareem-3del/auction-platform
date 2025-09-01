@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 
 import { CountdownTimer } from '../common/CountdownTimer';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Product {
   id: string;
@@ -74,6 +75,7 @@ const CATEGORY_THEMES = [
 
 export function FeaturedSection() {
   const router = useRouter();
+  const { t } = useLocale();
   const [featuredCategories, setFeaturedCategories] = useState<FeaturedCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -124,7 +126,7 @@ export function FeaturedSection() {
           gutterBottom
           sx={{ mb: 6, fontWeight: 'bold' }}
         >
-          Featured Categories
+          {t('homepage.sections.featuredCategories')}
         </Typography>
         
         {[...Array(3)].map((_, categoryIdx) => (
@@ -158,7 +160,7 @@ export function FeaturedSection() {
           gutterBottom
           sx={{ mb: 4, fontWeight: 'bold' }}
         >
-          Featured Categories
+          {t('homepage.sections.featuredCategories')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
           No featured categories available at the moment.
@@ -177,7 +179,7 @@ export function FeaturedSection() {
           gutterBottom
           sx={{ mb: 6, fontWeight: 'bold' }}
         >
-          Featured Categories
+          {t('homepage.sections.featuredCategories')}
         </Typography>
       
       {featuredCategories.map((category, categoryIndex) => {

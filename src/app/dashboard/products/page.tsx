@@ -41,6 +41,7 @@ import {
 import { apiClient } from 'src/lib/axios';
 import { formatCurrency } from 'src/lib/utils';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Category {
   id: string;
@@ -82,6 +83,7 @@ interface Product {
 
 export default function ProductsPage() {
   const router = useRouter();
+  const { t } = useLocale();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -281,13 +283,13 @@ export default function ProductsPage() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Product</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Value Range</TableCell>
-              <TableCell>Condition</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Created</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>{t('navigation.products')}</TableCell>
+              <TableCell>{t('categories.category')}</TableCell>
+              <TableCell>{t('products.valueRange')}</TableCell>
+              <TableCell>{t('products.condition')}</TableCell>
+              <TableCell>{t('common.status')}</TableCell>
+              <TableCell>{t('categories.created')}</TableCell>
+              <TableCell align="right">{t('common.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -314,7 +316,7 @@ export default function ProductsPage() {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2" color="text.secondary">
-                    {product.category?.name || 'No category'}
+                    {product.category?.name || t('products.noCategory')}
                   </Typography>
                 </TableCell>
                 <TableCell>
@@ -339,7 +341,7 @@ export default function ProductsPage() {
                     </Typography>
                   ) : (
                     <Typography variant="body2" color="text.secondary">
-                      No value set
+                      {t('products.noValueSet')}
                     </Typography>
                   )}
                 </TableCell>
@@ -376,7 +378,7 @@ export default function ProductsPage() {
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                   <Typography color="text.secondary">
-                    Loading products...
+                    {t('products.loading')}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -385,7 +387,7 @@ export default function ProductsPage() {
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                   <Typography color="text.secondary">
-                    {searchQuery ? 'No products match your search' : 'No products found'}
+                    {searchQuery ? t('products.noSearchResults') : t('products.noProducts')}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -403,10 +405,10 @@ export default function ProductsPage() {
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
           <Box>
             <Typography variant="h4" gutterBottom>
-              Products
+              {t('navigation.products')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Manage your product inventory and listings
+              {t('products.pageDescription')}
             </Typography>
           </Box>
           <Button
@@ -414,7 +416,7 @@ export default function ProductsPage() {
             startIcon={<AddIcon />}
             onClick={handleCreateProduct}
           >
-            Add Product
+            {t('navigation.addProduct')}
           </Button>
         </Stack>
 
@@ -429,7 +431,7 @@ export default function ProductsPage() {
         <Card sx={{ mb: 3, p: 2 }}>
           <Stack direction="row" spacing={2} alignItems="center">
             <TextField
-              placeholder="Search products..."
+              placeholder={t('products.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
@@ -439,31 +441,31 @@ export default function ProductsPage() {
             />
             
             <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Status</InputLabel>
+              <InputLabel>{t('common.status')}</InputLabel>
               <Select
                 value={statusFilter}
-                label="Status"
+                label={t('common.status')}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <MenuItem value="all">All Status</MenuItem>
-                <MenuItem value="APPROVED">Approved</MenuItem>
-                <MenuItem value="PENDING_APPROVAL">Pending</MenuItem>
-                <MenuItem value="REJECTED">Rejected</MenuItem>
+                <MenuItem value="all">{t('products.allStatus')}</MenuItem>
+                <MenuItem value="APPROVED">{t('products.approved')}</MenuItem>
+                <MenuItem value="PENDING_APPROVAL">{t('products.pending')}</MenuItem>
+                <MenuItem value="REJECTED">{t('products.rejected')}</MenuItem>
               </Select>
             </FormControl>
 
             <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Condition</InputLabel>
+              <InputLabel>{t('products.condition')}</InputLabel>
               <Select
                 value={conditionFilter}
-                label="Condition"
+                label={t('products.condition')}
                 onChange={(e) => setConditionFilter(e.target.value)}
               >
-                <MenuItem value="all">All Conditions</MenuItem>
-                <MenuItem value="NEW">New</MenuItem>
-                <MenuItem value="EXCELLENT">Excellent</MenuItem>
-                <MenuItem value="GOOD">Good</MenuItem>
-                <MenuItem value="FAIR">Fair</MenuItem>
+                <MenuItem value="all">{t('products.allConditions')}</MenuItem>
+                <MenuItem value="NEW">{t('products.conditionNew')}</MenuItem>
+                <MenuItem value="EXCELLENT">{t('products.conditionExcellent')}</MenuItem>
+                <MenuItem value="GOOD">{t('products.conditionGood')}</MenuItem>
+                <MenuItem value="FAIR">{t('products.conditionFair')}</MenuItem>
               </Select>
             </FormControl>
 
@@ -497,18 +499,18 @@ export default function ProductsPage() {
         >
           <MenuItem onClick={() => actionMenuProduct && handleViewProduct(actionMenuProduct)}>
             <ViewIcon sx={{ mr: 1 }} fontSize="small" />
-            View
+            {t('common.view')}
           </MenuItem>
           <MenuItem onClick={() => actionMenuProduct && handleEditProduct(actionMenuProduct)}>
             <EditIcon sx={{ mr: 1 }} fontSize="small" />
-            Edit
+            {t('common.edit')}
           </MenuItem>
           <MenuItem 
             onClick={() => actionMenuProduct && handleDeleteProduct(actionMenuProduct)}
             sx={{ color: 'error.main' }}
           >
             <DeleteIcon sx={{ mr: 1 }} fontSize="small" />
-            Delete
+            {t('common.delete')}
           </MenuItem>
         </Menu>
       </Box>

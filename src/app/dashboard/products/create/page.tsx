@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { useLocale } from 'src/hooks/useLocale';
+
 import {
   Add as AddIcon,
   Save as SaveIcon,
@@ -59,6 +61,7 @@ const mockTags = [
 
 export default function CreateProductPage() {
   const router = useRouter();
+  const { t } = useLocale();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -133,31 +136,31 @@ export default function CreateProductPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Product title is required';
+      newErrors.title = t('products.productTitleRequired');
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+      newErrors.description = t('products.descriptionRequired');
     }
 
     if (!formData.brand.trim()) {
-      newErrors.brand = 'Brand is required';
+      newErrors.brand = t('products.brandRequired');
     }
 
     if (!formData.category.trim()) {
-      newErrors.category = 'Category is required';
+      newErrors.category = t('products.categoryRequired');
     }
 
     if (!formData.price || parseFloat(formData.price) <= 0) {
-      newErrors.price = 'Valid price is required';
+      newErrors.price = t('products.startingPriceRequired');
     }
 
     if (!formData.reservePrice || parseFloat(formData.reservePrice) <= 0) {
-      newErrors.reservePrice = 'Valid reserve price is required';
+      newErrors.reservePrice = t('products.reservePriceRequired');
     }
 
     if (parseFloat(formData.reservePrice) >= parseFloat(formData.price)) {
-      newErrors.reservePrice = 'Reserve price must be less than starting price';
+      newErrors.reservePrice = t('products.reservePriceMustBeLess');
     }
 
     setErrors(newErrors);
@@ -180,7 +183,7 @@ export default function CreateProductPage() {
       
       console.log('Creating product:', formData);
       
-      setSuccessMessage('Product created successfully!');
+      setSuccessMessage(t('products.createSuccess'));
       
       // Redirect after success
       setTimeout(() => {
@@ -207,10 +210,10 @@ export default function CreateProductPage() {
           </IconButton>
           <Box>
             <Typography variant="h4" gutterBottom>
-              Create Product
+              {t('products.createTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Add a new product to your inventory
+              {t('products.createDescription')}
             </Typography>
           </Box>
         </Stack>
@@ -230,12 +233,12 @@ export default function CreateProductPage() {
                 {/* Basic Information */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Basic Information
+                    {t('products.basicInfo')}
                   </Typography>
                   <Stack spacing={3}>
                     <TextField
                       fullWidth
-                      label="Product Title"
+                      label={t('products.productTitle')}
                       value={formData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
                       error={!!errors.title}
@@ -245,7 +248,7 @@ export default function CreateProductPage() {
 
                     <TextField
                       fullWidth
-                      label="Description"
+                      label={t('products.description')}
                       multiline
                       rows={4}
                       value={formData.description}
@@ -265,7 +268,7 @@ export default function CreateProductPage() {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="Brand"
+                              label={t('products.brand')}
                               error={!!errors.brand}
                               helperText={errors.brand}
                               required
@@ -282,7 +285,7 @@ export default function CreateProductPage() {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="Category"
+                              label={t('products.category')}
                               error={!!errors.category}
                               helperText={errors.category}
                               required
@@ -293,16 +296,16 @@ export default function CreateProductPage() {
                     </Grid>
 
                     <FormControl fullWidth>
-                      <InputLabel>Condition</InputLabel>
+                      <InputLabel>{t('products.condition')}</InputLabel>
                       <Select
                         value={formData.condition}
-                        label="Condition"
+                        label={t('products.condition')}
                         onChange={(e) => handleInputChange('condition', e.target.value)}
                       >
-                        <MenuItem value="NEW">New</MenuItem>
-                        <MenuItem value="EXCELLENT">Excellent</MenuItem>
-                        <MenuItem value="GOOD">Good</MenuItem>
-                        <MenuItem value="FAIR">Fair</MenuItem>
+                        <MenuItem value="NEW">{t('products.conditionNew')}</MenuItem>
+                        <MenuItem value="EXCELLENT">{t('products.conditionExcellent')}</MenuItem>
+                        <MenuItem value="GOOD">{t('products.conditionGood')}</MenuItem>
+                        <MenuItem value="FAIR">{t('products.conditionFair')}</MenuItem>
                         <MenuItem value="POOR">Poor</MenuItem>
                       </Select>
                     </FormControl>
@@ -312,13 +315,13 @@ export default function CreateProductPage() {
                 {/* Pricing */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Pricing
+                    {t('products.pricing')}
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Starting Price"
+                        label={t('products.startingPrice')}
                         type="number"
                         value={formData.price}
                         onChange={(e) => handleInputChange('price', e.target.value)}
@@ -333,12 +336,12 @@ export default function CreateProductPage() {
                     <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Reserve Price"
+                        label={t('products.reservePrice')}
                         type="number"
                         value={formData.reservePrice}
                         onChange={(e) => handleInputChange('reservePrice', e.target.value)}
                         error={!!errors.reservePrice}
-                        helperText={errors.reservePrice || 'Minimum acceptable bid'}
+                        helperText={errors.reservePrice || t('products.reservePriceHelp')}
                         required
                         InputProps={{
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
@@ -351,13 +354,13 @@ export default function CreateProductPage() {
                 {/* Dimensions */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Dimensions & Weight
+                    {t('products.dimensionsWeight')}
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={6} md={3}>
                       <TextField
                         fullWidth
-                        label="Length"
+                        label={t('products.length')}
                         type="number"
                         value={formData.dimensions.length}
                         onChange={(e) => handleDimensionChange('length', e.target.value)}
@@ -369,7 +372,7 @@ export default function CreateProductPage() {
                     <Grid item xs={6} md={3}>
                       <TextField
                         fullWidth
-                        label="Width"
+                        label={t('products.width')}
                         type="number"
                         value={formData.dimensions.width}
                         onChange={(e) => handleDimensionChange('width', e.target.value)}
@@ -381,7 +384,7 @@ export default function CreateProductPage() {
                     <Grid item xs={6} md={3}>
                       <TextField
                         fullWidth
-                        label="Height"
+                        label={t('products.height')}
                         type="number"
                         value={formData.dimensions.height}
                         onChange={(e) => handleDimensionChange('height', e.target.value)}
@@ -393,7 +396,7 @@ export default function CreateProductPage() {
                     <Grid item xs={6} md={3}>
                       <TextField
                         fullWidth
-                        label="Weight"
+                        label={t('products.weight')}
                         type="number"
                         value={formData.dimensions.weight}
                         onChange={(e) => handleDimensionChange('weight', e.target.value)}
@@ -408,7 +411,7 @@ export default function CreateProductPage() {
                 {/* Specifications */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Specifications
+                    {t('products.specifications')}
                   </Typography>
                   <Stack spacing={2}>
                     {formData.specifications.map((spec, index) => (
@@ -416,19 +419,19 @@ export default function CreateProductPage() {
                         <Grid item xs={5}>
                           <TextField
                             fullWidth
-                            label="Specification"
+                            label={t('products.specification')}
                             value={spec.key}
                             onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
-                            placeholder="e.g., Screen Size"
+                            placeholder={t('products.specificationPlaceholder')}
                           />
                         </Grid>
                         <Grid item xs={5}>
                           <TextField
                             fullWidth
-                            label="Value"
+                            label={t('products.value')}
                             value={spec.value}
                             onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
-                            placeholder="e.g., 6.7 inches"
+                            placeholder={t('products.valuePlaceholder')}
                           />
                         </Grid>
                         <Grid item xs={2}>
@@ -447,7 +450,7 @@ export default function CreateProductPage() {
                       variant="outlined"
                       size="small"
                     >
-                      Add Specification
+                      {t('products.addSpecification')}
                     </Button>
                   </Stack>
                 </Card>
@@ -460,7 +463,7 @@ export default function CreateProductPage() {
                 {/* Images */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Product Images
+                    {t('products.productImages')}
                   </Typography>
                   <Box
                     sx={{
@@ -478,10 +481,10 @@ export default function CreateProductPage() {
                   >
                     <UploadIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
                     <Typography variant="body2" color="text.secondary">
-                      Click to upload or drag and drop
+                      {t('products.uploadHelp')}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      PNG, JPG, WEBP up to 5MB (Max 10 images)
+                      {t('products.uploadFormats')}
                     </Typography>
                   </Box>
                 </Card>
@@ -489,7 +492,7 @@ export default function CreateProductPage() {
                 {/* Tags */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Tags
+                    {t('products.tags')}
                   </Typography>
                   <Autocomplete
                     multiple
@@ -510,8 +513,8 @@ export default function CreateProductPage() {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        placeholder="Add tags..."
-                        helperText="Press Enter to add tags"
+                        placeholder={t('products.tagsPlaceholder')}
+                        helperText={t('products.tagsHelp')}
                       />
                     )}
                   />
@@ -520,7 +523,7 @@ export default function CreateProductPage() {
                 {/* Settings */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Settings
+                    {t('products.settings')}
                   </Typography>
                   <FormControlLabel
                     control={
@@ -529,7 +532,7 @@ export default function CreateProductPage() {
                         onChange={(e) => handleInputChange('isActive', e.target.checked)}
                       />
                     }
-                    label="Active"
+                    label={t('products.active')}
                   />
                 </Card>
 
@@ -543,7 +546,7 @@ export default function CreateProductPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    {isSubmitting ? 'Creating...' : 'Create Product'}
+                    {isSubmitting ? t('products.creating') : t('products.createProduct')}
                   </Button>
                   <Button
                     variant="outlined"
@@ -551,7 +554,7 @@ export default function CreateProductPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    Cancel
+                    {t('products.cancel')}
                   </Button>
                 </Stack>
               </Stack>

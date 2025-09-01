@@ -29,6 +29,7 @@ import {
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Category {
   id: string;
@@ -49,6 +50,7 @@ interface Category {
 export default function EditCategoryPage() {
   const router = useRouter();
   const params = useParams();
+  const { t } = useLocale();
   const categoryId = params.id as string;
   
   const [loading, setLoading] = useState(true);
@@ -131,15 +133,15 @@ export default function EditCategoryPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Category name is required';
+      newErrors.name = t('categories.nameRequired');
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+      newErrors.description = t('categories.descriptionRequired');
     }
 
     if (!formData.slug.trim()) {
-      newErrors.slug = 'Slug is required';
+      newErrors.slug = t('categories.slugRequired');
     }
 
     setErrors(newErrors);
@@ -178,16 +180,16 @@ export default function EditCategoryPage() {
       });
 
       if (data.success) {
-        setSuccessMessage('Category updated successfully!');
+        setSuccessMessage(t('categories.updateSuccess'));
         setTimeout(() => {
           router.push('/dashboard/categories');
         }, 1500);
       } else {
-        setErrors({ general: data.error?.message || 'Failed to update category' });
+        setErrors({ general: data.error?.message || t('categories.updateError') });
       }
     } catch (error) {
       console.error('Error updating category:', error);
-      setErrors({ general: 'An unexpected error occurred' });
+      setErrors({ general: t('messages.unexpectedError') });
     } finally {
       setIsSubmitting(false);
     }
@@ -209,13 +211,13 @@ export default function EditCategoryPage() {
     
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      setErrors(prev => ({ ...prev, image: 'Please select a valid image file' }));
+      setErrors(prev => ({ ...prev, image: t('categories.invalidImageFile') }));
       return;
     }
 
     // Validate file size (2MB limit)
     if (file.size > 2 * 1024 * 1024) {
-      setErrors(prev => ({ ...prev, image: 'Image size must be less than 2MB' }));
+      setErrors(prev => ({ ...prev, image: t('categories.imageSizeLimit') }));
       return;
     }
 
@@ -262,10 +264,10 @@ export default function EditCategoryPage() {
           </IconButton>
           <Box>
             <Typography variant="h4" gutterBottom>
-              Edit Category
+              {t('categories.editCategory')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Update category information and settings
+              {t('categories.editDescription')}
             </Typography>
           </Box>
         </Stack>
@@ -292,12 +294,12 @@ export default function EditCategoryPage() {
                 {/* Basic Information */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Basic Information
+                    {t('categories.basicInfo')}
                   </Typography>
                   <Stack spacing={3}>
                     <TextField
                       fullWidth
-                      label="Category Name"
+                      label={t('categories.categoryName')}
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       error={!!errors.name}
@@ -307,7 +309,7 @@ export default function EditCategoryPage() {
 
                     <TextField
                       fullWidth
-                      label="Description"
+                      label={t('common.description')}
                       multiline
                       rows={4}
                       value={formData.description}
@@ -319,22 +321,22 @@ export default function EditCategoryPage() {
 
                     <TextField
                       fullWidth
-                      label="URL Slug"
+                      label={t('categories.urlSlug')}
                       value={formData.slug}
                       onChange={(e) => handleInputChange('slug', e.target.value)}
                       error={!!errors.slug}
-                      helperText={errors.slug || 'URL-friendly version of the category name'}
+                      helperText={errors.slug || t('categories.slugHelper')}
                       required
                     />
 
                     <FormControl fullWidth>
-                      <InputLabel>Parent Category</InputLabel>
+                      <InputLabel>{t('categories.parentCategory')}</InputLabel>
                       <Select
                         value={formData.parentId}
-                        label="Parent Category"
+                        label={t('categories.parentCategory')}
                         onChange={(e) => handleInputChange('parentId', e.target.value)}
                       >
-                        <MenuItem value="">None (Top Level)</MenuItem>
+                        <MenuItem value="">{t('categories.noParent')}</MenuItem>
                         {parentCategories.map((parentCategory) => (
                           <MenuItem key={parentCategory.id} value={parentCategory.id}>
                             {parentCategory.name}
@@ -350,7 +352,7 @@ export default function EditCategoryPage() {
                           onChange={(e) => handleInputChange('isActive', e.target.checked)}
                         />
                       }
-                      label="Active"
+                      label={t('common.active')}
                     />
 
                     <FormControlLabel
@@ -360,7 +362,7 @@ export default function EditCategoryPage() {
                           onChange={(e) => handleInputChange('isFeatured', e.target.checked)}
                         />
                       }
-                      label="Featured Category"
+                      label={t('categories.featuredCategory')}
                       sx={{ mt: 1 }}
                     />
                   </Stack>
@@ -374,7 +376,7 @@ export default function EditCategoryPage() {
                 {/* Category Image */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Category Image
+                    {t('categories.categoryImage')}
                   </Typography>
                   
                   <input
@@ -390,7 +392,7 @@ export default function EditCategoryPage() {
                       <Box
                         component="img"
                         src={imageUrl}
-                        alt="Category image"
+                        alt={t('categories.categoryImage')}
                         sx={{
                           width: '100%',
                           height: 200,
@@ -407,7 +409,7 @@ export default function EditCategoryPage() {
                           onClick={handleImageUpload}
                           fullWidth
                         >
-                          Change Image
+                          {t('categories.changeImage')}
                         </Button>
                         <Button
                           variant="outlined"
@@ -415,7 +417,7 @@ export default function EditCategoryPage() {
                           color="error"
                           onClick={handleRemoveImage}
                         >
-                          Remove
+                          {t('common.remove')}
                         </Button>
                       </Stack>
                     </Box>
@@ -437,10 +439,10 @@ export default function EditCategoryPage() {
                     >
                       <UploadIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
                       <Typography variant="body2" color="text.secondary">
-                        Click to upload or drag and drop
+                        {t('categories.uploadInstructions')}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        PNG, JPG, WEBP up to 2MB
+                        {t('categories.uploadFormats')}
                       </Typography>
                     </Box>
                   )}
@@ -456,12 +458,12 @@ export default function EditCategoryPage() {
                 {category && (
                   <Card sx={{ p: 3 }}>
                     <Typography variant="h6" gutterBottom>
-                      Category Details
+                      {t('categories.categoryDetails')}
                     </Typography>
                     <Stack spacing={2}>
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Category ID
+                          {t('categories.categoryId')}
                         </Typography>
                         <Typography variant="body2" fontFamily="monospace">
                           {category.id}
@@ -470,25 +472,25 @@ export default function EditCategoryPage() {
 
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Product Count
+                          {t('categories.productCount')}
                         </Typography>
                         <Typography variant="body2">
-                          {category.productCount || 0} products
+                          {t('categories.productsCount', { count: category.productCount || 0 })}
                         </Typography>
                       </Box>
 
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Level
+                          {t('categories.levelLabel')}
                         </Typography>
                         <Typography variant="body2">
-                          Level {category.level}
+                          {t('categories.level', { level: category.level })}
                         </Typography>
                       </Box>
 
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Created
+                          {t('categories.created')}
                         </Typography>
                         <Typography variant="body2">
                           {new Date(category.createdAt).toLocaleDateString()}
@@ -497,7 +499,7 @@ export default function EditCategoryPage() {
 
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Last Updated
+                          {t('categories.updated')}
                         </Typography>
                         <Typography variant="body2">
                           {new Date(category.updatedAt).toLocaleDateString()}
@@ -517,7 +519,7 @@ export default function EditCategoryPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    {isSubmitting ? 'Updating...' : 'Update Category'}
+                    {isSubmitting ? t('categories.updating') : t('categories.updateCategory')}
                   </Button>
                   <Button
                     variant="outlined"
@@ -525,7 +527,7 @@ export default function EditCategoryPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                 </Stack>
               </Stack>

@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 
 import { CompactCard } from 'src/components/product-card/compact-card';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Product {
   id: string;
@@ -44,6 +45,7 @@ export const RecentAdditionsSection: FC<RecentAdditionsSectionProps> = ({
   containerMaxWidth = 'xl',
 }) => {
   const router = useRouter();
+  const { t } = useLocale();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +103,7 @@ export const RecentAdditionsSection: FC<RecentAdditionsSectionProps> = ({
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
             <CircularProgress size={40} sx={{ color: '#CE0E2D' }} />
             <Typography variant="body1" sx={{ ml: 2, color: 'white' }}>
-              Loading recent additions...
+              {t('common.loading')}
             </Typography>
           </Box>
         </Container>
@@ -122,7 +124,7 @@ export const RecentAdditionsSection: FC<RecentAdditionsSectionProps> = ({
                 size="small" 
                 onClick={() => window.location.reload()}
               >
-                Retry
+                {t('common.retry', 'Retry')}
               </Button>
             }
           >
@@ -179,7 +181,7 @@ export const RecentAdditionsSection: FC<RecentAdditionsSectionProps> = ({
                       backgroundClip: 'text',
                     }}
                   >
-                    Latest Additions
+                    {t('homepage.sections.latestAdditions')}
                   </Typography>
                   <Typography
                     variant="h6"
@@ -189,7 +191,7 @@ export const RecentAdditionsSection: FC<RecentAdditionsSectionProps> = ({
                       color: 'rgba(255, 255, 255, 0.7)',
                     }}
                   >
-                    Recently Added to Auction
+                    {t('homepage.sections.recentlyAdded')}
                   </Typography>
                 </Box>
               </Box>

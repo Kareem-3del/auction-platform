@@ -66,7 +66,8 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
   const renderList = () => {
     const isAgent = user?.userType === 'AGENT';
     const isAdmin = user?.userType === 'ADMIN';
-    const showDashboard = isAgent || isAdmin;
+    const isSuperAdmin = user?.userType === 'SUPER_ADMIN';
+    const showDashboard = isAgent || isAdmin || isSuperAdmin;
 
     const menuItems = [
       ...data,

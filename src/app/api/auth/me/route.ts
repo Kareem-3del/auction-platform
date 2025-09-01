@@ -1,13 +1,13 @@
 import type { NextRequest } from 'next/server';
 
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from 'src/lib/auth';
 import { 
   ErrorCodes, 
   errorResponse, 
   handleAPIError,
   validateMethod,
   successResponse
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 export async function GET(request: NextRequest) {
   try {

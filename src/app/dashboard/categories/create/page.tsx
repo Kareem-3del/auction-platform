@@ -27,6 +27,7 @@ import {
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 // Mock parent categories
 const mockParentCategories = [
@@ -39,6 +40,7 @@ const mockParentCategories = [
 
 export default function CreateCategoryPage() {
   const router = useRouter();
+  const { t } = useLocale();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -120,15 +122,15 @@ export default function CreateCategoryPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Category name is required';
+      newErrors.name = t('categories.nameRequired');
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+      newErrors.description = t('categories.descriptionRequired');
     }
 
     if (!formData.slug.trim()) {
-      newErrors.slug = 'Slug is required';
+      newErrors.slug = t('categories.slugRequired');
     }
 
     setErrors(newErrors);
@@ -151,7 +153,7 @@ export default function CreateCategoryPage() {
       
       console.log('Creating category:', formData);
       
-      setSuccessMessage('Category created successfully!');
+      setSuccessMessage(t('categories.createSuccess'));
       
       // Redirect after success
       setTimeout(() => {
@@ -178,10 +180,10 @@ export default function CreateCategoryPage() {
           </IconButton>
           <Box>
             <Typography variant="h4" gutterBottom>
-              Create Category
+              {t('categories.createCategory')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Add a new product category to organize your inventory
+              {t('categories.createDescription')}
             </Typography>
           </Box>
         </Stack>
@@ -198,12 +200,12 @@ export default function CreateCategoryPage() {
             {/* Basic Information */}
             <Card sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Basic Information
+                {t('categories.basicInfo')}
               </Typography>
               <Stack spacing={3}>
                 <TextField
                   fullWidth
-                  label="Category Name"
+                  label={t('categories.categoryName')}
                   value={formData.name}
                   onChange={handleInputChange('name')}
                   error={!!errors.name}
@@ -213,7 +215,7 @@ export default function CreateCategoryPage() {
 
                 <TextField
                   fullWidth
-                  label="Description"
+                  label={t('common.description')}
                   multiline
                   rows={3}
                   value={formData.description}
@@ -225,23 +227,23 @@ export default function CreateCategoryPage() {
 
                 <TextField
                   fullWidth
-                  label="Slug"
+                  label={t('categories.slug')}
                   value={formData.slug}
                   onChange={handleInputChange('slug')}
                   error={!!errors.slug}
-                  helperText={errors.slug || 'URL-friendly version of the category name'}
+                  helperText={errors.slug || t('categories.slugHelper')}
                   required
                 />
 
                 <FormControl fullWidth>
-                  <InputLabel>Parent Category</InputLabel>
+                  <InputLabel>{t('categories.parentCategory')}</InputLabel>
                   <Select
                     value={formData.parentId}
-                    label="Parent Category"
+                    label={t('categories.parentCategory')}
                     onChange={handleSelectChange('parentId')}
                   >
                     <MenuItem value="">
-                      <em>None (Top Level Category)</em>
+                      <em>{t('categories.noParent')}</em>
                     </MenuItem>
                     {mockParentCategories.map((category) => (
                       <MenuItem key={category.id} value={category.id}>
@@ -258,7 +260,7 @@ export default function CreateCategoryPage() {
                       onChange={handleInputChange('isActive')}
                     />
                   }
-                  label="Active"
+                  label={t('common.active')}
                 />
               </Stack>
             </Card>
@@ -266,35 +268,35 @@ export default function CreateCategoryPage() {
             {/* SEO Settings */}
             <Card sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
-                SEO Settings
+                {t('categories.seoSettings')}
               </Typography>
               <Stack spacing={3}>
                 <TextField
                   fullWidth
-                  label="Meta Title"
+                  label={t('categories.metaTitle')}
                   value={formData.metaTitle}
                   onChange={handleInputChange('metaTitle')}
-                  helperText="Recommended length: 50-60 characters"
+                  helperText={t('categories.metaTitleHelper')}
                 />
 
                 <TextField
                   fullWidth
-                  label="Meta Description"
+                  label={t('categories.metaDescription')}
                   multiline
                   rows={2}
                   value={formData.metaDescription}
                   onChange={handleInputChange('metaDescription')}
-                  helperText="Recommended length: 150-160 characters"
+                  helperText={t('categories.metaDescHelper')}
                 />
 
                 <Box>
                   <Typography variant="subtitle2" gutterBottom>
-                    Keywords
+                    {t('categories.keywords')}
                   </Typography>
                   <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
                     <TextField
                       size="small"
-                      placeholder="Enter keyword"
+                      placeholder={t('categories.enterKeyword')}
                       value={keywordInput}
                       onChange={(e) => setKeywordInput(e.target.value)}
                       onKeyPress={(e) => {
@@ -309,7 +311,7 @@ export default function CreateCategoryPage() {
                       onClick={handleAddKeyword}
                       disabled={!keywordInput.trim()}
                     >
-                      Add
+                      {t('common.add')}
                     </Button>
                   </Stack>
                   <Stack direction="row" spacing={1} flexWrap="wrap">
@@ -329,7 +331,7 @@ export default function CreateCategoryPage() {
             {/* Image Upload */}
             <Card sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Category Image
+                {t('categories.categoryImage')}
               </Typography>
               <Box
                 sx={{
@@ -347,10 +349,10 @@ export default function CreateCategoryPage() {
               >
                 <UploadIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
                 <Typography variant="body2" color="text.secondary">
-                  Click to upload or drag and drop
+                  {t('categories.uploadInstructions')}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  PNG, JPG, WEBP up to 2MB
+                  {t('categories.uploadFormats')}
                 </Typography>
               </Box>
             </Card>
@@ -362,7 +364,7 @@ export default function CreateCategoryPage() {
                 onClick={handleBack}
                 disabled={isSubmitting}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -370,7 +372,7 @@ export default function CreateCategoryPage() {
                 startIcon={<SaveIcon />}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Creating...' : 'Create Category'}
+                {isSubmitting ? t('categories.creating') : t('categories.createCategory')}
               </Button>
             </Stack>
           </Stack>

@@ -1,11 +1,11 @@
 import type { NextRequest } from 'next/server';
 
-import { prisma } from '@/lib/prisma';
+import { prisma } from 'src/lib/prisma';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 interface RouteParams {
   params: Promise<{

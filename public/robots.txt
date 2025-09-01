@@ -1,0 +1,67 @@
+# robots.txt for Lebanon Auction
+# https://auction.lebanon-auction.bdaya.tech/robots.txt
+
+User-agent: *
+Allow: /
+
+# Allow specific paths for better indexing
+Allow: /products/*
+Allow: /auctions/*
+Allow: /categories/*
+Allow: /search*
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /privacy
+
+# Disallow admin and private areas
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /profile/
+Disallow: /auth/
+Disallow: /_next/
+Disallow: /static/
+
+# Disallow temporary and development files
+Disallow: *.json$
+Disallow: *.xml$
+Disallow: /temp/
+Disallow: /tmp/
+
+# Allow important SEO files
+Allow: /sitemap.xml
+Allow: /favicon.ico
+Allow: /manifest.json
+Allow: /robots.txt
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://auction.lebanon-auction.bdaya.tech/sitemap.xml
+
+# Special rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+# Block known bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /

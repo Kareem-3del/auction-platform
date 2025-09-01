@@ -4,47 +4,18 @@ import type { ReactNode } from 'react';
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useContext, createContext } from 'react';
-
-interface User {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  userType: string;
-  kycStatus: string;
-  isActive: boolean;
-  emailVerified: boolean;
-  balanceReal: number;
-  balanceVirtual: number;
-  isAnonymousDisplay?: boolean;
-  anonymousDisplayName?: string;
-}
-
-interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
-}
+import { authAPI, apiClient, isSuccessResponse } from 'src/lib/api-client';
+import type { User, AuthTokens, LoginRequest, RegisterRequest } from 'src/types/common';
 
 interface AuthContextType {
   user: User | null;
   tokens: AuthTokens | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>;
+  register: (data: RegisterRequest) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   refreshToken: () => Promise<boolean>;
   updateUser: (userData: Partial<User>) => void;
-}
-
-interface RegisterData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  userType?: string;
-  agreeToTerms: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -69,6 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (parsedTokens.expiresAt > Date.now()) {
           setTokens(parsedTokens);
           setUser(parsedUser);
+          // Set token in API client
+          apiClient.setAuthToken(parsedTokens.accessToken);
         } else {
           // Token expired, try to refresh
           attemptTokenRefresh(parsedTokens.refreshToken);
@@ -98,29 +71,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const attemptTokenRefresh = async (refreshTokenValue: string) => {
     try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken: refreshTokenValue }),
-      });
+      const response = await authAPI.refreshToken(refreshTokenValue);
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          const newTokens = {
-            accessToken: data.data.tokens.accessToken,
-            refreshToken: data.data.tokens.refreshToken,
-            expiresAt: Date.now() + (15 * 60 * 1000), // 15 minutes
-          };
+      if (isSuccessResponse(response)) {
+        // Calculate expiration time (JWT tokens typically expire in 15 minutes)
+        const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+        
+        const newTokens: AuthTokens = {
+          accessToken: response.data.tokens.accessToken,
+          refreshToken: response.data.tokens.refreshToken,
+          expiresAt,
+        };
 
-          setTokens(newTokens);
-          setUser(data.data.user);
-          localStorage.setItem('auth_tokens', JSON.stringify(newTokens));
-          localStorage.setItem('auth_user', JSON.stringify(data.data.user));
-          return true;
-        }
+        // Set API client token
+        apiClient.setAuthToken(newTokens.accessToken);
+
+        setTokens(newTokens);
+        setUser(response.data.user);
+        localStorage.setItem('auth_tokens', JSON.stringify(newTokens));
+        localStorage.setItem('auth_user', JSON.stringify(response.data.user));
+        return true;
       }
     } catch (error) {
       console.error('Token refresh failed:', error);
@@ -134,31 +104,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const loginData: LoginRequest = { email, password };
+      const response = await authAPI.login(loginData);
 
-      const data = await response.json();
-
-      if (data.success) {
-        const newTokens = {
-          accessToken: data.data.tokens.accessToken,
-          refreshToken: data.data.tokens.refreshToken,
-          expiresAt: Date.now() + (15 * 60 * 1000), // 15 minutes
+      if (isSuccessResponse(response)) {
+        // Calculate expiration time (JWT tokens typically expire in 15 minutes)
+        const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+        
+        const newTokens: AuthTokens = {
+          accessToken: response.data.tokens.accessToken,
+          refreshToken: response.data.tokens.refreshToken,
+          expiresAt,
         };
 
+        // Set API client token for future requests
+        apiClient.setAuthToken(newTokens.accessToken);
+
         setTokens(newTokens);
-        setUser(data.data.user);
+        setUser(response.data.user);
         localStorage.setItem('auth_tokens', JSON.stringify(newTokens));
-        localStorage.setItem('auth_user', JSON.stringify(data.data.user));
+        localStorage.setItem('auth_user', JSON.stringify(response.data.user));
 
         return { success: true };
       } else {
-        return { success: false, error: data.error?.message || 'Login failed' };
+        return { success: false, error: response.error.message || 'Login failed' };
       }
     } catch (error) {
       return { success: false, error: 'Network error occurred' };
@@ -167,34 +136,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (data: RegisterData) => {
+  const register = async (data: RegisterRequest) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await authAPI.register(data);
 
-      const responseData = await response.json();
-
-      if (responseData.success) {
-        const newTokens = {
-          accessToken: responseData.data.tokens.accessToken,
-          refreshToken: responseData.data.tokens.refreshToken,
-          expiresAt: Date.now() + (15 * 60 * 1000), // 15 minutes
+      if (isSuccessResponse(response)) {
+        // Calculate expiration time (JWT tokens typically expire in 15 minutes)
+        const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+        
+        const newTokens: AuthTokens = {
+          accessToken: response.data.tokens.accessToken,
+          refreshToken: response.data.tokens.refreshToken,
+          expiresAt,
         };
 
+        // Set API client token for future requests
+        apiClient.setAuthToken(newTokens.accessToken);
+
         setTokens(newTokens);
-        setUser(responseData.data.user);
+        setUser(response.data.user);
         localStorage.setItem('auth_tokens', JSON.stringify(newTokens));
-        localStorage.setItem('auth_user', JSON.stringify(responseData.data.user));
+        localStorage.setItem('auth_user', JSON.stringify(response.data.user));
 
         return { success: true };
       } else {
-        return { success: false, error: responseData.error?.message || 'Registration failed' };
+        return { success: false, error: response.error.message || 'Registration failed' };
       }
     } catch (error) {
       return { success: false, error: 'Network error occurred' };
@@ -206,21 +173,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       if (tokens) {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tokens.accessToken}`,
-          },
-          body: JSON.stringify({
-            refreshToken: tokens.refreshToken,
-          }),
-        });
+        // Set token for the logout API call
+        apiClient.setAuthToken(tokens.accessToken);
+        await authAPI.logout();
       }
     } catch (error) {
       // Ignore logout errors - we're clearing local state anyway
     }
 
+    // Clear API client token
+    apiClient.removeAuthToken();
+    
     setUser(null);
     setTokens(null);
     localStorage.removeItem('auth_tokens');

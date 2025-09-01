@@ -1,11 +1,11 @@
 import type { NextRequest } from 'next/server';
 import type { UserType } from '@prisma/client';
 
-import { type AuthUser, getCurrentUser } from '@/lib/auth';
+import { type AuthUser, getCurrentUser } from 'src/lib/auth';
 import { 
   ErrorCodes,
   errorResponse 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // Extend NextRequest to include user data
 export interface AuthenticatedRequest extends NextRequest {

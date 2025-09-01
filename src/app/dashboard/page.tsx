@@ -38,6 +38,7 @@ import {
 } from '@mui/icons-material';
 
 import { useAuth } from 'src/hooks/useAuth';
+import { useLocale } from 'src/hooks/useLocale';
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -74,6 +75,7 @@ interface UpcomingAuction {
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { t } = useLocale();
   const [stats, setStats] = useState<DashboardStats>({
     activeBids: 0,
     auctionsWon: 0,
@@ -197,10 +199,10 @@ export default function DashboardPage() {
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Box>
           <Typography variant="h4" gutterBottom>
-            Welcome back, {user.firstName || 'User'}!
+            {t('dashboard.welcomeBack', { name: user.firstName || t('common.user') })}!
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Here's what's happening with your auctions
+            {t('dashboard.auctionSummary')}
           </Typography>
         </Box>
         <Box display="flex" gap={1}>
@@ -249,7 +251,7 @@ export default function DashboardPage() {
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Box display="flex" alignItems="center">
                     <WalletIcon sx={{ mr: 1, color: 'primary.main' }} />
-                    <Typography variant="body2">Real Balance</Typography>
+                    <Typography variant="body2">{t('wallet.realBalance')}</Typography>
                   </Box>
                   <Typography variant="h6" color="primary.main">
                     {formatCurrency(user.balanceReal)}
@@ -259,7 +261,7 @@ export default function DashboardPage() {
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Box display="flex" alignItems="center">
                     <TrendingUpIcon sx={{ mr: 1, color: 'secondary.main' }} />
-                    <Typography variant="body2">Virtual Balance</Typography>
+                    <Typography variant="body2">{t('wallet.virtualBalance')}</Typography>
                   </Box>
                   <Typography variant="h6" color="secondary.main">
                     {formatCurrency(user.balanceVirtual)}
@@ -268,7 +270,7 @@ export default function DashboardPage() {
                 
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="body2" color="text.secondary">
-                    KYC Status
+                    {t('profile.kyc')} {t('common.status')}
                   </Typography>
                   <Chip 
                     label={user.kycStatus} 
@@ -284,7 +286,7 @@ export default function DashboardPage() {
                 onClick={() => router.push('/profile')}
                 sx={{ mt: 2 }}
               >
-                View Profile
+                {t('profile.viewProfile')}
               </Button>
             </CardContent>
           </Card>
@@ -300,7 +302,7 @@ export default function DashboardPage() {
                   {loadingData ? '-' : stats.activeBids}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Active Bids
+                  {t('profile.activeBids')}
                 </Typography>
               </Paper>
             </Grid>
@@ -311,7 +313,7 @@ export default function DashboardPage() {
                   {loadingData ? '-' : stats.auctionsWon}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Won Auctions
+                  {t('profile.wonAuctions')}
                 </Typography>
               </Paper>
             </Grid>
@@ -322,7 +324,7 @@ export default function DashboardPage() {
                   {loadingData ? '-' : stats.watchedAuctions}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Watched
+                  {t('profile.watched')}
                 </Typography>
               </Paper>
             </Grid>
@@ -333,7 +335,7 @@ export default function DashboardPage() {
                   {loadingData ? '-' : formatCurrency(stats.totalSpent).replace('$', '')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Total Spent
+                  {t('profile.totalSpent')}
                 </Typography>
               </Paper>
             </Grid>
@@ -342,7 +344,7 @@ export default function DashboardPage() {
           {/* Quick Actions */}
           <Paper sx={{ p: 3, mt: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Quick Actions
+              {t('dashboard.quickActions')}
             </Typography>
             <Stack direction="row" spacing={2} flexWrap="wrap" gap={2}>
               <Button
@@ -350,7 +352,7 @@ export default function DashboardPage() {
                 startIcon={<GavelIcon />}
                 onClick={() => router.push('/auctions')}
               >
-                Browse Auctions
+                {t('dashboard.browseAuctions')}
               </Button>
               <Button
                 variant="outlined"
@@ -358,21 +360,21 @@ export default function DashboardPage() {
                 onClick={() => router.push('/auctions/create')}
                 disabled={user.userType !== 'AGENT'}
               >
-                Create Auction
+                {t('navigation.createAuction')}
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<WalletIcon />}
                 onClick={() => router.push('/wallet')}
               >
-                Manage Wallet
+                {t('dashboard.manageWallet')}
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<FavoriteIcon />}
                 onClick={() => router.push('/watchlist')}
               >
-                Watchlist
+                {t('dashboard.watchlist')}
               </Button>
             </Stack>
           </Paper>
@@ -383,7 +385,7 @@ export default function DashboardPage() {
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Recent Activity
+                {t('dashboard.recentActivity')}
               </Typography>
               
               {loadingData ? (
@@ -425,7 +427,7 @@ export default function DashboardPage() {
                   ))}
                 </List>
               ) : (
-                <Alert severity="info">No recent activity</Alert>
+                <Alert severity="info">{t('dashboard.noRecentActivity')}</Alert>
               )}
               
               <Button
@@ -434,7 +436,7 @@ export default function DashboardPage() {
                 onClick={() => router.push('/activity')}
                 sx={{ mt: 2 }}
               >
-                View All Activity
+                {t('dashboard.viewAllActivity')}
               </Button>
             </CardContent>
           </Card>
@@ -445,7 +447,7 @@ export default function DashboardPage() {
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Upcoming Auctions
+                {t('dashboard.upcomingAuctions')}
               </Typography>
               
               {loadingData ? (
@@ -468,10 +470,10 @@ export default function DashboardPage() {
                       <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Box>
                           <Typography variant="caption" display="block">
-                            Current Bid: {formatCurrency(auction.currentBid)}
+                            {t('auction.currentBid')}: {formatCurrency(auction.currentBid)}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            Starts in: {formatTimeRemaining(auction.startTime)}
+                            {t('dashboard.startsIn')}: {formatTimeRemaining(auction.startTime)}
                           </Typography>
                         </Box>
                         <Button
@@ -479,14 +481,14 @@ export default function DashboardPage() {
                           startIcon={<VisibilityIcon />}
                           onClick={() => router.push(`/auctions/${auction.id}`)}
                         >
-                          View
+                          {t('common.view')}
                         </Button>
                       </Box>
                     </Paper>
                   ))}
                 </Stack>
               ) : (
-                <Alert severity="info">No upcoming auctions</Alert>
+                <Alert severity="info">{t('dashboard.noUpcomingAuctions')}</Alert>
               )}
               
               <Button
@@ -495,7 +497,7 @@ export default function DashboardPage() {
                 onClick={() => router.push('/auctions')}
                 sx={{ mt: 2 }}
               >
-                Browse All Auctions
+                {t('dashboard.browseAllAuctions')}
               </Button>
             </CardContent>
           </Card>

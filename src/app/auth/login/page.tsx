@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import {
   Visibility,
   VisibilityOff,
+  Google,
 } from '@mui/icons-material';
 import {
   Box,
@@ -24,12 +25,14 @@ import {
 } from '@mui/material';
 
 import { useAuth } from 'src/hooks/useAuth';
+import { useLocale } from 'src/hooks/useLocale';
 
 import { isValidEmail } from 'src/lib/utils';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, loading } = useAuth();
+  const { t } = useLocale();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -38,18 +41,19 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('validation.emailRequired');
     } else if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = t('validation.emailInvalid');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('validation.passwordRequired');
     }
 
     setErrors(newErrors);
@@ -72,10 +76,10 @@ export default function LoginPage() {
       if (result.success) {
         router.push('/');
       } else {
-        setSubmitError(result.error || 'Login failed');
+        setSubmitError(result.error || t('auth.loginFailed'));
       }
     } catch (error) {
-      setSubmitError('An unexpected error occurred');
+      setSubmitError(t('messages.unexpectedError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -90,6 +94,71 @@ export default function LoginPage() {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    setSubmitError(null);
+    
+    try {
+      // Load Google Identity Services
+      if (typeof window !== 'undefined') {
+        const { google } = window as any;
+        
+        if (!google) {
+          throw new Error('Google Identity Services not loaded');
+        }
+
+        // Initialize Google Sign-In
+        google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          callback: async (response: any) => {
+            try {
+              const result = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.credential }),
+              });
+
+              const data = await result.json();
+              
+              if (data.success) {
+                // Store tokens in the format expected by auth context
+                const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+                
+                const authTokens = {
+                  accessToken: data.data.tokens.accessToken,
+                  refreshToken: data.data.tokens.refreshToken,
+                  expiresAt,
+                };
+
+                // Store in localStorage in the format expected by useAuth
+                localStorage.setItem('auth_tokens', JSON.stringify(authTokens));
+                localStorage.setItem('auth_user', JSON.stringify(data.data.user));
+                
+                // Also store the simple accessToken for backward compatibility
+                localStorage.setItem('accessToken', data.data.tokens.accessToken);
+                
+                // Redirect to home page - auth context will pick up the stored tokens
+                window.location.href = '/';
+              } else {
+                setSubmitError(data.error?.message || t('auth.loginFailed'));
+              }
+            } catch (error) {
+              setSubmitError(t('messages.unexpectedError'));
+            } finally {
+              setIsGoogleLoading(false);
+            }
+          },
+        });
+
+        // Trigger the sign-in prompt
+        google.accounts.id.prompt();
+      }
+    } catch (error) {
+      setSubmitError(t('auth.googleLoginError'));
+      setIsGoogleLoading(false);
+    }
   };
 
   return (
@@ -126,10 +195,10 @@ export default function LoginPage() {
                 mb: 1,
               }}
             >
-              Welcome Back
+              {t('auth.welcomeBack')}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1rem' }}>
-              Sign in to your Lebanon Auction account
+              {t('auth.signInContinue')}
             </Typography>
           </Box>
 
@@ -145,7 +214,7 @@ export default function LoginPage() {
             <Stack spacing={3}>
               <TextField
                 fullWidth
-                label="Email Address"
+                label={t('auth.emailAddress')}
                 type="email"
                 value={formData.email}
                 onChange={handleInputChange('email')}
@@ -168,7 +237,7 @@ export default function LoginPage() {
 
               <TextField
                 fullWidth
-                label="Password"
+                label={t('auth.password')}
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleInputChange('password')}
@@ -230,11 +299,52 @@ export default function LoginPage() {
                 {isSubmitting ? (
                   <>
                     <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
-                    Signing In...
+                    {t('auth.signingIn')}
                   </>
                 ) : (
-                  'Sign In'
+                  t('auth.signIn')
                 )}
+              </Button>
+
+              {/* Divider */}
+              <Box sx={{ display: 'flex', alignItems: 'center', my: 3 }}>
+                <Box sx={{ flex: 1, height: '1px', backgroundColor: '#e0e0e0' }} />
+                <Typography variant="body2" sx={{ px: 2, color: 'text.secondary' }}>
+                  {t('auth.orContinueWith')}
+                </Typography>
+                <Box sx={{ flex: 1, height: '1px', backgroundColor: '#e0e0e0' }} />
+              </Box>
+
+              {/* Google Sign-In Button */}
+              <Button
+                fullWidth
+                variant="outlined"
+                size="large"
+                onClick={handleGoogleLogin}
+                disabled={isGoogleLoading || isSubmitting || loading}
+                startIcon={isGoogleLoading ? <CircularProgress size={20} /> : <Google />}
+                sx={{
+                  py: 1.5,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  textTransform: 'none',
+                  borderColor: '#dadce0',
+                  color: '#3c4043',
+                  backgroundColor: '#ffffff',
+                  '&:hover': {
+                    backgroundColor: '#f8f9fa',
+                    borderColor: '#dadce0',
+                    boxShadow: '0 1px 2px 0 rgba(60,64,67,.30), 0 1px 3px 1px rgba(60,64,67,.15)',
+                  },
+                  '&:disabled': {
+                    backgroundColor: '#ffffff',
+                    borderColor: '#dadce0',
+                    opacity: 0.6,
+                  },
+                }}
+              >
+                {isGoogleLoading ? t('auth.signingInWithGoogle') : t('auth.continueWithGoogle')}
               </Button>
             </Stack>
           </Box>
@@ -255,13 +365,13 @@ export default function LoginPage() {
                   },
                 }}
               >
-                Forgot password?
+{t('auth.forgotPassword')}
               </MuiLink>
             </Box>
             
             <Box textAlign="center">
               <Typography variant="body2" color="text.secondary">
-                Don&apos;t have an account?{' '}
+                {t('auth.dontHaveAccount')}{' '}
                 <MuiLink
                   component={Link}
                   href="/auth/register"
@@ -274,7 +384,7 @@ export default function LoginPage() {
                     },
                   }}
                 >
-                  Sign up
+                  {t('auth.signUp')}
                 </MuiLink>
               </Typography>
             </Box>

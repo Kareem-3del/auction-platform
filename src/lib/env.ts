@@ -10,7 +10,7 @@ export function getEnvVar(key: string, defaultValue?: string): string | undefine
 
 export function getClientEnv() {
   return {
-    WS_URL: getEnvVar('NEXT_PUBLIC_WS_URL', process.env.NODE_ENV === 'production' ? 'wss://your-domain.com' : 'ws://localhost:8081'),
-    APP_URL: getEnvVar('NEXT_PUBLIC_APP_URL', process.env.NODE_ENV === 'production' ? 'https://your-domain.com' : 'http://localhost:3000'),
+    WS_URL: getEnvVar('NEXT_PUBLIC_WS_URL', process.env.NODE_ENV === 'production' ? 'wss://auction.lebanon-auction.bdaya.tech/ws/' : 'ws://localhost:8081'),
+    APP_URL: getEnvVar('NEXT_PUBLIC_APP_URL', process.env.NODE_ENV === 'production' ? 'https://auction.lebanon-auction.bdaya.tech' : 'http://localhost:3000'),
   };
 }

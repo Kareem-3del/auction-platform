@@ -44,63 +44,63 @@ const ICONS = {
 
 // ----------------------------------------------------------------------
 
-export const navData: NavSectionProps['data'] = [
+export const getNavData = (t: (key: string) => string): NavSectionProps['data'] => [
   /**
    * Overview
    */
   {
-    subheader: 'Overview',
+    subheader: t('dashboard.overview'),
     items: [
       {
-        title: 'Dashboard',
+        title: t('navigation.dashboard'),
         path: paths.dashboard.root,
         icon: ICONS.dashboard,
         info: <Label>v{CONFIG.appVersion}</Label>,
       },
-      { title: 'Analytics', path: paths.dashboard.analytics, icon: ICONS.analytics },
-      { title: 'Reports', path: paths.dashboard.reports, icon: ICONS.ecommerce },
+      { title: t('navigation.analytics'), path: paths.dashboard.analytics, icon: ICONS.analytics },
+      { title: t('navigation.reports'), path: paths.dashboard.reports, icon: ICONS.ecommerce },
     ],
   },
   /**
    * Inventory Management
    */
   {
-    subheader: 'Inventory Management',
+    subheader: t('dashboard.inventoryManagement'),
     items: [
       {
-        title: 'Products',
+        title: t('navigation.products'),
         path: paths.dashboard.products.root,
         icon: ICONS.product,
         children: [
-          { title: 'All Products', path: paths.dashboard.products.root },
-          { title: 'Add Product', path: paths.dashboard.products.create },
+          { title: t('navigation.allProducts'), path: paths.dashboard.products.root },
+          { title: t('navigation.addProduct'), path: paths.dashboard.products.create },
         ],
       },
       {
-        title: 'Categories',
+        title: t('navigation.categories'),
         path: paths.dashboard.categories.root,
         icon: ICONS.folder,
         children: [
-          { title: 'All Categories', path: paths.dashboard.categories.root },
-          { title: 'Add Category', path: paths.dashboard.categories.create },
+          { title: t('navigation.allCategories'), path: paths.dashboard.categories.root },
+          { title: t('navigation.addCategory'), path: paths.dashboard.categories.create },
         ],
       },
       {
-        title: 'Brands',
+        title: t('navigation.brands'),
         path: paths.dashboard.brands.root,
         icon: ICONS.label,
         children: [
-          { title: 'All Brands', path: paths.dashboard.brands.root },
-          { title: 'Add Brand', path: paths.dashboard.brands.create },
+          { title: t('navigation.allBrands'), path: paths.dashboard.brands.root },
+          { title: t('navigation.addBrand'), path: paths.dashboard.brands.create },
         ],
       },
       {
-        title: 'Tags',
+        title: t('navigation.tags'),
         path: paths.dashboard.tags.root,
         icon: ICONS.label,
         children: [
-          { title: 'All Tags', path: paths.dashboard.tags.root },
-          { title: 'Add Tag', path: paths.dashboard.tags.create },
+          { title: t('navigation.allTags'), path: paths.dashboard.tags.root },
+          { title: t('navigation.addTag'), path: paths.dashboard.tags.create },
         ],
       },
     ],
@@ -109,47 +109,54 @@ export const navData: NavSectionProps['data'] = [
    * Auction Management
    */
   {
-    subheader: 'Auction Management',
+    subheader: t('dashboard.auctionManagement'),
     items: [
       {
-        title: 'Auctions',
+        title: t('navigation.auctions'),
         path: paths.dashboard.auctions.root,
         icon: ICONS.ecommerce,
         children: [
-          { title: 'All Auctions', path: paths.dashboard.auctions.root },
-          { title: 'Create Auction', path: paths.dashboard.auctions.create },
+          { title: t('navigation.allAuctions'), path: paths.dashboard.auctions.root },
+          { title: t('navigation.createAuction'), path: paths.dashboard.auctions.create },
         ],
       },
-      { title: 'Bids', path: paths.dashboard.bids, icon: ICONS.order },
-      { title: 'Transactions', path: paths.dashboard.transactions, icon: ICONS.banking },
+      { title: t('navigation.bids'), path: paths.dashboard.bids, icon: ICONS.order },
+      { title: 'Wallet & Recharge', path: '/dashboard/wallet', icon: ICONS.banking },
+      { title: t('navigation.transactions'), path: paths.dashboard.transactions, icon: ICONS.banking },
     ],
   },
   /**
    * User Management
    */
   {
-    subheader: 'User Management',
+    subheader: t('dashboard.userManagement'),
     items: [
       {
-        title: 'Users',
+        title: t('navigation.users'),
         path: paths.dashboard.users.root,
         icon: ICONS.user,
         children: [
-          { title: 'All Users', path: paths.dashboard.users.root },
-          { title: 'Add User', path: paths.dashboard.users.create },
+          { title: t('navigation.allUsers'), path: paths.dashboard.users.root },
+          { title: t('navigation.addUser'), path: paths.dashboard.users.create },
         ],
       },
-      { title: 'KYC Verification', path: paths.dashboard.kyc, icon: ICONS.file },
+      { title: t('navigation.kycVerification'), path: paths.dashboard.kyc, icon: ICONS.file },
     ],
   },
   /**
    * Settings
    */
   {
-    subheader: 'Settings',
+    subheader: t('navigation.settings'),
     items: [
-      { title: 'System Settings', path: paths.dashboard.settings, icon: ICONS.parameter },
-      { title: 'Mail Templates', path: paths.dashboard.mailTemplates, icon: ICONS.mail },
+      { title: t('navigation.systemSettings'), path: paths.dashboard.settings, icon: ICONS.parameter },
+      { title: t('navigation.mailTemplates'), path: paths.dashboard.mailTemplates, icon: ICONS.mail },
     ],
   },
 ];
+
+// Default export for backward compatibility
+export const navData: NavSectionProps['data'] = [];
+
+// Export a simple function to get translated nav data
+export const getTranslatedNavData = (t: (key: string) => string) => getNavData(t);

@@ -22,6 +22,7 @@ import {
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 const predefinedColors = [
   { name: 'Blue', value: '#1976d2' },
@@ -40,6 +41,7 @@ const predefinedColors = [
 
 export default function CreateTagPage() {
   const router = useRouter();
+  const { t } = useLocale();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -78,11 +80,11 @@ export default function CreateTagPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Tag name is required';
+      newErrors.name = t('tags.tagNameRequired');
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+      newErrors.description = t('tags.descriptionRequired');
     }
 
     setErrors(newErrors);
@@ -105,7 +107,7 @@ export default function CreateTagPage() {
       
       console.log('Creating tag:', formData);
       
-      setSuccessMessage('Tag created successfully!');
+      setSuccessMessage(t('tags.createSuccess'));
       
       // Redirect after success
       setTimeout(() => {
@@ -132,10 +134,10 @@ export default function CreateTagPage() {
           </IconButton>
           <Box>
             <Typography variant="h4" gutterBottom>
-              Create Tag
+              {t('tags.createTag')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Add a new tag to categorize and label your products
+              {t('tags.createDescription')}
             </Typography>
           </Box>
         </Stack>
@@ -152,31 +154,31 @@ export default function CreateTagPage() {
             {/* Basic Information */}
             <Card sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Tag Information
+                {t('tags.tagInformation')}
               </Typography>
               <Stack spacing={3}>
                 <TextField
                   fullWidth
-                  label="Tag Name"
+                  label={t('tags.tagName')}
                   value={formData.name}
                   onChange={handleInputChange('name')}
                   error={!!errors.name}
                   helperText={errors.name}
                   required
-                  placeholder="e.g., Premium, Sale, New Arrival"
+                  placeholder={t('tags.tagNamePlaceholder')}
                 />
 
                 <TextField
                   fullWidth
-                  label="Description"
+                  label={t('tags.description')}
                   multiline
                   rows={3}
                   value={formData.description}
                   onChange={handleInputChange('description')}
                   error={!!errors.description}
-                  helperText={errors.description || 'Describe what this tag represents'}
+                  helperText={errors.description || t('tags.descriptionHelp')}
                   required
-                  placeholder="Brief description of when to use this tag"
+                  placeholder={t('tags.descriptionPlaceholder')}
                 />
 
                 <FormControlLabel
@@ -186,7 +188,7 @@ export default function CreateTagPage() {
                       onChange={handleInputChange('isActive')}
                     />
                   }
-                  label="Active"
+                  label={t('tags.active')}
                 />
               </Stack>
             </Card>
@@ -195,15 +197,15 @@ export default function CreateTagPage() {
             <Card sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PaletteIcon />
-                Tag Color
+                {t('tags.tagColor')}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Choose a color that will represent this tag
+                {t('tags.colorDescription')}
               </Typography>
               
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle2" gutterBottom>
-                  Current Color
+                  {t('tags.currentColor')}
                 </Typography>
                 <Box
                   sx={{
@@ -221,13 +223,13 @@ export default function CreateTagPage() {
                     fontSize: '0.875rem',
                   }}
                 >
-                  {formData.name || 'Tag'}
+                  {formData.name || t('tags.tag')}
                 </Box>
               </Box>
 
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle2" gutterBottom>
-                  Predefined Colors
+                  {t('tags.predefinedColors')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {predefinedColors.map((color) => (
@@ -255,7 +257,7 @@ export default function CreateTagPage() {
 
               <Box>
                 <Typography variant="subtitle2" gutterBottom>
-                  Custom Color
+                  {t('tags.customColor')}
                 </Typography>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <TextField
@@ -278,10 +280,10 @@ export default function CreateTagPage() {
             {/* Preview */}
             <Card sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Preview
+                {t('tags.preview')}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                This is how your tag will appear on products
+                {t('tags.previewDescription')}
               </Typography>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Box
@@ -295,10 +297,10 @@ export default function CreateTagPage() {
                     fontSize: '0.875rem',
                   }}
                 >
-                  {formData.name || 'Tag Name'}
+                  {formData.name || t('tags.tagName')}
                 </Box>
                 <Typography variant="body2" color="text.secondary">
-                  {formData.description || 'Tag description will appear here'}
+                  {formData.description || t('tags.descriptionHelp')}
                 </Typography>
               </Stack>
             </Card>
@@ -310,7 +312,7 @@ export default function CreateTagPage() {
                 onClick={handleBack}
                 disabled={isSubmitting}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -318,7 +320,7 @@ export default function CreateTagPage() {
                 startIcon={<SaveIcon />}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Creating...' : 'Create Tag'}
+                {isSubmitting ? t('tags.creating') : t('tags.createTag')}
               </Button>
             </Stack>
           </Stack>

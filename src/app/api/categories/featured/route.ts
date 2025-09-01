@@ -1,12 +1,12 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
+import { prisma } from 'src/lib/prisma';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 const searchParamsSchema = z.object({
   limit: z.string().transform(val => Math.min(parseInt(val) || 6, 20)).optional(),
@@ -31,6 +31,12 @@ export async function GET(request: NextRequest) {
         products: {
           where: {
             status: 'APPROVED',
+            // Exclude sold items and ended auctions from live displays
+            NOT: [
+              { status: 'SOLD' },
+              { auctionStatus: 'ENDED' },
+              { auctionStatus: 'CANCELLED' }
+            ],
           },
           include: {
             agent: {
@@ -53,6 +59,12 @@ export async function GET(request: NextRequest) {
             products: {
               where: {
                 status: 'APPROVED',
+                // Exclude sold items and ended auctions from count
+                NOT: [
+                  { status: 'SOLD' },
+                  { auctionStatus: 'ENDED' },
+                  { auctionStatus: 'CANCELLED' }
+                ],
               },
             },
           },

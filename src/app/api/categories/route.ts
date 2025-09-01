@@ -1,14 +1,14 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/middleware/auth';
+import { prisma } from 'src/lib/prisma';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse, 
   validateContentType 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 import { slugify } from 'src/lib/utils';
 
@@ -117,10 +117,7 @@ export async function GET(request: NextRequest) {
       _count: undefined,
     }));
 
-    return successResponse({
-      data: categoriesWithCounts,
-      message: 'Categories retrieved successfully',
-    });
+    return successResponse(categoriesWithCounts);
 
   } catch (error) {
     return handleAPIError(error);
@@ -227,13 +224,10 @@ export const POST = withAuth(async (request) => {
     });
 
     return successResponse({
-      category: {
-        ...category,
-        productCount: category._count.products,
-        childrenCount: category._count.children,
-        _count: undefined,
-      },
-      message: 'Category created successfully',
+      ...category,
+      productCount: category._count.products,
+      childrenCount: category._count.children,
+      _count: undefined,
     });
 
   } catch (error) {

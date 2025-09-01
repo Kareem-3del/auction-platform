@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 
 import { ComingSoonCard } from 'src/components/product-card/coming-soon-card';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Product {
   id: string;
@@ -45,6 +46,7 @@ export const ComingSoonSection: FC<ComingSoonSectionProps> = ({
   containerMaxWidth = '1536px',
 }) => {
   const router = useRouter();
+  const { t } = useLocale();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -177,7 +179,7 @@ export const ComingSoonSection: FC<ComingSoonSectionProps> = ({
                       mb: 0.5,
                     }}
                   >
-                    Coming Soon Auctions
+                    {t('homepage.sections.comingSoon')}
                   </Typography>
                   <Typography
                     variant="body1"
@@ -186,7 +188,7 @@ export const ComingSoonSection: FC<ComingSoonSectionProps> = ({
                       fontSize: { xs: '1rem', md: '1.1rem' },
                     }}
                   >
-                    Get early previews and set notifications
+                    {t('homepage.sections.getEarlyPreviews')}
                   </Typography>
                 </Box>
               </Box>

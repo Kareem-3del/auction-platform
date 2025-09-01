@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/middleware/auth';
+import { prisma } from 'src/lib/prisma';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   ErrorCodes, 
   errorResponse, 
@@ -10,7 +10,7 @@ import {
   successResponse,
   validateContentType,
   validateRequiredFields
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // Validation schema
 const chargeAccountSchema = z.object({

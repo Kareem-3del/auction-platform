@@ -90,7 +90,6 @@ const navigationItems = [
   { label: 'Products', path: '/products', icon: ProductIcon, public: true },
   { label: 'Auctions', path: '/auctions', icon: AuctionIcon, public: true },
   { label: 'Categories', path: '/categories', icon: CategoryIcon, public: true },
-  { label: 'About', path: '/about', icon: MenuIcon, public: true },
 ];
 
 const userMenuItems = [

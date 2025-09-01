@@ -1,8 +1,9 @@
 'use client';
 
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from 'src/hooks/useAuth';
 import { useState, useEffect } from 'react';
-import { useRealtimeBidding } from '@/hooks/useRealtimeBidding';
+import { useRealtimeBidding } from 'src/hooks/useRealtimeBidding';
+import { useLocale } from 'src/hooks/useLocale';
 
 import {
   Box,
@@ -22,6 +23,9 @@ interface RealtimeBiddingProps {
   bidIncrement?: number;
   estimatedValueMin?: number;
   estimatedValueMax?: number;
+  isConnected?: boolean;
+  connectionError?: string | null;
+  onReconnect?: () => void;
 }
 
 export function RealtimeBidding({
@@ -32,27 +36,41 @@ export function RealtimeBidding({
   bidIncrement = 5,
   estimatedValueMin = 0,
   estimatedValueMax = 0,
+  isConnected: propIsConnected,
+  connectionError: propConnectionError,
+  onReconnect: propOnReconnect,
 }: RealtimeBiddingProps) {
-  const { user, tokens } = useAuth();
+  const { user, tokens, updateUser } = useAuth();
+  const { t } = useLocale();
   const [bidAmount, setBidAmount] = useState('');
   const [isPlacingBid, setIsPlacingBid] = useState(false);
   const [bidError, setBidError] = useState<string | null>(null);
   const [bidSuccess, setBidSuccess] = useState<string | null>(null);
+  const [liveBalance, setLiveBalance] = useState<number | null>(null);
 
   const {
-    isConnected,
+    isConnected: hookIsConnected,
     isAuthenticated,
     currentBid,
     bidCount,
     lastBid,
     auctionStatus,
-    connectionError,
-    reconnect,
+    connectionError: hookConnectionError,
+    reconnect: hookReconnect,
   } = useRealtimeBidding({
     productId,
     onBidUpdate: (update) => {
       console.log('🔔 New bid update:', update);
       setBidSuccess(`New bid: $${update.bid.amount.toFixed(2)} by ${update.bid.bidderName}`);
+      
+      // If this is the user's own bid, update their balance
+      if (user && update.bid.userId === user.id) {
+        const newBalance = user.balanceVirtual - update.bid.amount;
+        setLiveBalance(newBalance);
+        // Also update the auth context
+        updateUser({ balanceVirtual: newBalance });
+      }
+      
       setTimeout(() => setBidSuccess(null), 5000);
     },
     onAuctionStatusChange: (status) => {
@@ -64,6 +82,11 @@ export function RealtimeBidding({
     },
   });
 
+  // Use prop values if provided, otherwise fall back to hook values
+  const isConnected = propIsConnected !== undefined ? propIsConnected : hookIsConnected;
+  const connectionError = propConnectionError !== undefined ? propConnectionError : hookConnectionError;
+  const reconnect = propOnReconnect || hookReconnect;
+  
   const displayCurrentBid = currentBid || initialBid;
   const displayBidCount = bidCount || initialBidCount;
   const minimumBid = displayCurrentBid + bidIncrement;
@@ -76,8 +99,14 @@ export function RealtimeBidding({
   }, [minimumBid, bidAmount]);
 
   const handlePlaceBid = async () => {
-    if (!user || !isAuthenticated) {
+    if (!user) {
       setBidError('Please log in to place a bid');
+      return;
+    }
+
+    if (!isConnected) {
+      setBidError('Connection lost. Attempting to reconnect...');
+      reconnect();
       return;
     }
 
@@ -102,18 +131,42 @@ export function RealtimeBidding({
           amount,
           isAnonymous: false,
         }),
+        signal: AbortSignal.timeout(15000), // 15 second timeout
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data = await response.json();
 
       if (data.success) {
-        setBidSuccess(`Bid placed successfully: $${amount.toFixed(2)}`);
+        setBidSuccess(`🎉 Bid placed successfully: $${amount.toFixed(2)}`);
         setBidAmount((amount + bidIncrement).toFixed(2)); // Set next suggested bid
+        
+        // Update user's balance immediately after successful bid
+        if (user) {
+          const newBalance = user.balanceVirtual - amount;
+          setLiveBalance(newBalance);
+          updateUser({ balanceVirtual: newBalance });
+        }
+        
+        setTimeout(() => setBidSuccess(null), 5000);
       } else {
         setBidError(data.error?.message || 'Failed to place bid');
       }
-    } catch (error) {
-      setBidError('Network error - please try again');
+    } catch (error: any) {
+      console.error('Bid placement error:', error);
+      
+      if (error.name === 'TimeoutError') {
+        setBidError('Request timed out. Check your connection and try again.');
+      } else if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+        setBidError('Network error. Reconnecting...');
+        // Trigger reconnection on network issues
+        setTimeout(() => reconnect(), 1000);
+      } else {
+        setBidError(error.message || 'Failed to place bid. Please try again.');
+      }
     } finally {
       setIsPlacingBid(false);
     }
@@ -126,15 +179,83 @@ export function RealtimeBidding({
   };
 
   const getConnectionStatusText = () => {
-    if (!isConnected) return 'Disconnected';
-    if (!isAuthenticated) return 'Connecting...';
-    return 'Live';
+    if (!isConnected && connectionError?.includes('reconnecting')) return t('auction.reconnecting');
+    if (!isConnected && connectionError?.includes('retrying')) return t('auction.reconnecting');
+    if (!isConnected) return t('auction.disconnected');
+    if (!isAuthenticated) return 'Authenticating...';
+    return t('auction.liveBiddingActive');
   };
 
   return (
     <Box sx={{ maxWidth: 500 }}>
       <Stack spacing={3}>
 
+
+        {/* Connection Status with Green Dot */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 2, 
+          p: 2, 
+          backgroundColor: isConnected ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
+          border: `1px solid ${isConnected ? '#4CAF50' : '#f44336'}`,
+          borderRadius: 2,
+          mb: 2
+        }}>
+          {/* Connection Status Indicator */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                backgroundColor: isConnected ? '#00ff00' : '#ff0000',
+                boxShadow: isConnected ? '0 0 8px #00ff00' : '0 0 8px #ff0000',
+                animation: isConnected ? 'pulse-dot 2s infinite' : 'none',
+                '@keyframes pulse-dot': {
+                  '0%': { boxShadow: '0 0 8px #00ff00' },
+                  '50%': { boxShadow: '0 0 16px #00ff00, 0 0 24px #00ff00' },
+                  '100%': { boxShadow: '0 0 8px #00ff00' },
+                },
+              }}
+            />
+            <Typography variant="body2" sx={{ fontWeight: 'bold', color: isConnected ? '#2E7D32' : '#C62828' }}>
+              {getConnectionStatusText()}
+            </Typography>
+          </Box>
+          
+          {/* Connection Info */}
+          <Box sx={{ flex: 1 }}>
+            {isConnected && isAuthenticated ? (
+              <Typography variant="caption" sx={{ color: '#2E7D32' }}>
+                Current: <strong>${displayCurrentBid.toFixed(2)}</strong> • {displayBidCount} bids
+              </Typography>
+            ) : !isConnected ? (
+              <Typography variant="caption" sx={{ color: '#C62828' }}>
+                Attempting to reconnect...
+              </Typography>
+            ) : null}
+          </Box>
+          
+          {/* Reconnect Button */}
+          {!isConnected && (
+            <Button 
+              size="small" 
+              onClick={reconnect} 
+              variant="outlined" 
+              sx={{ 
+                borderColor: '#f44336', 
+                color: '#f44336',
+                '&:hover': {
+                  backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                  borderColor: '#f44336'
+                }
+              }}
+            >
+              Reconnect
+            </Button>
+          )}
+        </Box>
 
         {/* Last Bid Info */}
         {lastBid && (
@@ -153,11 +274,11 @@ export function RealtimeBidding({
           </Box>
         )}
 
-        {/* Connection Error */}
-        {connectionError && (
-          <Alert severity="warning" action={
+        {/* Connection Error - Only show if not covered by main status */}
+        {connectionError && !isConnected && !connectionError.includes('reconnecting') && (
+          <Alert severity="error" action={
             <Button size="small" onClick={reconnect}>
-              Reconnect
+              Retry Now
             </Button>
           }>
             {connectionError}
@@ -173,20 +294,76 @@ export function RealtimeBidding({
             border: '1px solid #e0e0e0'
           }}>
             <Stack spacing={3}>
-              {/* Virtual Balance Display */}
+              {/* Enhanced Balance Display */}
               <Box sx={{ 
-                textAlign: 'center',
-                p: 2,
-                bgcolor: 'rgba(206, 14, 45, 0.05)',
-                borderRadius: 2,
-                border: '1px solid rgba(206, 14, 45, 0.2)'
+                p: 3,
+                background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.05), rgba(206, 14, 45, 0.1))',
+                borderRadius: 3,
+                border: '2px solid rgba(206, 14, 45, 0.2)',
+                boxShadow: '0 4px 12px rgba(206, 14, 45, 0.1)'
               }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                  Your Virtual Balance
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'center', fontSize: '0.9rem' }}>
+                  💰 Your Account Balance
                 </Typography>
-                <Typography variant="h6" sx={{ color: '#CE0E2D', fontWeight: 'bold' }}>
-                  ${user?.balanceVirtual?.toFixed(2) || '0.00'}
-                </Typography>
+                
+                {/* Virtual Balance */}
+                <Box sx={{ textAlign: 'center', mb: 2 }}>
+                  <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem', mb: 0.5 }}>
+                    Virtual Balance
+                  </Typography>
+                  <Typography 
+                    variant="h5" 
+                    sx={{ 
+                      color: '#CE0E2D', 
+                      fontWeight: 'bold',
+                      transition: 'all 0.3s ease',
+                      transform: liveBalance !== null ? 'scale(1.05)' : 'scale(1)'
+                    }}
+                  >
+                    ${(liveBalance ?? user?.balanceVirtual ?? 0).toFixed(2)}
+                  </Typography>
+                </Box>
+                
+                {/* Real Balance */}
+                {user?.balanceReal && user.balanceReal > 0 && (
+                  <Box sx={{ textAlign: 'center', mb: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem', mb: 0.5 }}>
+                      Real Balance
+                    </Typography>
+                    <Typography variant="h6" sx={{ color: '#28a745', fontWeight: 'bold' }}>
+                      ${user.balanceReal.toFixed(2)}
+                    </Typography>
+                  </Box>
+                )}
+                
+                {/* Balance Status */}
+                <Box sx={{ textAlign: 'center', mt: 1 }}>
+                  {user && user.balanceVirtual < displayCurrentBid + (bidIncrement || 1) ? (
+                    <Typography variant="caption" sx={{ 
+                      color: '#d32f2f', 
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 1
+                    }}>
+                      ⚠️ Insufficient for next bid
+                    </Typography>
+                  ) : (
+                    <Typography variant="caption" sx={{ 
+                      color: '#2e7d32', 
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 1
+                    }}>
+                      ✓ Ready to bid
+                    </Typography>
+                  )}
+                </Box>
               </Box>
 
               <TextField
@@ -219,14 +396,14 @@ export function RealtimeBidding({
                 variant="contained"
                 size="large"
                 onClick={handlePlaceBid}
-                disabled={isPlacingBid || !isConnected || auctionStatus !== 'LIVE'}
+                disabled={isPlacingBid || auctionStatus !== 'LIVE' || (!isConnected && !isPlacingBid)}
                 sx={{
-                  bgcolor: '#CE0E2D',
+                  bgcolor: isConnected ? '#CE0E2D' : '#6c757d',
                   py: 1.5,
                   fontSize: '1.1rem',
                   fontWeight: 'bold',
                   '&:hover': { 
-                    bgcolor: '#a50b25',
+                    bgcolor: isConnected ? '#a50b25' : '#6c757d',
                   },
                   '&.Mui-disabled': {
                     bgcolor: '#ccc',
@@ -239,8 +416,10 @@ export function RealtimeBidding({
                     <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
                     Placing Bid...
                   </>
+                ) : !isConnected ? (
+                  '🔄 Reconnecting...'
                 ) : (
-                  'Place Bid'
+                  '💰 Place Bid'
                 )}
               </Button>
             </Stack>

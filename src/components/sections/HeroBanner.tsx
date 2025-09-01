@@ -14,9 +14,12 @@ import {
   InputAdornment,
 } from '@mui/material';
 
+import { useLocale } from 'src/hooks/useLocale';
+
 export function HeroBanner() {
   const theme = useTheme();
   const router = useRouter();
+  const { t } = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = () => {
@@ -76,9 +79,9 @@ export function HeroBanner() {
               textShadow: '0 4px 8px rgba(0,0,0,0.3)',
             }}
           >
-            Lebanon&apos;s Premier
+            {t('footer.company.name')}
             <br />
-            <Box component="span" sx={{ color: 'primary.main' }}>Auction House</Box>
+            <Box component="span" sx={{ color: 'primary.main' }}>{t('homepage.hero.auctionHouse')}</Box>
           </Typography>
 
           {/* Subtitle */}
@@ -94,8 +97,7 @@ export function HeroBanner() {
               mx: 'auto',
             }}
           >
-            Discover exceptional items from cars and real estate to jewelry and collectibles.
-            Join Lebanon&apos;s most trusted auction platform since 2020.
+            {t('homepage.hero.description')}
           </Typography>
 
           {/* Search Bar */}
@@ -112,7 +114,7 @@ export function HeroBanner() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Search for cars, properties, jewelry, collectibles..."
+              placeholder={t('homepage.hero.searchPlaceholder')}
               variant="outlined"
               InputProps={{
                 startAdornment: (
@@ -142,7 +144,7 @@ export function HeroBanner() {
                         },
                       }}
                     >
-                      Search
+                      {t('common.search')}
                     </Button>
                   </InputAdornment>
                 ),
@@ -185,8 +187,8 @@ export function HeroBanner() {
             }}
           >
             {[
-              { label: 'Cars', icon: 'mdi:car', path: '/categories/cars' },
-              { label: 'Properties', icon: 'mdi:home-city', path: '/categories/properties' },
+              { label: t('homepage.categories.motors'), icon: 'mdi:car', path: '/categories/cars' },
+              { label: t('homepage.categories.properties'), icon: 'mdi:home-city', path: '/categories/properties' },
               { label: 'Jewelry', icon: 'mdi:diamond-stone', path: '/categories/jewelry' },
               { label: 'Plates', icon: 'mdi:card-text', path: '/categories/plates' },
             ].map((category) => (
@@ -253,7 +255,7 @@ export function HeroBanner() {
                 transition: 'all 0.3s ease',
               }}
             >
-              Browse Live Auctions
+              {t('navigation.auctions')}
             </Button>
             
             <Button
@@ -281,7 +283,7 @@ export function HeroBanner() {
                 transition: 'all 0.3s ease',
               }}
             >
-              Join as Bidder
+              {t('auth.signUp')}
             </Button>
           </Box>
 
@@ -298,10 +300,10 @@ export function HeroBanner() {
             }}
           >
             {[
-              { label: 'Government Licensed', icon: 'mdi:certificate-outline', desc: 'Regulated & Compliant' },
-              { label: 'Trusted Since 2020', icon: 'mdi:shield-check-outline', desc: 'Proven Track Record' },
-              { label: 'Elite Community', icon: 'mdi:crown-outline', desc: '5000+ Collectors' },
-              { label: 'Expert Authentication', icon: 'mdi:diamond-outline', desc: 'Verified Authenticity' },
+              { label: t('homepage.trustBadges.licensedSecure'), icon: 'mdi:certificate-outline', desc: t('homepage.trustBadges.governmentRegulated') },
+              { label: t('homepage.trustBadges.trustedSince'), icon: 'mdi:shield-check-outline', desc: t('homepage.trustBadges.provenTrackRecord') },
+              { label: t('homepage.trustBadges.eliteCommunity'), icon: 'mdi:crown-outline', desc: `5000+ ${t('homepage.trustBadges.collectors')}` },
+              { label: t('homepage.trustBadges.expertAuthentication'), icon: 'mdi:diamond-outline', desc: t('homepage.trustBadges.verifiedAuthenticity') },
             ].map((badge, index) => (
               <Box
                 key={index}

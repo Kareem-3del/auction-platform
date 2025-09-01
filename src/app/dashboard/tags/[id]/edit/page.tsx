@@ -27,6 +27,7 @@ import {
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Tag {
   id: string;
@@ -54,6 +55,7 @@ export default function EditTagPage() {
   const router = useRouter();
   const params = useParams();
   const tagId = params.id as string;
+  const { t } = useLocale();
   
   const [loading, setLoading] = useState(true);
   const [tag, setTag] = useState<Tag | null>(null);
@@ -109,11 +111,11 @@ export default function EditTagPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Tag name is required';
+      newErrors.name = t('tags.tagNameRequired');
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+      newErrors.description = t('tags.descriptionRequired');
     }
 
     if (!formData.color.trim()) {
@@ -138,16 +140,16 @@ export default function EditTagPage() {
       const data = await apiClient.put(`/api/tags/${tagId}`, formData);
 
       if (data.success) {
-        setSuccessMessage('Tag updated successfully!');
+        setSuccessMessage(t('tags.updateSuccess'));
         setTimeout(() => {
           router.push('/dashboard/tags');
         }, 1500);
       } else {
-        setErrors({ general: data.error?.message || 'Failed to update tag' });
+        setErrors({ general: data.error?.message || t('tags.updateError') });
       }
     } catch (error) {
       console.error('Error updating tag:', error);
-      setErrors({ general: 'An unexpected error occurred' });
+      setErrors({ general: t('tags.unexpectedError') });
     } finally {
       setIsSubmitting(false);
     }
@@ -177,10 +179,10 @@ export default function EditTagPage() {
           </IconButton>
           <Box>
             <Typography variant="h4" gutterBottom>
-              Edit Tag
+              {t('tags.editTag')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Update tag information and settings
+              {t('tags.editDescription')}
             </Typography>
           </Box>
         </Stack>
@@ -207,12 +209,12 @@ export default function EditTagPage() {
                 {/* Basic Information */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Basic Information
+                    {t('tags.tagInformation')}
                   </Typography>
                   <Stack spacing={3}>
                     <TextField
                       fullWidth
-                      label="Tag Name"
+                      label={t('tags.tagName')}
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       error={!!errors.name}
@@ -222,7 +224,7 @@ export default function EditTagPage() {
 
                     <TextField
                       fullWidth
-                      label="Description"
+                      label={t('tags.description')}
                       multiline
                       rows={4}
                       value={formData.description}
@@ -239,7 +241,7 @@ export default function EditTagPage() {
                           onChange={(e) => handleInputChange('isActive', e.target.checked)}
                         />
                       }
-                      label="Active"
+                      label={t('tags.active')}
                     />
                   </Stack>
                 </Card>
@@ -247,7 +249,7 @@ export default function EditTagPage() {
                 {/* Color Selection */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Tag Color
+                    {t('tags.tagColor')}
                   </Typography>
                   <Stack spacing={3}>
                     <TextField
@@ -313,14 +315,14 @@ export default function EditTagPage() {
                 {/* Preview */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Preview
+                    {t('tags.preview')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    This is how your tag will appear
+                    {t('tags.previewDescription')}
                   </Typography>
                   <Stack direction="row" spacing={1} flexWrap="wrap">
                     <Chip
-                      label={formData.name || 'Tag Name'}
+                      label={formData.name || t('tags.tagName')}
                       size="small"
                       icon={<TagIcon />}
                       sx={{
@@ -350,12 +352,12 @@ export default function EditTagPage() {
                 {tag && (
                   <Card sx={{ p: 3 }}>
                     <Typography variant="h6" gutterBottom>
-                      Tag Details
+                      {t('tags.tagDetails')}
                     </Typography>
                     <Stack spacing={2}>
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Tag ID
+                          {t('tags.tagId')}
                         </Typography>
                         <Typography variant="body2" fontFamily="monospace">
                           {tag.id}
@@ -364,16 +366,16 @@ export default function EditTagPage() {
 
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Product Count
+                          {t('tags.productCount')}
                         </Typography>
                         <Typography variant="body2">
-                          {tag.productCount || 0} products
+                          {tag.productCount || 0} {t('tags.products').toLowerCase()}
                         </Typography>
                       </Box>
 
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Created
+                          {t('tags.created')}
                         </Typography>
                         <Typography variant="body2">
                           {new Date(tag.createdAt).toLocaleDateString()}
@@ -382,7 +384,7 @@ export default function EditTagPage() {
 
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">
-                          Last Updated
+                          {t('common.updated')}
                         </Typography>
                         <Typography variant="body2">
                           {new Date(tag.updatedAt).toLocaleDateString()}
@@ -402,7 +404,7 @@ export default function EditTagPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    {isSubmitting ? 'Updating...' : 'Update Tag'}
+                    {isSubmitting ? t('tags.updating') : t('tags.editTag')}
                   </Button>
                   <Button
                     variant="outlined"
@@ -410,7 +412,7 @@ export default function EditTagPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                 </Stack>
               </Stack>

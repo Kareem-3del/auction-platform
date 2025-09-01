@@ -10,6 +10,9 @@ import {
   useTheme,
   Container,
   Typography,
+  Chip,
+  Breadcrumbs,
+  Link,
 } from '@mui/material';
 import {
   Speed as SpeedIcon,
@@ -18,82 +21,136 @@ import {
   Support as SupportIcon,
   Security as SecurityIcon,
   TrendingUp as TrendingUpIcon,
+  Home as HomeIcon,
+  Business as BusinessIcon,
+  EmojiEvents as AwardIcon,
+  Verified as VerifiedIcon,
+  Payment as PaymentIcon,
+  Timeline as TimelineIcon,
+  LocalShipping as ShippingIcon,
+  Shield as ShieldIcon,
 } from '@mui/icons-material';
+
+import HomepageLayout from 'src/components/layout/HomepageLayout';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'src/hooks/useLocale';
 
 const features = [
   {
     icon: AuctionIcon,
-    title: 'Live Auctions',
-    description: 'Experience the thrill of real-time bidding with our advanced auction platform.',
+    title: 'Live Luxury Auctions',
+    description: 'Experience real-time bidding on premium cars, prestigious license plates, fine jewelry, and exclusive collectibles from Lebanon and the Middle East.',
+    color: '#CE0E2D',
   },
   {
-    icon: SecurityIcon,
-    title: 'Secure Transactions',
-    description: 'Your transactions are protected with enterprise-level security and encryption.',
+    icon: VerifiedIcon,
+    title: 'Expert Authentication',
+    description: 'Every item undergoes rigorous authentication by certified experts. All luxury goods come with certificates of authenticity and provenance.',
+    color: '#22C55E',
   },
   {
-    icon: SpeedIcon,
-    title: 'Fast & Reliable',
-    description: 'Lightning-fast bidding system that never lets you miss an opportunity.',
+    icon: PaymentIcon,
+    title: 'Modern Payment Methods',
+    description: 'Accept Binance Pay, Whish Money, traditional bank transfers, and all major credit cards with instant processing and secure transactions.',
+    color: '#1976D2',
+  },
+  {
+    icon: ShieldIcon,
+    title: 'Anonymous Bidding',
+    description: 'Bid confidentially with our anonymous display system. Your identity remains private while maintaining full security and trust.',
+    color: '#9C27B0',
   },
   {
     icon: SupportIcon,
-    title: '24/7 Support',
-    description: 'Our dedicated team is always here to help you with any questions or concerns.',
-  },
-  {
-    icon: PeopleIcon,
-    title: 'Community Driven',
-    description: 'Join a vibrant community of collectors, dealers, and auction enthusiasts.',
+    title: 'Lebanese Expert Support',
+    description: 'Our local Lebanese team provides 24/7 support in Arabic and English, understanding regional preferences and market dynamics.',
+    color: '#FF9800',
   },
   {
     icon: TrendingUpIcon,
-    title: 'Market Insights',
-    description: 'Get valuable insights and analytics to make informed bidding decisions.',
+    title: 'Market Intelligence',
+    description: 'Access comprehensive market data, price trends, and investment insights for luxury items in the Lebanese and regional markets.',
+    color: '#00BCD4',
   },
 ];
 
 const stats = [
-  { value: '50K+', label: 'Active Users' },
-  { value: '10K+', label: 'Auctions Completed' },
-  { value: '$5M+', label: 'Total Volume' },
-  { value: '99.9%', label: 'Uptime' },
+  { value: '25K+', label: 'Registered Users', description: 'Active bidders from Lebanon and MENA region' },
+  { value: '5,000+', label: 'Successful Auctions', description: 'Luxury items sold with verified authenticity' },
+  { value: '$12M+', label: 'Total Transaction Volume', description: 'In luxury cars, jewelry, and collectibles' },
+  { value: '99.8%', label: 'Customer Satisfaction', description: 'Based on post-auction surveys' },
+];
+
+const milestones = [
+  {
+    year: '2020',
+    title: 'Lebanon Auction Founded',
+    description: 'Established as the first premium online auction platform in Lebanon',
+    icon: BusinessIcon,
+  },
+  {
+    year: '2021',
+    title: 'Luxury Car Auctions Launch',
+    description: 'Introduced specialized auctions for high-end vehicles and prestigious license plates',
+    icon: AuctionIcon,
+  },
+  {
+    year: '2022',
+    title: 'Regional Expansion',
+    description: 'Extended services to serve collectors across the Middle East and North Africa',
+    icon: TrendingUpIcon,
+  },
+  {
+    year: '2023',
+    title: 'Technology Innovation',
+    description: 'Launched anonymous bidding, crypto payments, and mobile-first platform',
+    icon: SpeedIcon,
+  },
+  {
+    year: '2024',
+    title: 'Market Leadership',
+    description: 'Became the leading luxury auction platform in the MENA region',
+    icon: AwardIcon,
+  },
 ];
 
 const team = [
   {
-    name: 'Sarah Johnson',
+    name: 'Ahmad Khalil',
     role: 'CEO & Founder',
-    avatar: '/images/team/sarah.jpg',
-    bio: '15+ years in auction industry',
+    avatar: '/images/team/ahmad.jpg',
+    bio: 'Luxury market expert with 20+ years in Lebanese auction industry',
+    expertise: 'Market Strategy, Luxury Authentication',
   },
   {
-    name: 'Mike Chen',
-    role: 'CTO',
-    avatar: '/images/team/mike.jpg',
-    bio: 'Tech visionary & platform architect',
+    name: 'Nadia Saab',
+    role: 'Chief Technology Officer',
+    avatar: '/images/team/nadia.jpg',
+    bio: 'Former tech lead at major fintech companies, specialized in secure platforms',
+    expertise: 'Platform Development, Cybersecurity',
   },
   {
-    name: 'Emily Davis',
-    role: 'Head of Operations',
-    avatar: '/images/team/emily.jpg',
-    bio: 'Ensures smooth auction experiences',
+    name: 'Rami Boutros',
+    role: 'Head of Authentication',
+    avatar: '/images/team/rami.jpg',
+    bio: 'Certified appraiser for luxury goods, jewelry, and collectibles',
+    expertise: 'Item Authentication, Market Valuation',
   },
 ];
 
 export default function AboutPage() {
   const theme = useTheme();
+  const router = useRouter();
+  const { t } = useLocale();
 
   return (
-    <Box>
+    <HomepageLayout>
       {/* Hero Section */}
       <Box
         sx={{
-          background: theme.palette.mode === 'dark' 
-            ? 'linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%)'
-            : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`,
-          pt: 12,
-          pb: 8,
+          background: 'linear-gradient(135deg, #CE0E2D 0%, #B00C24 50%, #8A0A1C 100%)',
+          pt: { xs: 6, md: 8 },
+          pb: { xs: 6, md: 8 },
           position: 'relative',
           overflow: 'hidden',
           '&::before': {
@@ -109,85 +166,210 @@ export default function AboutPage() {
         }}
       >
         <Container maxWidth="lg">
-          <Box textAlign="center" sx={{ position: 'relative', zIndex: 1 }}>
-            <Typography
-              variant="h2"
-              gutterBottom
-              sx={{
-                fontWeight: 800,
-                fontStyle: 'italic',
-                letterSpacing: '-0.02em',
-                background: theme.palette.mode === 'dark'
-                  ? 'linear-gradient(45deg, #fff 30%, #f0f0f0 90%)'
-                  : 'linear-gradient(45deg, #fff 30%, #f0f0f0 90%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                mb: 2,
-              }}
-            >
-              About Sassy.
-            </Typography>
-            <Typography
-              variant="h5"
-              sx={{
-                color: theme.palette.mode === 'dark' ? 'common.white' : 'white',
+          <Box sx={{ position: 'relative', zIndex: 1 }}>
+            {/* Breadcrumbs */}
+            <Breadcrumbs 
+              sx={{ 
                 mb: 4,
-                maxWidth: 800,
-                mx: 'auto',
-                lineHeight: 1.4,
+                '& .MuiBreadcrumbs-separator': { color: 'rgba(255,255,255,0.5)' }
               }}
             >
-              We&apos;re revolutionizing the auction experience with cutting-edge technology,
-              transparent processes, and a community-first approach.
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              sx={{
-                px: 4,
-                py: 1.5,
-                borderRadius: 2,
-                fontSize: '1.1rem',
-                fontWeight: 600,
-                background: 'rgba(255, 255, 255, 0.9)',
-                color: theme.palette.primary.main,
-                '&:hover': {
-                  background: 'rgba(255, 255, 255, 1)',
-                  transform: 'translateY(-2px)',
-                },
-                transition: 'all 0.3s ease-in-out',
-              }}
-            >
-              Join Our Community
-            </Button>
+              <Link 
+                color="rgba(255,255,255,0.7)" 
+                href="/" 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  textDecoration: 'none',
+                  '&:hover': { color: 'white' }
+                }}
+              >
+                <HomeIcon sx={{ mr: 0.5, fontSize: 16 }} />
+                Home
+              </Link>
+              <Typography sx={{ color: 'white', fontWeight: 500 }}>About Us</Typography>
+            </Breadcrumbs>
+
+            <Grid container spacing={6} alignItems="center">
+              <Grid item xs={12} md={7}>
+                <Typography
+                  variant="h1"
+                  gutterBottom
+                  sx={{
+                    fontWeight: 900,
+                    color: 'white',
+                    mb: 3,
+                    fontSize: { xs: '2.5rem', md: '3.5rem', lg: '4rem' },
+                    lineHeight: 1.1,
+                  }}
+                >
+                  Lebanon's Premier <br />
+                  <Box component="span" sx={{ fontStyle: 'italic', opacity: 0.9 }}>
+                    Luxury Auction
+                  </Box> Platform
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.95)',
+                    mb: 6,
+                    lineHeight: 1.6,
+                    fontSize: { xs: '1.3rem', md: '1.6rem' },
+                  }}
+                >
+                  {t('about.subtitle', "Lebanon's premier luxury auction platform connecting collectors with authentic treasures since 2020")}
+                </Typography>
+                
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => router.push('/products')}
+                    sx={{
+                      px: 6,
+                      py: 2,
+                      borderRadius: 3,
+                      fontSize: '1.2rem',
+                      fontWeight: 700,
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      color: '#CE0E2D',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 1)',
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.25)',
+                      },
+                      transition: 'all 0.3s ease-in-out',
+                    }}
+                  >
+                    Explore Auctions
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    onClick={() => router.push('/auth/register')}
+                    sx={{
+                      px: 6,
+                      py: 2,
+                      borderRadius: 3,
+                      fontSize: '1.2rem',
+                      fontWeight: 700,
+                      borderWidth: 2,
+                      borderColor: 'rgba(255, 255, 255, 0.8)',
+                      color: 'white',
+                      '&:hover': {
+                        borderColor: 'white',
+                        background: 'rgba(255, 255, 255, 0.15)',
+                        transform: 'translateY(-3px)',
+                        borderWidth: 2,
+                      },
+                      transition: 'all 0.3s ease-in-out',
+                    }}
+                  >
+                    Join Community
+                  </Button>
+                </Stack>
+              </Grid>
+              
+              <Grid item xs={12} md={5}>
+                <Box
+                  sx={{
+                    height: { xs: 300, md: 400 },
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: 4,
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                  }}
+                >
+                  <Stack spacing={3} alignItems="center">
+                    <BusinessIcon sx={{ fontSize: 80, color: 'rgba(255,255,255,0.9)' }} />
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        color: 'white',
+                        fontWeight: 700,
+                        textAlign: 'center',
+                      }}
+                    >
+                      Trusted by 25,000+ Users
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: 'rgba(255,255,255,0.8)',
+                        textAlign: 'center',
+                        maxWidth: 300,
+                      }}
+                    >
+                      From Beirut to the world, connecting luxury enthusiasts with extraordinary items
+                    </Typography>
+                  </Stack>
+                </Box>
+              </Grid>
+            </Grid>
           </Box>
         </Container>
       </Box>
 
       {/* Stats Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
+      <Container maxWidth="lg" sx={{ py: 10 }}>
+        <Typography
+          variant="h3"
+          textAlign="center"
+          gutterBottom
+          sx={{ fontWeight: 700, mb: 8, color: 'text.primary' }}
+        >
+          Our Impact in Numbers
+        </Typography>
+        
         <Grid container spacing={4}>
           {stats.map((stat, index) => (
-            <Grid item xs={6} md={3} key={index}>
-              <Box textAlign="center">
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card
+                sx={{
+                  p: 4,
+                  textAlign: 'center',
+                  height: '100%',
+                  borderRadius: 4,
+                  border: '2px solid transparent',
+                  background: 'linear-gradient(135deg, rgba(206,14,45,0.05), rgba(206,14,45,0.02))',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    borderColor: '#CE0E2D',
+                    boxShadow: '0 20px 60px rgba(206,14,45,0.15)',
+                  },
+                }}
+              >
                 <Typography
-                  variant="h3"
+                  variant="h2"
                   sx={{
-                    fontWeight: 800,
-                    color: 'primary.main',
-                    mb: 1,
+                    fontWeight: 900,
+                    color: '#CE0E2D',
+                    mb: 2,
+                    fontSize: { xs: '2.5rem', md: '3rem' },
                   }}
                 >
                   {stat.value}
                 </Typography>
                 <Typography
-                  variant="h6"
-                  color="text.secondary"
-                  sx={{ fontWeight: 500 }}
+                  variant="h5"
+                  color="text.primary"
+                  sx={{ fontWeight: 600, mb: 2 }}
                 >
                   {stat.label}
                 </Typography>
-              </Box>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ lineHeight: 1.6 }}
+                >
+                  {stat.description}
+                </Typography>
+              </Card>
             </Grid>
           ))}
         </Grid>
@@ -462,6 +644,6 @@ export default function AboutPage() {
           </Box>
         </Container>
       </Box>
-    </Box>
+    </HomepageLayout>
   );
 }

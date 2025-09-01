@@ -34,6 +34,7 @@ import {
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Tag {
   id: string;
@@ -48,6 +49,7 @@ interface Tag {
 
 export default function TagsPage() {
   const router = useRouter();
+  const { t } = useLocale();
   
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,12 +67,12 @@ export default function TagsPage() {
         if (data.success) {
           setTags(data.data?.data || []);
         } else {
-          setError(data.error?.message || 'Failed to load tags');
+          setError(data.error?.message || t('tags.loadError'));
           setTags([]);
         }
       } catch (error) {
         console.error('Error loading tags:', error);
-        setError('An unexpected error occurred');
+        setError(t('tags.unexpectedError'));
         setTags([]);
       } finally {
         setLoading(false);
@@ -100,18 +102,18 @@ export default function TagsPage() {
   };
 
   const handleDeleteTag = async (tag: Tag) => {
-    if (confirm(`Are you sure you want to delete "${tag.name}"?`)) {
+    if (confirm(t('tags.confirmDelete', { name: tag.name }))) {
       try {
         const data = await apiClient.delete(`/api/tags/${tag.id}`);
 
         if (data.success) {
           setTags(prev => prev.filter(t => t.id !== tag.id));
         } else {
-          setError(data.error?.message || 'Failed to delete tag');
+          setError(data.error?.message || t('tags.deleteError'));
         }
       } catch (error) {
         console.error('Error deleting tag:', error);
-        setError('An unexpected error occurred');
+        setError(t('tags.unexpectedError'));
       }
     }
     setMenuAnchor(null);
@@ -130,11 +132,11 @@ export default function TagsPage() {
             : t
         ));
       } else {
-        setError(data.error?.message || 'Failed to update tag');
+        setError(data.error?.message || t('tags.updateError'));
       }
     } catch (error) {
       console.error('Error updating tag:', error);
-      setError('An unexpected error occurred');
+      setError(t('tags.unexpectedError'));
     }
     setMenuAnchor(null);
   };
@@ -158,10 +160,10 @@ export default function TagsPage() {
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
           <Box>
             <Typography variant="h4" gutterBottom>
-              Tags
+              {t('tags.title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Manage product tags and labels
+              {t('tags.pageDescription')}
             </Typography>
           </Box>
           <Button
@@ -169,7 +171,7 @@ export default function TagsPage() {
             startIcon={<AddIcon />}
             onClick={handleCreateTag}
           >
-            Add Tag
+            {t('tags.addTag')}
           </Button>
         </Stack>
 
@@ -184,7 +186,7 @@ export default function TagsPage() {
         <Card sx={{ mb: 3, p: 2 }}>
           <TextField
             fullWidth
-            placeholder="Search tags..."
+            placeholder={t('tags.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
@@ -199,13 +201,13 @@ export default function TagsPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Tag</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Color</TableCell>
-                  <TableCell>Products</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell>{t('tags.tag')}</TableCell>
+                  <TableCell>{t('common.description')}</TableCell>
+                  <TableCell>{t('tags.color')}</TableCell>
+                  <TableCell>{t('tags.products')}</TableCell>
+                  <TableCell>{t('common.status')}</TableCell>
+                  <TableCell>{t('tags.created')}</TableCell>
+                  <TableCell align="right">{t('common.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -262,7 +264,7 @@ export default function TagsPage() {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={tag.isActive ? 'Active' : 'Inactive'}
+                        label={tag.isActive ? t('tags.active') : t('tags.inactive')}
                         size="small"
                         color={tag.isActive ? 'success' : 'default'}
                         variant={tag.isActive ? 'filled' : 'outlined'}
@@ -287,7 +289,7 @@ export default function TagsPage() {
                   <TableRow>
                     <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                       <Typography color="text.secondary">
-                        Loading tags...
+                        {t('tags.loading')}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -296,7 +298,7 @@ export default function TagsPage() {
                   <TableRow>
                     <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                       <Typography color="text.secondary">
-                        {searchQuery ? 'No tags match your search' : 'No tags found'}
+                        {searchQuery ? t('tags.noSearchResults') : t('tags.noTags')}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -316,22 +318,22 @@ export default function TagsPage() {
         >
           <MenuItem onClick={() => actionMenuTag && handleViewTag(actionMenuTag)}>
             <ViewIcon sx={{ mr: 1 }} fontSize="small" />
-            View
+            {t('common.view')}
           </MenuItem>
           <MenuItem onClick={() => actionMenuTag && handleEditTag(actionMenuTag)}>
             <EditIcon sx={{ mr: 1 }} fontSize="small" />
-            Edit
+            {t('common.edit')}
           </MenuItem>
           <MenuItem onClick={() => actionMenuTag && handleToggleStatus(actionMenuTag)}>
             <TagIcon sx={{ mr: 1 }} fontSize="small" />
-            {actionMenuTag?.isActive ? 'Deactivate' : 'Activate'}
+            {actionMenuTag?.isActive ? t('tags.deactivate') : t('tags.activate')}
           </MenuItem>
           <MenuItem 
             onClick={() => actionMenuTag && handleDeleteTag(actionMenuTag)}
             sx={{ color: 'error.main' }}
           >
             <DeleteIcon sx={{ mr: 1 }} fontSize="small" />
-            Delete
+            {t('common.delete')}
           </MenuItem>
         </Menu>
       </Box>

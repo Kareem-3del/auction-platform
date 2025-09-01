@@ -4,6 +4,8 @@ import type { FC } from 'react';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { productsAPI, isSuccessResponse } from 'src/lib/api-client';
+import type { ProductCard } from 'src/types/common';
 
 import {
   AccessTime as TimeIcon,
@@ -21,16 +23,7 @@ import {
 
 import { EndingSoonCard } from 'src/components/product-card/ending-soon-card';
 
-interface Product {
-  id: string;
-  title: string;
-  images: string[];
-  category: { name: string };
-  endTime: string;
-  currentBid: number;
-  bidCount: number;
-  viewCount: number;
-}
+// Use Product type from API types
 
 interface EndingSoonSectionProps {
   limit?: number;
@@ -44,7 +37,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
   containerMaxWidth = '1536px',
 }) => {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,21 +47,14 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/products/showcase?section=ending-soon&limit=${limit}`);
+        const response = await productsAPI.getShowcaseProducts('ending-soon', limit);
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('EndingSoonSection API response:', data);
-        
-        if (data.success) {
-          const products = data.data?.data?.data || [];
+        if (isSuccessResponse(response)) {
+          const products = response.data.data || [];
           console.log('EndingSoonSection products:', products, 'isArray:', Array.isArray(products));
           setProducts(Array.isArray(products) ? products : []);
         } else {
-          throw new Error(data.message || 'Failed to fetch products');
+          throw new Error(response.error.message || 'Failed to fetch products');
         }
       } catch (err) {
         console.error('Error fetching ending soon products:', err);
@@ -213,9 +199,9 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
                 title={product.title}
                 category={product.category.name}
                 image={Array.isArray(product.images) ? product.images[0] : product.images}
-                endTime={product.endTime}
+                endTime={product.endTime || product.timeRemaining?.endTime}
                 currentBid={typeof product.currentBid === 'string' ? parseFloat(product.currentBid) : (product.currentBid || 0)}
-                bidCount={typeof product.bidCount === 'string' ? parseInt(product.bidCount) : (product.bidCount || 0)}
+                bidCount={typeof product.bidCount === 'string' ? parseInt(product.bidCount) : (product.bidCount || product._count?.bids || 0)}
                 viewCount={typeof product.viewCount === 'string' ? parseInt(product.viewCount) : (product.viewCount || 0)}
                 onClick={() => handleProductClick(product.id)}
               />

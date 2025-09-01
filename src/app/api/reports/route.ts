@@ -1,10 +1,10 @@
 
-import { withAuth } from '@/lib/middleware/auth';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // GET /api/reports - Get available reports
 export const GET = withAuth(async (request) => {

@@ -1,245 +1,304 @@
-'use client';
+import { Metadata } from 'next';
+import HomePageClient from './HomePageClient';
 
-import { gsap } from 'gsap';
-import { useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
-import {
-  Box,
-  Grid,
-  Paper,
-  Button,
-  Container,
-  Typography,
-} from '@mui/material';
-
-import { ErrorBoundary } from 'src/components/ErrorBoundary';
-import { FooterCTA } from 'src/components/sections/FooterCTA';
-import { HeroBanner } from 'src/components/sections/HeroBanner';
-import HomepageLayout from 'src/components/layout/HomepageLayout';
-import { FeaturedSection } from 'src/components/sections/FeaturedSection';
-import { TrendingSection } from 'src/components/sections/TrendingSection';
-import { EndingSoonSection } from 'src/components/sections/EndingSoonSection';
-import { ComingSoonSection } from 'src/components/sections/ComingSoonSection';
-import { RecentAdditionsSection } from 'src/components/sections/RecentAdditionsSection';
-
-
-export default function HomePage() {
-  const router = useRouter();
-  const featuresRef = useRef<HTMLDivElement>(null);
-
-  // Simplified without API calls to prevent memory leaks
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+export const metadata: Metadata = {
+  title: 'Lebanon Auction - Premier Online Auction House | Luxury Items, Cars, Real Estate & Collectibles',
+  description: 'Discover exceptional items from cars and real estate to jewelry and collectibles at Lebanon\'s most trusted auction platform since 2020. Join thousands of collectors in live bidding with verified sellers.',
+  keywords: [
+    'lebanon auction',
+    'online auction',
+    'luxury cars auction',
+    'real estate auction',
+    'jewelry auction',
+    'collectibles auction',
+    'antiques auction',
+    'art auction',
+    'live bidding',
+    'verified sellers',
+    'secure transactions',
+    'lebanon marketplace',
+    'middle east auction',
+    'premium items',
+    'investment collectibles'
+  ].join(', '),
+  
+  // Open Graph
+  openGraph: {
+    title: 'Lebanon Auction - Premier Online Auction House',
+    description: 'Discover exceptional items from cars and real estate to jewelry and collectibles at Lebanon\'s most trusted auction platform since 2020.',
+    url: 'https://auction.lebanon-auction.bdaya.tech',
+    siteName: 'Lebanon Auction',
+    images: [
+      {
+        url: 'https://auction.lebanon-auction.bdaya.tech/images/og-homepage.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Lebanon Auction - Premier Online Auction House',
+      }
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  
+  // Twitter
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lebanon Auction - Premier Online Auction House',
+    description: 'Discover exceptional items from cars and real estate to jewelry and collectibles at Lebanon\'s most trusted auction platform since 2020.',
+    images: ['https://auction.lebanon-auction.bdaya.tech/images/og-homepage.jpg'],
+    site: '@LebanonAuction',
+    creator: '@LebanonAuction',
+  },
+  
+  // Additional meta tags
+  other: {
+    // Business information
+    'business:contact_data:street_address': 'Beirut, Lebanon',
+    'business:contact_data:region': 'Beirut',
+    'business:contact_data:country_name': 'Lebanon',
+    'business:contact_data:email': 'info@lebauction.com',
+    'business:contact_data:phone_number': '+961 1 123-456',
     
-    // Simple fade-in animation without complex triggers
-    if (featuresRef.current) {
-      gsap.fromTo(featuresRef.current, 
-        { opacity: 0 },
-        { opacity: 1, duration: 1, delay: 0.3 }
-      );
-    }
-  }, []);
+    // SEO meta tags
+    'robots': 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+    'googlebot': 'index, follow',
+    'revisit-after': '1 day',
+    'rating': 'general',
+    'distribution': 'global',
+    'language': 'en',
+    
+    // Geographic SEO
+    'geo.region': 'LB',
+    'geo.placename': 'Beirut',
+    'geo.position': '33.8938;35.5018',
+    'ICBM': '33.8938, 35.5018',
+    
+    // App information
+    'application-name': 'Lebanon Auction',
+    'apple-mobile-web-app-title': 'Lebanon Auction',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'mobile-web-app-capable': 'yes',
+    
+    // Theme colors
+    'theme-color': '#CE0E2D',
+    'msapplication-TileColor': '#CE0E2D',
+    'msapplication-navbutton-color': '#CE0E2D',
+    
+    // Rich snippets
+    'article:publisher': 'https://auction.lebanon-auction.bdaya.tech',
+    'article:section': 'Auctions',
+    
+    // Additional SEO
+    'referrer': 'origin-when-cross-origin',
+    'format-detection': 'telephone=yes',
+    'HandheldFriendly': 'True',
+    'MobileOptimized': '320',
+    'viewport': 'width=device-width, initial-scale=1.0, shrink-to-fit=no',
+  },
+  
+  // Canonical URL
+  alternates: {
+    canonical: 'https://auction.lebanon-auction.bdaya.tech',
+    languages: {
+      'en': 'https://auction.lebanon-auction.bdaya.tech',
+      'ar': 'https://auction.lebanon-auction.bdaya.tech/ar',
+    },
+  },
+  
+  // Verification and tracking
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
+  
+  // App manifest
+  manifest: '/manifest.json',
+};
 
 
+export default async function HomePage() {
+  // Generate JSON-LD structured data for the homepage
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://auction.lebanon-auction.bdaya.tech';
+  
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      // Main organization
+      {
+        '@type': 'Organization',
+        '@id': `${baseUrl}/#organization`,
+        name: 'Lebanon Auction',
+        url: baseUrl,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${baseUrl}/images/logo.png`,
+          width: 300,
+          height: 100
+        },
+        address: {
+          '@type': 'PostalAddress',
+          addressCountry: 'LB',
+          addressRegion: 'Beirut',
+          addressLocality: 'Beirut'
+        },
+        contactPoint: {
+          '@type': 'ContactPoint',
+          telephone: '+961-1-123-456',
+          contactType: 'customer service',
+          email: 'info@lebauction.com'
+        },
+        sameAs: [
+          'https://facebook.com/LebanonAuction',
+          'https://twitter.com/LebanonAuction',
+          'https://instagram.com/LebanonAuction',
+          'https://linkedin.com/company/LebanonAuction'
+        ],
+        foundingDate: '2020',
+        description: 'Lebanon\'s premier online auction platform for luxury items, cars, real estate, and collectibles.',
+        slogan: 'Discover exceptional items through trusted online auctions'
+      },
+      
+      // Website
+      {
+        '@type': 'WebSite',
+        '@id': `${baseUrl}/#website`,
+        url: baseUrl,
+        name: 'Lebanon Auction',
+        description: 'Premier online auction house in Lebanon specializing in luxury cars, real estate, jewelry, art, and collectibles.',
+        publisher: {
+          '@id': `${baseUrl}/#organization`
+        },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${baseUrl}/search?q={search_term_string}`
+          },
+          'query-input': 'required name=search_term_string'
+        }
+      },
+
+      // Webpage (Homepage)
+      {
+        '@type': 'WebPage',
+        '@id': `${baseUrl}/#webpage`,
+        url: baseUrl,
+        name: 'Lebanon Auction - Premier Online Auction House',
+        description: 'Discover exceptional items from cars and real estate to jewelry and collectibles at Lebanon\'s most trusted auction platform since 2020.',
+        isPartOf: {
+          '@id': `${baseUrl}/#website`
+        },
+        about: {
+          '@id': `${baseUrl}/#organization`
+        },
+        mainContentOfPage: {
+          '@type': 'WebPageElement',
+          cssSelector: 'main'
+        },
+        primaryImageOfPage: {
+          '@type': 'ImageObject',
+          url: `${baseUrl}/images/og-homepage.jpg`,
+          width: 1200,
+          height: 630
+        }
+      },
+
+      // Service offerings
+      {
+        '@type': 'Service',
+        '@id': `${baseUrl}/#auction-service`,
+        name: 'Online Auction Services',
+        description: 'Professional online auction services for luxury items, vehicles, real estate, and collectibles',
+        provider: {
+          '@id': `${baseUrl}/#organization`
+        },
+        serviceType: 'Auction Services',
+        areaServed: {
+          '@type': 'Country',
+          name: 'Lebanon'
+        },
+        hasOfferCatalog: {
+          '@type': 'OfferCatalog',
+          name: 'Auction Categories',
+          itemListElement: [
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Product',
+                name: 'Luxury Vehicles',
+                category: 'Automotive'
+              }
+            },
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Product',
+                name: 'Real Estate',
+                category: 'Property'
+              }
+            },
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Product',
+                name: 'Jewelry & Watches',
+                category: 'Luxury Goods'
+              }
+            },
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Product',
+                name: 'Art & Collectibles',
+                category: 'Collectibles'
+              }
+            }
+          ]
+        }
+      },
+
+      // FAQ structured data
+      {
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'How do online auctions work?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Online auctions allow you to bid on items from anywhere. Simply register, browse available items, place bids, and track your bidding status in real-time until the auction ends.'
+            }
+          },
+          {
+            '@type': 'Question',
+            name: 'Is bidding secure on Lebanon Auction?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Yes, we use advanced encryption and secure payment processing to protect all transactions. All sellers are verified and items are authenticated by our experts.'
+            }
+          },
+          {
+            '@type': 'Question',
+            name: 'What payment methods are accepted?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'We accept various payment methods including credit cards, bank transfers, and digital payment platforms like Binance Pay and Whish Money.'
+            }
+          }
+        ]
+      }
+    ]
+  };
 
   return (
-    <ErrorBoundary>
-      <HomepageLayout>
-        {/* Hero Banner */}
-        <ErrorBoundary>
-          <HeroBanner />
-        </ErrorBoundary>
-
-        {/* Ending Soon Section */}
-        <ErrorBoundary>
-          <EndingSoonSection limit={8} />
-        </ErrorBoundary>
-
-        {/* Coming Soon Section */}
-        <ErrorBoundary>
-          <ComingSoonSection limit={6} />
-        </ErrorBoundary>
-
-        {/* Featured Categories Section */}
-        <ErrorBoundary>
-          <FeaturedSection />
-        </ErrorBoundary>
-
-        {/* Trending Section */}
-        <ErrorBoundary>
-          <TrendingSection section="trending" limit={6} />
-        </ErrorBoundary>
-
-        {/* Featured Collection Section */}
-        <ErrorBoundary>
-          <TrendingSection section="featured" limit={6} />
-        </ErrorBoundary>
-
-        {/* Recent Additions Section */}
-        <ErrorBoundary>
-          <RecentAdditionsSection limit={8} />
-        </ErrorBoundary>
-
-        <Container maxWidth={false} sx={{ maxWidth: '1536px', px: 3 }}>
-          {/* Call to Action */}
-          <Box sx={{ 
-            py: { xs: 6, md: 10 }, 
-            textAlign: 'center',
-            background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.05), rgba(25, 118, 210, 0.05))',
-            borderRadius: 4,
-            my: 4,
-            border: '1px solid',
-            borderColor: 'divider',
-          }}>
-            <Typography 
-              variant="h3" 
-              component="h2" 
-              gutterBottom
-              sx={{
-                fontWeight: 800,
-                background: 'linear-gradient(135deg, #CE0E2D, #1976D2)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Ready to Start Bidding?
-            </Typography>
-            <Typography variant="h6" color="text.secondary" paragraph sx={{ mb: 6, maxWidth: 600, mx: 'auto' }}>
-              Join thousands of collectors and discover unique items from verified sellers across the region
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button 
-                variant="contained" 
-                size="large" 
-                onClick={() => router.push('/products')}
-                sx={{ 
-                  px: 6, 
-                  py: 2,
-                  background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  boxShadow: '0 4px 16px rgba(206, 14, 45, 0.3)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #b00c26, #e63939)',
-                    boxShadow: '0 6px 20px rgba(206, 14, 45, 0.4)',
-                    transform: 'translateY(-2px)',
-                  },
-                }}
-              >
-                Browse All Products
-              </Button>
-              <Button 
-                variant="outlined" 
-                size="large" 
-                onClick={() => router.push('/auctions')}
-                sx={{ 
-                  px: 6, 
-                  py: 2,
-                  borderColor: '#1976D2',
-                  color: '#1976D2',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  '&:hover': {
-                    borderColor: '#1976D2',
-                    backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                  },
-                }}
-              >
-                View Live Auctions
-              </Button>
-            </Box>
-          </Box>
-
-          {/* Features Section */}
-          <Box ref={featuresRef} sx={{ 
-            bgcolor: 'background.neutral', 
-            py: 8, 
-            px: 4,
-            borderRadius: 3, 
-            my: 4 
-          }}>
-            <Typography variant="h3" component="h2" textAlign="center" gutterBottom>
-              Why Choose LebAuction?
-            </Typography>
-            <Typography variant="h6" textAlign="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
-              Join thousands of satisfied users who trust our platform
-            </Typography>
-
-            <Grid container spacing={4}>
-              {[
-                {
-                  icon: '🛡️',
-                  title: 'Secure Transactions',
-                  description: 'Advanced encryption and secure payment processing protect every transaction on our platform.'
-                },
-                {
-                  icon: '🎯',
-                  title: 'Expert Authentication',
-                  description: 'Professional authenticators verify high-value items to ensure authenticity and quality.'
-                },
-                {
-                  icon: '🌍',
-                  title: 'Global Marketplace',
-                  description: 'Connect with buyers and sellers from around the world in our international auction house.'
-                },
-                {
-                  icon: '📱',
-                  title: 'Mobile Friendly',
-                  description: 'Bid and sell on the go with our responsive design and mobile-optimized experience.'
-                },
-                {
-                  icon: '💰',
-                  title: 'Competitive Fees',
-                  description: 'Transparent pricing with competitive seller fees and no hidden charges for buyers.'
-                },
-                {
-                  icon: '🏆',
-                  title: 'Award Winning',
-                  description: 'Recognized as the leading online auction platform in the Middle East region.'
-                },
-              ].map((feature, index) => (
-                <Grid item xs={12} sm={6} md={4} key={index}>
-                  <Paper sx={{ 
-                    p: 4, 
-                    textAlign: 'center', 
-                    height: '100%',
-                    bgcolor: 'background.paper',
-                    boxShadow: (theme) => theme.palette.mode === 'dark' 
-                      ? '0 4px 12px rgba(0, 0, 0, 0.3)'
-                      : '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    '&:hover': {
-                      boxShadow: (theme) => theme.palette.mode === 'dark' 
-                        ? '0 8px 24px rgba(0, 0, 0, 0.4)'
-                        : '0 8px 24px rgba(0, 0, 0, 0.15)',
-                      transform: 'translateY(-2px)',
-                      transition: 'all 0.3s ease-in-out',
-                    }
-                  }}>
-                    <Typography variant="h2" sx={{ mb: 2 }}>
-                      {feature.icon}
-                    </Typography>
-                    <Typography variant="h5" gutterBottom color="text.primary">
-                      {feature.title}
-                    </Typography>
-                    <Typography color="text.secondary">
-                      {feature.description}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        </Container>
-
-        {/* Footer CTA - Only on Homepage */}
-        <ErrorBoundary>
-          <FooterCTA />
-        </ErrorBoundary>
-      </HomepageLayout>
-    </ErrorBoundary>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData)
+        }}
+      />
+      <HomePageClient />
+    </>
   );
 }

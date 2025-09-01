@@ -3,12 +3,12 @@ import { NextRequest } from 'next/server';
 import { POST } from '../register/route';
 
 // Mock the auth module
-jest.mock('@/lib/auth', () => ({
+jest.mock('src/lib/auth', () => ({
   registerUser: jest.fn(),
 }));
 
 // Mock the prisma module
-jest.mock('@/lib/prisma', () => ({
+jest.mock('src/lib/prisma', () => ({
   prisma: {
     $disconnect: jest.fn(),
   },
@@ -20,7 +20,7 @@ describe('/api/auth/register', () => {
   });
 
   it('should register a new user with valid data', async () => {
-    const { registerUser } = await import('@/lib/auth');
+    const { registerUser } = await import('src/lib/auth');
     
     // Mock successful registration
     (registerUser as jest.Mock).mockResolvedValue({
@@ -142,7 +142,7 @@ describe('/api/auth/register', () => {
   });
 
   it('should return error when user already exists', async () => {
-    const { registerUser } = await import('@/lib/auth');
+    const { registerUser } = await import('src/lib/auth');
     
     // Mock user already exists error
     (registerUser as jest.Mock).mockRejectedValue(

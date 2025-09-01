@@ -27,6 +27,7 @@ import {
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Category {
   id: string;
@@ -47,6 +48,7 @@ interface Category {
 export default function ViewCategoryPage() {
   const router = useRouter();
   const params = useParams();
+  const { t } = useLocale();
   const categoryId = params.id as string;
   
   const [loading, setLoading] = useState(true);
@@ -61,11 +63,11 @@ export default function ViewCategoryPage() {
         if (data.success) {
           setCategory(data.data);
         } else {
-          setError(data.error?.message || 'Failed to load category');
+          setError(data.error?.message || t('categories.loadError'));
         }
       } catch (error) {
         console.error('Error loading category:', error);
-        setError('An unexpected error occurred');
+        setError(t('messages.unexpectedError'));
       } finally {
         setLoading(false);
       }
@@ -83,7 +85,7 @@ export default function ViewCategoryPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this category?')) {
+    if (!confirm(t('categories.confirmDeleteSingle'))) {
       return;
     }
 
@@ -93,11 +95,11 @@ export default function ViewCategoryPage() {
       if (data.success) {
         router.push('/dashboard/categories');
       } else {
-        setError(data.error?.message || 'Failed to delete category');
+        setError(data.error?.message || t('categories.deleteError'));
       }
     } catch (error) {
       console.error('Error deleting category:', error);
-      setError('An unexpected error occurred');
+      setError(t('messages.unexpectedError'));
     }
   };
 
@@ -120,10 +122,10 @@ export default function ViewCategoryPage() {
       <DashboardContent>
         <Box sx={{ py: 3 }}>
           <Alert severity="error" sx={{ mb: 3 }}>
-            {error || 'Category not found'}
+            {error || t('categories.notFound')}
           </Alert>
           <Button startIcon={<ArrowBackIcon />} onClick={handleBack}>
-            Back to Categories
+            {t('categories.backToCategories')}
           </Button>
         </Box>
       </DashboardContent>
@@ -145,12 +147,12 @@ export default function ViewCategoryPage() {
               </Typography>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Chip
-                  label={category.isActive ? 'Active' : 'Inactive'}
+                  label={category.isActive ? t('common.active') : t('common.inactive')}
                   color={category.isActive ? 'success' : 'default'}
                   variant={category.isActive ? 'filled' : 'outlined'}
                 />
                 <Chip
-                  label={`Level ${category.level}`}
+                  label={t('categories.level', { level: category.level })}
                   size="small"
                   variant="outlined"
                 />
@@ -167,7 +169,7 @@ export default function ViewCategoryPage() {
               startIcon={<EditIcon />}
               onClick={handleEdit}
             >
-              Edit
+              {t('common.edit')}
             </Button>
             <Button
               variant="outlined"
@@ -175,7 +177,7 @@ export default function ViewCategoryPage() {
               startIcon={<DeleteIcon />}
               onClick={handleDelete}
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </Stack>
         </Stack>
@@ -187,7 +189,7 @@ export default function ViewCategoryPage() {
               {/* Description */}
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Description
+                  {t('common.description')}
                 </Typography>
                 <Typography variant="body1">
                   {category.description}
@@ -197,7 +199,7 @@ export default function ViewCategoryPage() {
               {/* Image */}
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Category Image
+                  {t('categories.categoryImage')}
                 </Typography>
                 {category.imageUrl ? (
                   <Box
@@ -228,7 +230,7 @@ export default function ViewCategoryPage() {
                     <Stack alignItems="center" spacing={1}>
                       <ImageIcon sx={{ fontSize: 48, color: 'text.secondary' }} />
                       <Typography variant="body2" color="text.secondary">
-                        No image uploaded
+                        {t('categories.noImage')}
                       </Typography>
                     </Stack>
                   </Box>
@@ -239,7 +241,7 @@ export default function ViewCategoryPage() {
               {category.children && category.children.length > 0 && (
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Subcategories
+                    {t('categories.subcategories')}
                   </Typography>
                   <Grid container spacing={2}>
                     {category.children.map((child) => (
@@ -252,7 +254,7 @@ export default function ViewCategoryPage() {
                                 {child.name}
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
-                                {child.productCount} products
+                                {t('categories.productsCount', { count: child.productCount })}
                               </Typography>
                             </Box>
                           </Stack>
@@ -271,12 +273,12 @@ export default function ViewCategoryPage() {
               {/* Basic Info */}
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Category Details
+                  {t('categories.categoryDetails')}
                 </Typography>
                 <Stack spacing={2}>
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary">
-                      Category ID
+                      {t('categories.categoryId')}
                     </Typography>
                     <Typography variant="body2" fontFamily="monospace">
                       {category.id}
@@ -285,7 +287,7 @@ export default function ViewCategoryPage() {
 
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary">
-                      URL Slug
+                      {t('categories.urlSlug')}
                     </Typography>
                     <Typography variant="body2" fontFamily="monospace">
                       /{category.slug}
@@ -295,7 +297,7 @@ export default function ViewCategoryPage() {
                   {category.parent && (
                     <Box>
                       <Typography variant="subtitle2" color="text.secondary">
-                        Parent Category
+                        {t('categories.parentCategory')}
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing={1}>
                         {getCategoryIcon(category.parent.level)}
@@ -308,19 +310,19 @@ export default function ViewCategoryPage() {
 
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary">
-                      Level
+                      {t('categories.levelLabel')}
                     </Typography>
                     <Typography variant="body2">
-                      Level {category.level}
+                      {t('categories.level', { level: category.level })}
                     </Typography>
                   </Box>
 
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary">
-                      Status
+                      {t('common.status')}
                     </Typography>
                     <Chip
-                      label={category.isActive ? 'Active' : 'Inactive'}
+                      label={category.isActive ? t('common.active') : t('common.inactive')}
                       color={category.isActive ? 'success' : 'default'}
                       size="small"
                       variant={category.isActive ? 'filled' : 'outlined'}
@@ -332,12 +334,12 @@ export default function ViewCategoryPage() {
               {/* Statistics */}
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Statistics
+                  {t('categories.statistics')}
                 </Typography>
                 <Stack spacing={2}>
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      Products
+                      {t('navigation.products')}
                     </Typography>
                     <Typography variant="body2" fontWeight="medium">
                       {category.productCount || 0}
@@ -345,7 +347,7 @@ export default function ViewCategoryPage() {
                   </Box>
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      Subcategories
+                      {t('categories.subcategories')}
                     </Typography>
                     <Typography variant="body2" fontWeight="medium">
                       {category.children?.length || 0}
@@ -354,7 +356,7 @@ export default function ViewCategoryPage() {
                   <Divider />
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      Created
+                      {t('categories.created')}
                     </Typography>
                     <Typography variant="body2">
                       {formatDate(category.createdAt)}
@@ -362,7 +364,7 @@ export default function ViewCategoryPage() {
                   </Box>
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      Updated
+                      {t('categories.updated')}
                     </Typography>
                     <Typography variant="body2">
                       {formatDate(category.updatedAt)}

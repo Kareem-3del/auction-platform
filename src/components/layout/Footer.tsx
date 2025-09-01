@@ -20,41 +20,8 @@ import {
 } from '@mui/icons-material';
 
 import { Logo } from 'src/components/logo';
+import { useLocale } from 'src/hooks/useLocale';
 
-const footerLinks = {
-  'Auctions': [
-    { label: 'Motors', href: '/motors' },
-    { label: 'Prestigious Numbers', href: '/prestigious-numbers' },
-    { label: 'Properties', href: '/properties' },
-    { label: 'Surplus', href: '/surplus' },
-    { label: 'For Rent', href: '/for-rent' },
-  ],
-  'Services': [
-    { label: 'Register', href: '/auth/register' },
-    { label: 'Bidding Guide', href: '/bidding-guide' },
-    { label: 'Valuation Services', href: '/valuation' },
-    { label: 'Auction Calendar', href: '/auction-calendar' },
-  ],
-  'Support': [
-    { label: 'About EA', href: '/about' },
-    { label: 'Help', href: '/help' },
-    { label: 'Contact Us', href: '/contact-us' },
-    { label: 'Find Us', href: '/find-us' },
-  ],
-  'Legal': [
-    { label: 'Terms & Conditions', href: '/terms' },
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Bidding Terms', href: '/bidding-terms' },
-    { label: 'Cookie Policy', href: '/cookies' },
-  ],
-};
-
-const legalLinks = [
-  { label: 'Terms of Service', href: '/terms' },
-  { label: 'Privacy Policy', href: '/privacy' },
-  { label: 'Cookie Policy', href: '/cookies' },
-  { label: 'Auction Terms', href: '/auction-terms' },
-];
 
 const socialLinks = [
   { icon: FacebookIcon, href: 'https://facebook.com', label: 'Facebook' },
@@ -65,6 +32,42 @@ const socialLinks = [
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { t } = useLocale();
+
+  // Dynamic footer links based on translations
+  const footerLinks = {
+    [t('homepage.categories.auctions')]: [
+      { label: t('homepage.categories.motors'), href: '/motors' },
+      { label: t('homepage.categories.prestigiousNumbers'), href: '/prestigious-numbers' },
+      { label: t('homepage.categories.properties'), href: '/properties' },
+      { label: t('homepage.categories.surplus'), href: '/surplus' },
+      { label: t('homepage.categories.forRent'), href: '/for-rent' },
+    ],
+    [t('footer.links.services')]: [
+      { label: t('footer.links.register'), href: '/auth/register' },
+      { label: t('footer.links.biddingGuide'), href: '/bidding-guide' },
+      { label: t('footer.links.valuationServices'), href: '/valuation' },
+      { label: t('footer.links.auctionCalendar'), href: '/auction-calendar' },
+    ],
+    [t('footer.links.support')]: [
+      { label: t('footer.links.help'), href: '/help' },
+      { label: t('footer.links.contactUs'), href: '/contact-us' },
+      { label: t('footer.links.findUs'), href: '/find-us' },
+    ],
+    [t('footer.links.legal')]: [
+      { label: t('footer.links.termsConditions'), href: '/terms' },
+      { label: t('footer.links.privacyPolicy'), href: '/privacy' },
+      { label: t('footer.links.biddingTerms'), href: '/bidding-terms' },
+      { label: t('footer.links.cookiePolicy'), href: '/cookies' },
+    ],
+  };
+
+  const legalLinks = [
+    { label: t('footer.quickLinks.termsOfService'), href: '/terms' },
+    { label: t('footer.quickLinks.privacyPolicy'), href: '/privacy' },
+    { label: t('footer.quickLinks.cookiePolicy'), href: '/cookies' },
+    { label: t('footer.quickLinks.auctionTerms'), href: '/auction-terms' },
+  ];
 
   return (
     <Box
@@ -111,8 +114,7 @@ export default function Footer() {
                       fontSize: '0.875rem',
                     }}
                   >
-                    Lebanon&apos;s premier online auction platform. Discover authentic collectibles, 
-                    rare items, and unique pieces from verified sellers across the region.
+                    {t('footer.company.description')}
                   </Typography>
 
                   {/* Contact Info */}
@@ -120,19 +122,19 @@ export default function Footer() {
                     <Box display="flex" alignItems="center">
                       <EmailIcon sx={{ fontSize: 18, mr: 2, color: 'rgba(255, 255, 255, 0.5)' }} />
                       <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        info@lebauction.com
+                        {t('footer.company.contact.email')}
                       </Typography>
                     </Box>
                     <Box display="flex" alignItems="center">
                       <PhoneIcon sx={{ fontSize: 18, mr: 2, color: 'rgba(255, 255, 255, 0.5)' }} />
                       <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        +961 1 123-456
+                        {t('footer.company.contact.phone')}
                       </Typography>
                     </Box>
                     <Box display="flex" alignItems="center">
                       <LocationIcon sx={{ fontSize: 18, mr: 2, color: 'rgba(255, 255, 255, 0.5)' }} />
                       <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Beirut, Lebanon
+                        {t('footer.company.contact.address')}
                       </Typography>
                     </Box>
                   </Stack>
@@ -188,7 +190,7 @@ export default function Footer() {
                     fontSize: '1rem',
                   }}
                 >
-                  Follow Us
+                  {t('footer.social.followUs')}
                 </Typography>
                 
                 {/* Social Links */}
@@ -236,7 +238,7 @@ export default function Footer() {
                       fontWeight: 500,
                     }}
                   >
-                    Trusted Platform
+                    {t('footer.trust.trustedPlatform')}
                   </Typography>
                   <Typography 
                     variant="caption" 
@@ -246,7 +248,7 @@ export default function Footer() {
                       lineHeight: 1.4,
                     }}
                   >
-                    Secure payments • Verified sellers • Buyer protection • Worldwide shipping
+                    {t('footer.trust.securePayments')} • {t('footer.trust.verifiedSellers')} • {t('footer.trust.buyerProtection')} • {t('footer.trust.worldwideShipping')}
                   </Typography>
                 </Box>
               </Grid>
@@ -269,7 +271,7 @@ export default function Footer() {
                     fontSize: '0.875rem',
                   }}
                 >
-                  © {currentYear} LebAuction. All rights reserved.
+                  {t('footer.copyright')}
                 </Typography>
               </Grid>
               

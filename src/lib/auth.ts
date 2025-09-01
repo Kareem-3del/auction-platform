@@ -38,8 +38,15 @@ export interface AuthUser {
   emailVerified: boolean;
   balanceReal: number;
   balanceVirtual: number;
+  balanceUSD: number;
   isAnonymousDisplay: boolean;
   anonymousDisplayName: string;
+  agent?: {
+    id: string;
+    status: string;
+    businessName: string;
+    displayName: string;
+  };
 }
 
 // Configuration - lazy load to avoid build-time errors
@@ -154,9 +161,19 @@ export async function authenticateUser(email: string, password: string): Promise
   tokens: AuthTokens;
 } | null> {
   try {
-    // Find user by email
+    // Find user by email including agent information
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
+      include: {
+        agent: {
+          select: {
+            id: true,
+            status: true,
+            businessName: true,
+            displayName: true,
+          }
+        }
+      }
     });
 
     if (!user) {
@@ -222,8 +239,15 @@ export async function authenticateUser(email: string, password: string): Promise
       emailVerified: user.emailVerified,
       balanceReal: Number(user.balanceReal),
       balanceVirtual: Number(user.balanceVirtual),
+      balanceUSD: Number(user.balanceUSD),
       isAnonymousDisplay: user.isAnonymousDisplay,
       anonymousDisplayName: user.anonymousDisplayName,
+      agent: user.agent ? {
+        id: user.agent.id,
+        status: user.agent.status,
+        businessName: user.agent.businessName,
+        displayName: user.agent.displayName,
+      } : undefined,
     };
 
     return { user: authUser, tokens };
@@ -309,6 +333,7 @@ export async function registerUser(userData: {
       emailVerified: user.emailVerified,
       balanceReal: Number(user.balanceReal),
       balanceVirtual: Number(user.balanceVirtual),
+      balanceUSD: Number(user.balanceUSD),
       isAnonymousDisplay: user.isAnonymousDisplay,
       anonymousDisplayName: user.anonymousDisplayName,
     };
@@ -373,6 +398,16 @@ export async function getCurrentUser(accessToken: string): Promise<AuthUser | nu
     
     const user = await prisma.user.findUnique({
       where: { id: payload.sub },
+      include: {
+        agent: {
+          select: {
+            id: true,
+            status: true,
+            businessName: true,
+            displayName: true,
+          }
+        }
+      }
     });
 
     if (!user || !user.isActive) {
@@ -390,8 +425,15 @@ export async function getCurrentUser(accessToken: string): Promise<AuthUser | nu
       emailVerified: user.emailVerified,
       balanceReal: Number(user.balanceReal),
       balanceVirtual: Number(user.balanceVirtual),
+      balanceUSD: Number(user.balanceUSD),
       isAnonymousDisplay: user.isAnonymousDisplay,
       anonymousDisplayName: user.anonymousDisplayName,
+      agent: user.agent ? {
+        id: user.agent.id,
+        status: user.agent.status,
+        businessName: user.agent.businessName,
+        displayName: user.agent.displayName,
+      } : undefined,
     };
   } catch (error) {
     return null;

@@ -1,22 +1,22 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { registerUser } from '@/lib/auth';
+import { registerUser } from 'src/lib/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse, 
   validateContentType,
   validateRequiredFields 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // Validation schema
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
-           'Password must contain uppercase, lowercase, number and special character'),
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, 
+           'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)'),
   firstName: z.string()
     .min(1, 'First name is required')
     .max(50, 'First name must be less than 50 characters'),

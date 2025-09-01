@@ -32,6 +32,7 @@ import {
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface Category {
   id: string;
@@ -88,6 +89,7 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
+  const { t } = useLocale();
   
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
@@ -288,12 +290,12 @@ export default function EditProductPage() {
 
     Array.from(files).forEach((file) => {
       if (file.size > 5 * 1024 * 1024) {
-        alert(`File ${file.name} is too large. Maximum size is 5MB.`);
+        alert(t('products.fileTooLarge', { filename: file.name }));
         return;
       }
 
       if (!file.type.match(/^image\/(png|jpg|jpeg|webp)$/)) {
-        alert(`File ${file.name} is not a supported image format.`);
+        alert(t('products.fileNotSupported', { filename: file.name }));
         return;
       }
 
@@ -320,20 +322,20 @@ export default function EditProductPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Product title is required';
+      newErrors.title = t('products.productTitleRequired');
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+      newErrors.description = t('products.descriptionRequired');
     }
 
     if (!formData.categoryId.trim()) {
-      newErrors.categoryId = 'Category is required';
+      newErrors.categoryId = t('products.categoryRequired');
     }
 
     if (formData.estimatedValueMin && formData.estimatedValueMax) {
       if (parseFloat(formData.estimatedValueMin) > parseFloat(formData.estimatedValueMax)) {
-        newErrors.estimatedValueMax = 'Maximum value must be greater than minimum value';
+        newErrors.estimatedValueMax = t('products.maxValueError');
       }
     }
 
@@ -387,7 +389,7 @@ export default function EditProductPage() {
       
       // If no changes detected, show message and return
       if (Object.keys(changedFields).length === 0) {
-        setSuccessMessage('No changes detected - nothing to update.');
+        setSuccessMessage(t('products.noChangesDetected'));
         setTimeout(() => setSuccessMessage(''), 3000);
         setIsSubmitting(false);
         return;
@@ -430,16 +432,16 @@ export default function EditProductPage() {
       const data = await apiClient.put(`/api/products/${productId}`, processedChanges);
 
       if (data.success) {
-        setSuccessMessage('Product updated successfully!');
+        setSuccessMessage(t('products.updateSuccess'));
         setTimeout(() => {
           router.push('/dashboard/products');
         }, 1500);
       } else {
-        setErrors({ general: data.error?.message || 'Failed to update product' });
+        setErrors({ general: data.error?.message || t('products.updateError') });
       }
     } catch (error) {
       console.error('Error updating product:', error);
-      setErrors({ general: 'An unexpected error occurred' });
+      setErrors({ general: t('products.unexpectedError') });
     } finally {
       setIsSubmitting(false);
     }
@@ -469,10 +471,10 @@ export default function EditProductPage() {
           </IconButton>
           <Box>
             <Typography variant="h4" gutterBottom>
-              Edit Product
+              {t('products.editTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Update product information and settings
+              {t('products.editDescription')}
             </Typography>
           </Box>
         </Stack>
@@ -499,12 +501,12 @@ export default function EditProductPage() {
                 {/* Basic Information */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Basic Information
+                    {t('products.basicInfo')}
                   </Typography>
                   <Stack spacing={3}>
                     <TextField
                       fullWidth
-                      label="Product Title"
+                      label={t('products.productTitle')}
                       value={formData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
                       error={!!errors.title}
@@ -514,7 +516,7 @@ export default function EditProductPage() {
 
                     <TextField
                       fullWidth
-                      label="Description"
+                      label={t('products.description')}
                       multiline
                       rows={4}
                       value={formData.description}
@@ -526,17 +528,17 @@ export default function EditProductPage() {
 
                     <TextField
                       fullWidth
-                      label="Short Description"
+                      label={t('products.shortDescription')}
                       value={formData.shortDescription}
                       onChange={(e) => handleInputChange('shortDescription', e.target.value)}
-                      helperText="Brief summary for listings (optional)"
+                      helperText={t('products.shortDescriptionHelp')}
                     />
 
                     <FormControl fullWidth error={!!errors.categoryId} required>
-                      <InputLabel>Category</InputLabel>
+                      <InputLabel>{t('products.category')}</InputLabel>
                       <Select
                         value={formData.categoryId}
-                        label="Category"
+                        label={t('products.category')}
                         onChange={(e) => handleInputChange('categoryId', e.target.value)}
                       >
                         {categories.map((category) => (
@@ -553,14 +555,14 @@ export default function EditProductPage() {
                     </FormControl>
 
                     <FormControl fullWidth>
-                      <InputLabel>Brand</InputLabel>
+                      <InputLabel>{t('products.brand')}</InputLabel>
                       <Select
                         value={formData.brandId}
-                        label="Brand"
+                        label={t('products.brand')}
                         onChange={(e) => handleInputChange('brandId', e.target.value)}
                       >
                         <MenuItem value="">
-                          <em>No Brand</em>
+                          <em>{t('products.noBrand')}</em>
                         </MenuItem>
                         {brands.map((brand) => (
                           <MenuItem key={brand.id} value={brand.id}>
@@ -571,17 +573,17 @@ export default function EditProductPage() {
                     </FormControl>
 
                     <FormControl fullWidth>
-                      <InputLabel>Condition</InputLabel>
+                      <InputLabel>{t('products.condition')}</InputLabel>
                       <Select
                         value={formData.condition}
-                        label="Condition"
+                        label={t('products.condition')}
                         onChange={(e) => handleInputChange('condition', e.target.value)}
                       >
-                        <MenuItem value="NEW">New</MenuItem>
-                        <MenuItem value="EXCELLENT">Excellent</MenuItem>
-                        <MenuItem value="GOOD">Good</MenuItem>
-                        <MenuItem value="FAIR">Fair</MenuItem>
-                        <MenuItem value="POOR">Poor</MenuItem>
+                        <MenuItem value="NEW">{t('products.conditionNew')}</MenuItem>
+                        <MenuItem value="EXCELLENT">{t('products.conditionExcellent')}</MenuItem>
+                        <MenuItem value="GOOD">{t('products.conditionGood')}</MenuItem>
+                        <MenuItem value="FAIR">{t('products.conditionFair')}</MenuItem>
+                        <MenuItem value="POOR">{t('products.poor')}</MenuItem>
                       </Select>
                     </FormControl>
                   </Stack>
@@ -590,18 +592,18 @@ export default function EditProductPage() {
                 {/* Valuation */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Estimated Value
+                    {t('products.estimatedValue')}
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Minimum Value"
+                        label={t('products.minimumValue')}
                         type="number"
                         value={formData.estimatedValueMin}
                         onChange={(e) => handleInputChange('estimatedValueMin', e.target.value)}
                         error={!!errors.estimatedValueMin}
-                        helperText={errors.estimatedValueMin || 'Estimated minimum value'}
+                        helperText={errors.estimatedValueMin || t('products.minimumValueHelp')}
                         InputProps={{
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
                         }}
@@ -610,12 +612,12 @@ export default function EditProductPage() {
                     <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Maximum Value"
+                        label={t('products.maximumValue')}
                         type="number"
                         value={formData.estimatedValueMax}
                         onChange={(e) => handleInputChange('estimatedValueMax', e.target.value)}
                         error={!!errors.estimatedValueMax}
-                        helperText={errors.estimatedValueMax || 'Estimated maximum value'}
+                        helperText={errors.estimatedValueMax || t('products.maximumValueHelp')}
                         InputProps={{
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
                         }}
@@ -624,12 +626,12 @@ export default function EditProductPage() {
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="Reserve Price"
+                        label={t('products.reservePrice')}
                         type="number"
                         value={formData.reservePrice}
                         onChange={(e) => handleInputChange('reservePrice', e.target.value)}
                         error={!!errors.reservePrice}
-                        helperText={errors.reservePrice || 'Minimum acceptable auction bid (optional)'}
+                        helperText={errors.reservePrice || t('products.reservePriceEditHelp')}
                         InputProps={{
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
                         }}
@@ -641,18 +643,18 @@ export default function EditProductPage() {
                 {/* Auction Settings */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Auction Settings
+                    {t('products.auctionSettings')}
                   </Typography>
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Starting Bid"
+                        label={t('products.startingBid')}
                         type="number"
                         value={formData.startingBid}
                         onChange={(e) => handleInputChange('startingBid', e.target.value)}
                         error={!!errors.startingBid}
-                        helperText={errors.startingBid || 'Initial bid amount'}
+                        helperText={errors.startingBid || t('products.startingBidHelp')}
                         InputProps={{
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
                         }}
@@ -661,12 +663,12 @@ export default function EditProductPage() {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Bid Increment"
+                        label={t('products.bidIncrement')}
                         type="number"
                         value={formData.bidIncrement}
                         onChange={(e) => handleInputChange('bidIncrement', e.target.value)}
                         error={!!errors.bidIncrement}
-                        helperText={errors.bidIncrement || 'Minimum bid increase amount'}
+                        helperText={errors.bidIncrement || t('products.bidIncrementHelp')}
                         InputProps={{
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
                         }}
@@ -675,12 +677,12 @@ export default function EditProductPage() {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Buy Now Price"
+                        label={t('products.buyNowPrice')}
                         type="number"
                         value={formData.buyNowPrice}
                         onChange={(e) => handleInputChange('buyNowPrice', e.target.value)}
                         error={!!errors.buyNowPrice}
-                        helperText={errors.buyNowPrice || 'Instant purchase price (optional)'}
+                        helperText={errors.buyNowPrice || t('products.buyNowPriceHelp')}
                         InputProps={{
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
                         }}
@@ -688,45 +690,45 @@ export default function EditProductPage() {
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth>
-                        <InputLabel>Auction Type</InputLabel>
+                        <InputLabel>{t('products.auctionType')}</InputLabel>
                         <Select
                           value={formData.auctionType}
-                          label="Auction Type"
+                          label={t('products.auctionType')}
                           onChange={(e) => handleInputChange('auctionType', e.target.value)}
                         >
-                          <MenuItem value="LIVE">Live Auction</MenuItem>
-                          <MenuItem value="SEALED">Sealed Bid</MenuItem>
-                          <MenuItem value="RESERVE">Reserve Auction</MenuItem>
+                          <MenuItem value="LIVE">{t('products.liveAuction')}</MenuItem>
+                          <MenuItem value="SEALED">{t('products.sealedBid')}</MenuItem>
+                          <MenuItem value="RESERVE">{t('products.reserveAuction')}</MenuItem>
                         </Select>
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Start Time"
+                        label={t('products.startTime')}
                         type="datetime-local"
                         value={formData.startTime}
                         onChange={(e) => handleInputChange('startTime', e.target.value)}
                         error={!!errors.startTime}
-                        helperText={errors.startTime || 'When the auction begins'}
+                        helperText={errors.startTime || t('products.startTimeHelp')}
                         InputLabelProps={{ shrink: true }}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="End Time"
+                        label={t('products.endTime')}
                         type="datetime-local"
                         value={formData.endTime}
                         onChange={(e) => handleInputChange('endTime', e.target.value)}
                         error={!!errors.endTime}
-                        helperText={errors.endTime || 'When the auction ends'}
+                        helperText={errors.endTime || t('products.endTimeHelp')}
                         InputLabelProps={{ shrink: true }}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="subtitle2" gutterBottom>
-                        Auto-Extension Settings
+                        {t('products.autoExtensionSettings')}
                       </Typography>
                       <FormControlLabel
                         control={
@@ -735,7 +737,7 @@ export default function EditProductPage() {
                             onChange={(e) => handleInputChange('autoExtend', e.target.checked)}
                           />
                         }
-                        label="Enable automatic auction extension"
+                        label={t('products.enableAutoExtension')}
                       />
                     </Grid>
                     {formData.autoExtend && (
@@ -743,12 +745,12 @@ export default function EditProductPage() {
                         <Grid item xs={12} sm={4}>
                           <TextField
                             fullWidth
-                            label="Extension Trigger"
+                            label={t('products.extensionTrigger')}
                             type="number"
                             value={formData.extensionTriggerMinutes}
                             onChange={(e) => handleInputChange('extensionTriggerMinutes', e.target.value)}
                             error={!!errors.extensionTriggerMinutes}
-                            helperText="Minutes before end to trigger extension"
+                            helperText={t('products.extensionTriggerHelp')}
                             InputProps={{
                               endAdornment: <InputAdornment position="end">min</InputAdornment>,
                             }}
@@ -757,12 +759,12 @@ export default function EditProductPage() {
                         <Grid item xs={12} sm={4}>
                           <TextField
                             fullWidth
-                            label="Extension Duration"
+                            label={t('products.extensionDuration')}
                             type="number"
                             value={formData.extensionDurationMinutes}
                             onChange={(e) => handleInputChange('extensionDurationMinutes', e.target.value)}
                             error={!!errors.extensionDurationMinutes}
-                            helperText="Minutes to extend the auction"
+                            helperText={t('products.extensionDurationHelp')}
                             InputProps={{
                               endAdornment: <InputAdornment position="end">min</InputAdornment>,
                             }}
@@ -771,12 +773,12 @@ export default function EditProductPage() {
                         <Grid item xs={12} sm={4}>
                           <TextField
                             fullWidth
-                            label="Max Extensions"
+                            label={t('products.maxExtensions')}
                             type="number"
                             value={formData.maxExtensions}
                             onChange={(e) => handleInputChange('maxExtensions', e.target.value)}
                             error={!!errors.maxExtensions}
-                            helperText="Maximum number of extensions"
+                            helperText={t('products.maxExtensionsHelp')}
                           />
                         </Grid>
                       </>
@@ -787,18 +789,18 @@ export default function EditProductPage() {
                 {/* Status */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Status
+                    {t('common.status')}
                   </Typography>
                   <FormControl fullWidth>
-                    <InputLabel>Status</InputLabel>
+                    <InputLabel>{t('common.status')}</InputLabel>
                     <Select
                       value={formData.status}
-                      label="Status"
+                      label={t('common.status')}
                       onChange={(e) => handleInputChange('status', e.target.value)}
                     >
-                      <MenuItem value="PENDING_APPROVAL">Pending Approval</MenuItem>
-                      <MenuItem value="APPROVED">Approved</MenuItem>
-                      <MenuItem value="REJECTED">Rejected</MenuItem>
+                      <MenuItem value="PENDING_APPROVAL">{t('products.pendingApproval')}</MenuItem>
+                      <MenuItem value="APPROVED">{t('products.approved')}</MenuItem>
+                      <MenuItem value="REJECTED">{t('products.rejected')}</MenuItem>
                     </Select>
                   </FormControl>
                 </Card>
@@ -806,7 +808,7 @@ export default function EditProductPage() {
                 {/* Specifications */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Specifications
+                    {t('products.specifications')}
                   </Typography>
                   <Stack spacing={2}>
                     {formData.specifications.map((spec, index) => (
@@ -814,19 +816,19 @@ export default function EditProductPage() {
                         <Grid item xs={5}>
                           <TextField
                             fullWidth
-                            label="Specification"
+                            label={t('products.specification')}
                             value={spec.key}
                             onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
-                            placeholder="e.g., Screen Size"
+                            placeholder={t('products.specificationPlaceholder')}
                           />
                         </Grid>
                         <Grid item xs={5}>
                           <TextField
                             fullWidth
-                            label="Value"
+                            label={t('products.value')}
                             value={spec.value}
                             onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
-                            placeholder="e.g., 6.7 inches"
+                            placeholder={t('products.valuePlaceholder')}
                           />
                         </Grid>
                         <Grid item xs={2}>
@@ -845,7 +847,7 @@ export default function EditProductPage() {
                       variant="outlined"
                       size="small"
                     >
-                      Add Specification
+                      {t('products.addSpecification')}
                     </Button>
                   </Stack>
                 </Card>
@@ -858,7 +860,7 @@ export default function EditProductPage() {
                 {/* Images */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Product Images
+                    {t('products.productImages')}
                   </Typography>
                   {/* Hidden file input */}
                   <input
@@ -888,10 +890,10 @@ export default function EditProductPage() {
                   >
                     <UploadIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
                     <Typography variant="body2" color="text.secondary">
-                      Click to upload or drag and drop
+                      {t('products.uploadHelp')}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      PNG, JPG, WEBP up to 5MB (Max 10 images)
+                      {t('products.uploadFormats')}
                     </Typography>
                   </Box>
                   
@@ -899,7 +901,7 @@ export default function EditProductPage() {
                   {formData.images && formData.images.length > 0 && (
                     <Box sx={{ mt: 2 }}>
                       <Typography variant="subtitle2" gutterBottom>
-                        Current Images ({formData.images.length})
+                        {t('products.currentImages', { count: formData.images.length })}
                       </Typography>
                       <Grid container spacing={1}>
                         {formData.images.map((image, index) => (
@@ -951,10 +953,10 @@ export default function EditProductPage() {
                 {/* Custom Fields */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Additional Information
+                    {t('products.additionalInformation')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Product-specific custom fields and metadata will be managed here.
+                    {t('products.additionalInformationHelp')}
                   </Typography>
                 </Card>
 
@@ -968,7 +970,7 @@ export default function EditProductPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    {isSubmitting ? 'Updating...' : 'Update Product'}
+                    {isSubmitting ? t('products.updating') : t('products.updateProduct')}
                   </Button>
                   <Button
                     variant="outlined"
@@ -976,7 +978,7 @@ export default function EditProductPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    Cancel
+                    {t('products.cancel')}
                   </Button>
                 </Stack>
               </Stack>

@@ -1,8 +1,8 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { handleAPIError, validateMethod, successResponse } from '@/lib/api-response';
+import { prisma } from 'src/lib/prisma';
+import { handleAPIError, validateMethod, successResponse } from 'src/lib/api-response';
 
 const showcaseParamsSchema = z.object({
   section: z.enum(['ending-soon', 'coming-soon', 'featured', 'recent', 'trending']).default('featured'),
@@ -21,17 +21,13 @@ export async function GET(request: NextRequest) {
       await prisma.$queryRaw`SELECT 1`;
     } catch (dbError) {
       console.error('Database connection failed:', dbError);
-      return successResponse({
-        data: {
-          data: [],
-          meta: {
-            section,
-            title: section === 'trending' ? 'Trending Now' : section === 'featured' ? 'Featured Products' : 'Products',
-            count: 0,
-            hasMore: false,
-          },
+      return successResponse([], {
+        meta: {
+          section,
+          title: section === 'trending' ? 'Trending Now' : section === 'featured' ? 'Featured Products' : 'Products',
+          count: 0,
+          hasMore: false,
         },
-        message: `No ${section} products available`,
       });
     }
 
@@ -39,6 +35,12 @@ export async function GET(request: NextRequest) {
 
     let whereClause: any = {
       status: 'APPROVED',
+      // Exclude sold items and ended/cancelled auctions from all showcase sections
+      NOT: [
+        { status: 'SOLD' },
+        { auctionStatus: 'ENDED' },
+        { auctionStatus: 'CANCELLED' }
+      ],
     };
     let orderBy: any = { createdAt: 'desc' };
     let sectionTitle = 'Featured Products';
@@ -176,17 +178,13 @@ export async function GET(request: NextRequest) {
       } : null,
     }));
 
-    return successResponse({
-      data: {
-        data: productsData,
-        meta: {
-          section,
-          title: sectionTitle,
-          count: productsData.length,
-          hasMore: productsData.length === limit,
-        },
+    return successResponse(productsData, {
+      meta: {
+        section,
+        title: sectionTitle,
+        count: productsData.length,
+        hasMore: productsData.length === limit,
       },
-      message: `${sectionTitle} retrieved successfully`,
     });
 
   } catch (error) {

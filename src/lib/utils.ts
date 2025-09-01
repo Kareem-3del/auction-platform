@@ -34,6 +34,7 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'Asia/Beirut', // Lebanon timezone
   };
 
   return new Intl.DateTimeFormat('en-US', { ...defaultOptions, ...options }).format(dateObj);
@@ -232,6 +233,64 @@ export function getTimeRemaining(endDate: string | Date): {
     seconds,
     expired: false,
   };
+}
+
+/**
+ * Lebanon-specific timezone utilities
+ */
+export const LEBANON_TIMEZONE = 'Asia/Beirut';
+
+/**
+ * Get current time in Lebanon timezone
+ */
+export function getLebanonTime(): Date {
+  const now = new Date();
+  const lebanonTime = new Date(now.toLocaleString('en-US', { timeZone: LEBANON_TIMEZONE }));
+  return lebanonTime;
+}
+
+/**
+ * Format date for Lebanon timezone with locale-aware formatting
+ */
+export function formatLebanonDate(
+  date: string | Date, 
+  locale: string = 'en-US',
+  options?: Intl.DateTimeFormatOptions
+): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid Date';
+  }
+
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: LEBANON_TIMEZONE,
+    timeZoneName: 'short',
+  };
+
+  return new Intl.DateTimeFormat(locale, { ...defaultOptions, ...options }).format(dateObj);
+}
+
+/**
+ * Convert any date to Lebanon timezone
+ */
+export function toLebanonTimezone(date: string | Date): Date {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return new Date(dateObj.toLocaleString('en-US', { timeZone: LEBANON_TIMEZONE }));
+}
+
+/**
+ * Check if current time is during Lebanon business hours (9 AM - 6 PM)
+ */
+export function isLebanonBusinessHours(): boolean {
+  const lebanonTime = getLebanonTime();
+  const hour = lebanonTime.getHours();
+  return hour >= 9 && hour < 18;
 }
 
 /**

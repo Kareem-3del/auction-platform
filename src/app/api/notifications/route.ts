@@ -1,13 +1,13 @@
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/middleware/auth';
+import { prisma } from 'src/lib/prisma';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse,
   validateContentType 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // Validation schema for creating notifications
 const createNotificationSchema = z.object({

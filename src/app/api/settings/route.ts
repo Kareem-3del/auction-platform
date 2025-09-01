@@ -1,12 +1,12 @@
 
 import { z } from 'zod';
-import { withAuth } from '@/lib/middleware/auth';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse,
   validateContentType 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 const settingsSchema = z.object({
   general: z.object({
@@ -24,11 +24,14 @@ const settingsSchema = z.object({
     enableAutoBid: z.boolean(),
   }).optional(),
   payment: z.object({
-    enablePaypal: z.boolean(),
-    enableStripe: z.boolean(),
-    enableCrypto: z.boolean(),
+    enableBinance: z.boolean(),
+    enableWishMoney: z.boolean(),
+    enablePaypal: z.boolean().optional(),
+    enableStripe: z.boolean().optional(),
+    enableCrypto: z.boolean().optional(),
     paymentFeePercentage: z.number().min(0).max(10),
     minimumWithdrawal: z.number().min(1),
+    virtualBalanceMultiplier: z.number().min(1).max(10),
   }).optional(),
   email: z.object({
     smtpHost: z.string().min(1, 'SMTP host is required'),
@@ -71,11 +74,14 @@ export const GET = withAuth(async (request) => {
         enableAutoBid: true,
       },
       payment: {
-        enablePaypal: true,
-        enableStripe: true,
+        enableBinance: true,
+        enableWishMoney: true,
+        enablePaypal: false,
+        enableStripe: false,
         enableCrypto: false,
         paymentFeePercentage: 2.5,
         minimumWithdrawal: 10,
+        virtualBalanceMultiplier: 3.0,
       },
       email: {
         smtpHost: 'smtp.gmail.com',

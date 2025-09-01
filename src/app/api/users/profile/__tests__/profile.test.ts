@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import { GET, PUT } from '../route';
 
 // Mock the auth middleware
-jest.mock('@/lib/middleware/auth', () => ({
+jest.mock('src/lib/middleware/auth', () => ({
   withAuth: jest.fn((handler) => async (request: any) => {
       // Mock authenticated request with user data
       request.user = {
@@ -17,7 +17,7 @@ jest.mock('@/lib/middleware/auth', () => ({
 }));
 
 // Mock the prisma module
-jest.mock('@/lib/prisma', () => ({
+jest.mock('src/lib/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
@@ -40,7 +40,7 @@ jest.mock('@/lib/prisma', () => ({
 }));
 
 // Mock the API response utilities
-jest.mock('@/lib/api-response', () => ({
+jest.mock('src/lib/api-response', () => ({
   successResponse: jest.fn((data) => ({
     json: async () => ({ success: true, data }),
     status: 200,
@@ -60,8 +60,8 @@ describe('/api/users/profile', () => {
 
   describe('GET /api/users/profile', () => {
     it('should return user profile with statistics', async () => {
-      const { prisma } = await import('@/lib/prisma');
-      const { successResponse } = await import('@/lib/api-response');
+      const { prisma } = await import('src/lib/prisma');
+      const { successResponse } = await import('src/lib/api-response');
 
       // Mock user profile data
       const mockUserProfile = {
@@ -123,8 +123,8 @@ describe('/api/users/profile', () => {
     });
 
     it('should return error when user not found', async () => {
-      const { prisma } = await import('@/lib/prisma');
-      const { handleAPIError } = await import('@/lib/api-response');
+      const { prisma } = await import('src/lib/prisma');
+      const { handleAPIError } = await import('src/lib/api-response');
 
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
@@ -145,8 +145,8 @@ describe('/api/users/profile', () => {
 
   describe('PUT /api/users/profile', () => {
     it('should update user profile successfully', async () => {
-      const { prisma } = await import('@/lib/prisma');
-      const { successResponse } = await import('@/lib/api-response');
+      const { prisma } = await import('src/lib/prisma');
+      const { successResponse } = await import('src/lib/api-response');
 
       const updatedUser = {
         id: 'test-user-id',
@@ -207,7 +207,7 @@ describe('/api/users/profile', () => {
     });
 
     it('should return validation error for invalid data', async () => {
-      const { handleAPIError } = await import('@/lib/api-response');
+      const { handleAPIError } = await import('src/lib/api-response');
 
       const request = new NextRequest('http://localhost:3000/api/users/profile', {
         method: 'PUT',
@@ -228,8 +228,8 @@ describe('/api/users/profile', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      const { prisma } = await import('@/lib/prisma');
-      const { handleAPIError } = await import('@/lib/api-response');
+      const { prisma } = await import('src/lib/prisma');
+      const { handleAPIError } = await import('src/lib/api-response');
 
       (prisma.user.update as jest.Mock).mockRejectedValue(new Error('Database error'));
 

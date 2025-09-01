@@ -22,10 +22,17 @@ import { useAuth } from 'src/hooks/useAuth';
 
 import { _notifications } from 'src/_mock';
 import { LanguagePopover } from 'src/layouts/components/language-popover';
-import { NotificationsDrawer } from 'src/layouts/components/notifications-drawer';
+import NotificationCenter from 'src/components/notifications/NotificationCenter';
 
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
+import SearchDialog from 'src/components/search/SearchDialog';
+
+import SearchIcon from '@mui/icons-material/Search';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const navigationItems = [
   { label: 'Motors', path: '/categories/cars', count: 889 },
@@ -36,9 +43,8 @@ const navigationItems = [
 ];
 
 const utilityLinks = [
-  { label: 'About', path: '/about' },
   { label: 'Auction Calendar', path: '/auctions' },
-  { label: 'How it Works', path: '/how-it-works' },
+  { label: 'About', path: '/about' },
   { label: 'Help', path: '/help' },
   { label: 'Contact Us', path: '/contact' },
 ];
@@ -55,10 +61,11 @@ export default function Header({
   layoutQuery = 'lg' 
 }: HeaderProps) {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileDrawerOpen(!mobileDrawerOpen);
@@ -121,7 +128,7 @@ export default function Header({
                   gap: 0.5,
                 }}
               >
-                <Iconify icon="eva:phone-outline" width={14} height={14} />
+                <PhoneIcon sx={{ fontSize: 14 }} />
                 +961 1 234 567
               </Typography>
               <Typography
@@ -134,7 +141,7 @@ export default function Header({
                   gap: 0.5,
                 }}
               >
-                <Iconify icon="eva:email-outline" width={14} height={14} />
+                <EmailIcon sx={{ fontSize: 14 }} />
                 info@lebanonauction.com
               </Typography>
             </Box>
@@ -247,11 +254,11 @@ export default function Header({
                 >
                   ({item.count})
                 </Typography>
-                <Iconify 
-                  icon="eva:arrow-down-fill" 
-                  width={16}
-                  height={16}
-                  sx={{ opacity: 0.7 }}
+                <KeyboardArrowDownIcon 
+                  sx={{ 
+                    fontSize: 16,
+                    opacity: 0.7 
+                  }}
                 />
               </Button>
             ))}
@@ -266,18 +273,25 @@ export default function Header({
           }}>
             {/* Search Icon */}
             <IconButton 
+              onClick={() => setSearchDialogOpen(true)}
               sx={{ 
                 color: 'white',
                 p: 1,
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
               }}
             >
-              <Iconify icon="eva:search-outline" width={24} height={24} />
+              <SearchIcon sx={{ fontSize: 24 }} />
             </IconButton>
 
             {/* Auth Buttons */}
-            {user ? (
+            {loading ? (
+              // Show loading placeholder to prevent layout shift
+              <Box sx={{ width: { xs: 80, md: 220 }, height: 40 }} />
+            ) : user ? (
               <>
-                <NotificationsDrawer data={_notifications} />
+                <NotificationCenter />
                 
                 {/* User Profile Menu */}
                 <IconButton
@@ -367,7 +381,7 @@ export default function Header({
                   </MenuItem>
 
                   {/* Dashboard for Agent/Admin */}
-                  {(user?.userType === 'AGENT' || user?.userType === 'ADMIN') && (
+                  {(user?.userType === 'AGENT' || user?.userType === 'ADMIN' || user?.userType === 'SUPER_ADMIN') && (
                     <>
                       <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 1 }} />
                       <MenuItem onClick={() => handleMenuItemClick('/dashboard')}>
@@ -444,7 +458,7 @@ export default function Header({
                 p: 1,
               }}
             >
-              <Iconify icon="eva:menu-outline" width={24} height={24} />
+              <MenuIcon sx={{ fontSize: 24 }} />
             </IconButton>
           </Box>
         </Toolbar>
@@ -457,6 +471,12 @@ export default function Header({
           display: { xs: 'none', lg: 'block' },
         }} />
       </Container>
+
+      {/* Search Dialog */}
+      <SearchDialog
+        open={searchDialogOpen}
+        onClose={() => setSearchDialogOpen(false)}
+      />
     </AppBar>
   );
 }

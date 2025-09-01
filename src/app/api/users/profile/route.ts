@@ -1,12 +1,13 @@
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/middleware/auth';
+import { prisma } from 'src/lib/prisma';
+import { withAuth } from 'src/lib/middleware/auth';
+import { NotificationService } from 'src/lib/notification-service';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse, 
   validateContentType 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // Validation schema for profile updates
 const updateProfileSchema = z.object({
@@ -24,7 +25,7 @@ const updateProfileSchema = z.object({
     .optional()
     .nullable(),
   isAnonymousDisplay: z.boolean().optional(),
-  avatarUrl: z.string().url('Invalid avatar URL').optional().nullable(),
+  avatarUrl: z.string().optional().nullable(),
 });
 
 // GET /api/users/profile
@@ -232,6 +233,13 @@ export const PUT = withAuth(async (request) => {
         userAgent: request.headers.get('user-agent') || 'unknown',
       },
     });
+
+    // Send account change notification
+    await NotificationService.sendAccountChangeNotification(
+      userId,
+      'PROFILE_UPDATED',
+      { updatedFields: Object.keys(validatedData) }
+    );
 
     const responseData = {
       ...updatedUser,

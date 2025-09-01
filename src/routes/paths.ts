@@ -12,8 +12,8 @@ export const paths = {
   minimalStore: 'https://mui.com/store/items/minimal-dashboard/',
   // AUTH
   auth: {
-    signIn: '/login',
-    signUp: '/register',
+    signIn: '/auth/login',
+    signUp: '/auth/register',
   },
   // DASHBOARD
   dashboard: {

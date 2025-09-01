@@ -1,11 +1,11 @@
 
-import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/middleware/auth';
+import { prisma } from 'src/lib/prisma';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // POST /api/notifications/mark-all-read - Mark all notifications as read
 export const POST = withAuth(async (request) => {

@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="64" fill="#CE0E2D"/>
+  <g transform="translate(128, 128)">
+    <!-- Hammer icon representing auction -->
+    <path d="M200 40L120 120L80 80L40 120L120 200L160 160L240 240L280 200L200 40Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M80 80L160 160" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+    <!-- Decorative elements -->
+    <circle cx="48" cy="208" r="16" fill="#FFFFFF" opacity="0.8"/>
+    <circle cx="208" cy="48" r="12" fill="#FFFFFF" opacity="0.6"/>
+  </g>
+</svg>

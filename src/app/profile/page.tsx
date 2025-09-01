@@ -40,15 +40,20 @@ import {
   TrendingUp as TrendingUpIcon,
   AccountBalanceWallet as WalletIcon,
   Notifications as NotificationsIcon,
+  Payment as PaymentIcon,
+  Security as SecurityIcon,
 } from '@mui/icons-material';
 
 import { useAuth, getAccessToken } from 'src/hooks/useAuth';
+import { useLocale } from 'src/hooks/useLocale';
 
 import { formatDate, formatCurrency } from 'src/lib/utils';
 import { useNotifications } from 'src/contexts/NotificationContext';
 
 import Layout from 'src/components/layout/Layout';
 import ImageUpload from 'src/components/common/ImageUpload';
+import BinanceLogo from 'src/components/icons/BinanceLogo';
+import WhishLogo from 'src/components/icons/WhishLogo';
 
 interface UserProfile {
   id: string;
@@ -104,10 +109,10 @@ interface UserProfile {
     amount: number;
     status: string;
     createdAt: string;
-    auction: {
+    product: {
       id: string;
       title: string;
-      status: string;
+      auctionStatus: string;
       endTime: string;
     };
   }>;
@@ -121,9 +126,482 @@ interface ProfileFormData {
   avatarUrl?: string;
 }
 
+// ChargeTab component for wallet charging functionality
+function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalanceUpdate: () => void }) {
+  const { t } = useLocale();
+  const [chargeAmount, setChargeAmount] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'binance' | 'whish' | null>(null);
+
+  const predefinedAmounts = [10, 25, 50, 100, 250, 500];
+
+  const handleAmountSelect = (amount: number) => {
+    setSelectedAmount(amount);
+    setChargeAmount(amount.toString());
+    setError(null);
+  };
+
+  const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setChargeAmount(value);
+    setSelectedAmount(null);
+    setError(null);
+  };
+
+  const validateAmount = (amount: number) => {
+    if (!amount || amount <= 0) {
+      setError(t('wallet.invalidAmount'));
+      return false;
+    }
+
+    if (amount < 1) {
+      setError(t('wallet.minimumAmount') + ': $1');
+      return false;
+    }
+
+    if (amount > 10000) {
+      setError(t('wallet.maximumAmount') + ': $10,000');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleBinanceCharge = async () => {
+    const amount = parseFloat(chargeAmount);
+    if (!validateAmount(amount)) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+
+      const token = getAccessToken();
+      if (!token) {
+        setError(t('auth.loginRequired'));
+        return;
+      }
+
+      const response = await fetch('/api/binance/recharge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ amount }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess('💰 ' + t('wallet.rechargeSuccess') + ' via Binance');
+        setChargeAmount('');
+        setSelectedAmount(null);
+        setSelectedPaymentMethod(null);
+        // Add a small delay to ensure database consistency
+        setTimeout(() => {
+          onBalanceUpdate(); // Refresh profile data
+        }, 500);
+      } else {
+        setError(data.error?.message || t('wallet.rechargeFailed'));
+      }
+    } catch (err) {
+      setError(t('wallet.rechargeFailed'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleWhishCharge = async () => {
+    const amount = parseFloat(chargeAmount);
+    if (!validateAmount(amount)) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+
+      const token = getAccessToken();
+      if (!token) {
+        setError(t('auth.loginRequired'));
+        return;
+      }
+
+      const response = await fetch('/api/whish/recharge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ amount }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess('🚀 ' + t('wallet.rechargeSuccess') + ' via Whish.money');
+        setChargeAmount('');
+        setSelectedAmount(null);
+        setSelectedPaymentMethod(null);
+        // Add a small delay to ensure database consistency
+        setTimeout(() => {
+          onBalanceUpdate(); // Refresh profile data
+        }, 500);
+      } else {
+        setError(data.error?.message || t('wallet.rechargeFailed'));
+      }
+    } catch (err) {
+      setError(t('wallet.rechargeFailed'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box>
+      {/* Header Section */}
+      <Box
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(168,85,247,0.05) 100%)',
+          border: '1px solid rgba(99,102,241,0.1)',
+          mb: 4,
+        }}
+      >
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            fontWeight: 700,
+            background: 'linear-gradient(45deg, #6366f1 0%, #a855f7 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <PaymentIcon sx={{ fontSize: 40, color: '#6366f1' }} />
+          {t('wallet.recharge')} Your Wallet
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem', mt: 2 }}>
+          Choose your preferred payment method to add funds to your wallet instantly and securely.
+        </Typography>
+      </Box>
+
+      {error && (
+        <Alert 
+          severity="error" 
+          sx={{ 
+            mb: 3, 
+            borderRadius: 2,
+            '& .MuiAlert-icon': { fontSize: '1.5rem' }
+          }} 
+          onClose={() => setError(null)}
+        >
+          {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert 
+          severity="success" 
+          sx={{ 
+            mb: 3, 
+            borderRadius: 2,
+            '& .MuiAlert-icon': { fontSize: '1.5rem' }
+          }} 
+          onClose={() => setSuccess(null)}
+        >
+          {success}
+        </Alert>
+      )}
+
+      <Grid container spacing={4}>
+        {/* Current Balance Card */}
+        <Grid item xs={12} lg={4}>
+          <Card 
+            sx={{ 
+              p: 4, 
+              textAlign: 'center', 
+              background: 'linear-gradient(135deg, rgba(34,197,94,0.05) 0%, rgba(16,185,129,0.05) 100%)',
+              border: '1px solid rgba(34,197,94,0.2)',
+              borderRadius: 3,
+              height: 'fit-content',
+            }}
+          >
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #22c55e 0%, #10b981 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 3,
+                boxShadow: '0 8px 32px rgba(34,197,94,0.3)',
+              }}
+            >
+              <WalletIcon sx={{ fontSize: 40, color: 'white' }} />
+            </Box>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              {t('wallet.currentBalance')}
+            </Typography>
+            <Typography variant="h3" color="success.main" sx={{ mb: 2, fontWeight: 700 }}>
+              {formatCurrency(profile.balanceReal)}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              {t('wallet.realBalance')}
+            </Typography>
+            {profile.balanceVirtual > 0 && (
+              <Typography variant="body2" color="secondary.main" sx={{ mt: 2 }}>
+                {t('wallet.virtual')}: {formatCurrency(profile.balanceVirtual)}
+              </Typography>
+            )}
+          </Card>
+        </Grid>
+
+        {/* Payment Methods and Amount Selection */}
+        <Grid item xs={12} lg={8}>
+          <Stack spacing={4}>
+            {/* Payment Method Selection */}
+            <Card sx={{ p: 4, borderRadius: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                💳 Choose Payment Method
+              </Typography>
+              <Grid container spacing={3}>
+                {/* Binance Option */}
+                <Grid item xs={12} md={6}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      p: 3,
+                      cursor: 'pointer',
+                      borderRadius: 3,
+                      transition: 'all 0.3s ease',
+                      border: selectedPaymentMethod === 'binance' ? '2px solid #F0B90B' : '1px solid rgba(0,0,0,0.1)',
+                      background: selectedPaymentMethod === 'binance' 
+                        ? 'linear-gradient(135deg, rgba(240,185,11,0.05) 0%, rgba(240,185,11,0.1) 100%)'
+                        : 'transparent',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 12px 40px rgba(240,185,11,0.2)',
+                        borderColor: '#F0B90B',
+                      },
+                    }}
+                    onClick={() => setSelectedPaymentMethod('binance')}
+                  >
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <BinanceLogo sx={{ fontSize: 32, mr: 2 }} />
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        Binance Pay
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Fast and secure crypto payments with low fees
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <SecurityIcon sx={{ fontSize: 16, color: '#F0B90B' }} />
+                      <Typography variant="caption" color="#F0B90B" fontWeight={600}>
+                        Instant Processing • 0.1% Fee
+                      </Typography>
+                    </Box>
+                  </Card>
+                </Grid>
+
+                {/* Whish.money Option */}
+                <Grid item xs={12} md={6}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      p: 3,
+                      cursor: 'pointer',
+                      borderRadius: 3,
+                      transition: 'all 0.3s ease',
+                      border: selectedPaymentMethod === 'whish' ? '2px solid #6366f1' : '1px solid rgba(0,0,0,0.1)',
+                      background: selectedPaymentMethod === 'whish' 
+                        ? 'linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(139,92,246,0.05) 100%)'
+                        : 'transparent',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 12px 40px rgba(99,102,241,0.2)',
+                        borderColor: '#6366f1',
+                      },
+                    }}
+                    onClick={() => setSelectedPaymentMethod('whish')}
+                  >
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <WhishLogo sx={{ fontSize: 32, mr: 2 }} />
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        Whish.money
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Modern payment solution with instant transfers
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <SecurityIcon sx={{ fontSize: 16, color: '#6366f1' }} />
+                      <Typography variant="caption" color="#6366f1" fontWeight={600}>
+                        Instant Processing • 2.5% Fee
+                      </Typography>
+                    </Box>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Card>
+
+            {/* Amount Selection */}
+            {selectedPaymentMethod && (
+              <Card sx={{ p: 4, borderRadius: 3 }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                  💰 Select Amount
+                </Typography>
+                
+                {/* Predefined Amounts */}
+                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                  Quick Select
+                </Typography>
+                <Grid container spacing={2} sx={{ mb: 4 }}>
+                  {predefinedAmounts.map((amount) => (
+                    <Grid item xs={6} sm={4} md={2} key={amount}>
+                      <Button
+                        variant={selectedAmount === amount ? 'contained' : 'outlined'}
+                        fullWidth
+                        onClick={() => handleAmountSelect(amount)}
+                        sx={{
+                          py: 2,
+                          fontSize: '1.1rem',
+                          fontWeight: 600,
+                          borderRadius: 2,
+                          background: selectedAmount === amount 
+                            ? (selectedPaymentMethod === 'binance' 
+                                ? 'linear-gradient(45deg, #F0B90B 0%, #F0B90B 100%)'
+                                : 'linear-gradient(45deg, #6366f1 0%, #8b5cf6 100%)')
+                            : 'transparent',
+                          borderColor: selectedPaymentMethod === 'binance' ? '#F0B90B' : '#6366f1',
+                          color: selectedAmount === amount ? 'white' : (selectedPaymentMethod === 'binance' ? '#F0B90B' : '#6366f1'),
+                          '&:hover': {
+                            background: selectedPaymentMethod === 'binance' 
+                              ? 'rgba(240,185,11,0.1)'
+                              : 'rgba(99,102,241,0.1)',
+                          },
+                        }}
+                      >
+                        ${amount}
+                      </Button>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {/* Custom Amount */}
+                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                  Custom Amount
+                </Typography>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Enter amount in USD"
+                  value={chargeAmount}
+                  onChange={handleCustomAmountChange}
+                  sx={{ 
+                    mb: 4,
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: selectedPaymentMethod === 'binance' ? '#F0B90B' : '#6366f1',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: selectedPaymentMethod === 'binance' ? '#F0B90B' : '#6366f1',
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: <Typography sx={{ mr: 1, fontWeight: 600 }}>$</Typography>,
+                  }}
+                />
+
+                {/* Charge Button */}
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  onClick={selectedPaymentMethod === 'binance' ? handleBinanceCharge : handleWhishCharge}
+                  disabled={loading || !chargeAmount || parseFloat(chargeAmount) <= 0}
+                  sx={{
+                    py: 2,
+                    fontSize: '1.2rem',
+                    fontWeight: 700,
+                    borderRadius: 3,
+                    background: selectedPaymentMethod === 'binance'
+                      ? 'linear-gradient(45deg, #F0B90B 0%, #F0B90B 100%)'
+                      : 'linear-gradient(45deg, #6366f1 0%, #8b5cf6 100%)',
+                    '&:hover': {
+                      background: selectedPaymentMethod === 'binance'
+                        ? 'linear-gradient(45deg, #D19F0A 0%, #D19F0A 100%)'
+                        : 'linear-gradient(45deg, #5856eb 0%, #7c3aed 100%)',
+                    },
+                    boxShadow: selectedPaymentMethod === 'binance'
+                      ? '0 8px 32px rgba(240,185,11,0.3)'
+                      : '0 8px 32px rgba(99,102,241,0.3)',
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <CircularProgress size={24} sx={{ mr: 2, color: 'white' }} />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      {selectedPaymentMethod === 'binance' ? (
+                        <BinanceLogo sx={{ fontSize: 24, mr: 2 }} />
+                      ) : (
+                        <WhishLogo sx={{ fontSize: 24, mr: 2 }} />
+                      )}
+                      Charge ${chargeAmount || '0'} via {selectedPaymentMethod === 'binance' ? 'Binance' : 'Whish.money'}
+                    </>
+                  )}
+                </Button>
+
+                {/* Info */}
+                <Box 
+                  sx={{ 
+                    mt: 3, 
+                    p: 3, 
+                    borderRadius: 2, 
+                    background: 'rgba(0,0,0,0.02)',
+                    border: '1px solid rgba(0,0,0,0.05)',
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <SecurityIcon sx={{ fontSize: 16 }} />
+                    All transactions are secured with enterprise-grade encryption
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    • Processing fee: {selectedPaymentMethod === 'binance' ? '0.1%' : '2.5%'}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    • Minimum: $1 • Maximum: $10,000 per transaction
+                  </Typography>
+                </Box>
+              </Card>
+            )}
+          </Stack>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+}
+
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const { preferences, updatePreferences } = useNotifications();
+  const { t } = useLocale();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -153,36 +631,45 @@ export default function ProfilePage() {
       setLoading(true);
       const token = getAccessToken();
       if (!token) {
-        setError('Please log in to view your profile');
+        setError(t('auth.loginRequired'));
         return;
       }
       
       const response = await fetch('/api/users/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache',
         },
+        cache: 'no-store',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch profile');
+        throw new Error(t('profile.fetchError'));
       }
 
       const data = await response.json();
       if (data.success) {
-        setProfile(data.data.profile);
+        // Ensure balance values are properly converted to numbers
+        const profileData = {
+          ...data.data.profile,
+          balanceReal: Number(data.data.profile.balanceReal || 0),
+          balanceVirtual: Number(data.data.profile.balanceVirtual || 0),
+          virtualMultiplier: Number(data.data.profile.virtualMultiplier || 1),
+        };
+        setProfile(profileData);
         setFormData({
-          firstName: data.data.profile.firstName || '',
-          lastName: data.data.profile.lastName || '',
-          phone: data.data.profile.phone || '',
-          isAnonymousDisplay: data.data.profile.isAnonymousDisplay || false,
-          avatarUrl: data.data.profile.avatarUrl || '',
+          firstName: profileData.firstName || '',
+          lastName: profileData.lastName || '',
+          phone: profileData.phone || '',
+          isAnonymousDisplay: profileData.isAnonymousDisplay || false,
+          avatarUrl: profileData.avatarUrl || '',
         });
-        setProfileImageUrl(data.data.profile.avatarUrl || null);
+        setProfileImageUrl(profileData.avatarUrl || null);
       } else {
-        setError(data.error?.message || 'Failed to load profile');
+        setError(data.error?.message || t('profile.loadError'));
       }
     } catch (err) {
-      setError('Failed to load profile');
+      setError(t('profile.loadError'));
     } finally {
       setLoading(false);
     }
@@ -196,7 +683,7 @@ export default function ProfilePage() {
 
       const token = getAccessToken();
       if (!token) {
-        setError('Please log in to save your profile');
+        setError(t('auth.loginRequired'));
         return;
       }
 
@@ -213,13 +700,13 @@ export default function ProfilePage() {
 
       if (data.success) {
         setProfile({ ...profile!, ...data.data.profile });
-        setSuccess('Profile updated successfully');
+        setSuccess(t('profile.updateSuccess'));
         setEditing(false);
       } else {
-        setError(data.error?.message || 'Failed to update profile');
+        setError(data.error?.message || t('profile.updateError'));
       }
     } catch (err) {
-      setError('Failed to update profile');
+      setError(t('profile.updateError'));
     } finally {
       setSaving(false);
     }
@@ -246,10 +733,10 @@ export default function ProfilePage() {
       setSavingNotifications(true);
       setError(null);
       await updatePreferences({ [key]: value });
-      setSuccess('Notification preferences updated successfully');
+      setSuccess(t('profile.notificationUpdateSuccess'));
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError('Failed to update notification preferences');
+      setError(t('profile.notificationUpdateError'));
     } finally {
       setSavingNotifications(false);
     }
@@ -267,12 +754,12 @@ export default function ProfilePage() {
       audio.onended = () => setPlayingSound(false);
       audio.onerror = () => {
         setPlayingSound(false);
-        setError('Could not play notification sound');
+        setError(t('profile.soundError'));
         setTimeout(() => setError(null), 3000);
       };
     } catch (err) {
       setPlayingSound(false);
-      setError('Could not play notification sound');
+      setError(t('profile.soundError'));
       setTimeout(() => setError(null), 3000);
     }
   };
@@ -296,13 +783,13 @@ export default function ProfilePage() {
   const getKycStatusText = (status: string) => {
     switch (status) {
       case 'NOT_STARTED':
-        return 'Not Started';
+        return t('kyc.notStarted');
       case 'PENDING':
-        return 'Under Review';
+        return t('kyc.underReview');
       case 'APPROVED':
-        return 'Verified';
+        return t('kyc.verified');
       case 'REJECTED':
-        return 'Rejected';
+        return t('kyc.rejected');
       default:
         return status;
     }
@@ -322,7 +809,7 @@ export default function ProfilePage() {
     return (
       <Layout>
         <Box p={3}>
-          <Alert severity="error">Failed to load profile</Alert>
+          <Alert severity="error">{t('profile.loadError')}</Alert>
         </Box>
       </Layout>
     );
@@ -332,7 +819,7 @@ export default function ProfilePage() {
     <Layout>
       <Box p={3} maxWidth="1200px" mx="auto">
       <Typography variant="h4" gutterBottom>
-        Profile
+        {t('navigation.profile')}
       </Typography>
 
       {error && (
@@ -384,23 +871,23 @@ export default function ProfilePage() {
             />
             
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Member since {formatDate(profile.createdAt)}
+              {t('profile.memberSince')} {formatDate(profile.createdAt)}
             </Typography>
 
             <Stack spacing={1} mt={2}>
               <Chip 
-                label={`KYC: ${getKycStatusText(profile.kycStatus)}`}
+                label={`${t('profile.kyc')}: ${getKycStatusText(profile.kycStatus)}`}
                 color={getStatusColor(profile.kycStatus)}
                 size="small"
               />
               <Chip 
-                label={profile.emailVerified ? 'Email Verified' : 'Email Not Verified'}
+                label={profile.emailVerified ? t('profile.emailVerified') : t('profile.emailNotVerified')}
                 color={profile.emailVerified ? 'success' : 'warning'}
                 size="small"
               />
               {profile.phone && (
                 <Chip 
-                  label={profile.phoneVerified ? 'Phone Verified' : 'Phone Not Verified'}
+                  label={profile.phoneVerified ? t('profile.phoneVerified') : t('profile.phoneNotVerified')}
                   color={profile.phoneVerified ? 'success' : 'warning'}
                   size="small"
                 />
@@ -415,20 +902,20 @@ export default function ProfilePage() {
                 sx={{ mt: 2 }}
                 fullWidth
               >
-                Edit Profile
+                {t('profile.editProfile')}
               </Button>
             )}
           </Paper>
 
           <Paper sx={{ p: 3, mt: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Balance
+              {t('wallet.balance')}
             </Typography>
             <Stack spacing={2}>
               <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Box display="flex" alignItems="center">
                   <WalletIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="body2">Real Balance</Typography>
+                  <Typography variant="body2">{t('wallet.realBalance')}</Typography>
                 </Box>
                 <Typography variant="h6" color="primary.main">
                   {formatCurrency(profile.balanceReal)}
@@ -437,21 +924,21 @@ export default function ProfilePage() {
               <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Box display="flex" alignItems="center">
                   <TrendingUpIcon sx={{ mr: 1, color: 'secondary.main' }} />
-                  <Typography variant="body2">Virtual Balance</Typography>
+                  <Typography variant="body2">{t('wallet.virtualBalance')}</Typography>
                 </Box>
                 <Typography variant="h6" color="secondary.main">
                   {formatCurrency(profile.balanceVirtual)}
                 </Typography>
               </Box>
               <Typography variant="caption" color="text.secondary">
-                Virtual multiplier: {profile.virtualMultiplier}x
+                {t('wallet.virtualMultiplier')}: {profile.virtualMultiplier}x
               </Typography>
             </Stack>
           </Paper>
 
           <Paper sx={{ p: 3, mt: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Statistics
+              {t('profile.statistics')}
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={6}>
@@ -459,7 +946,7 @@ export default function ProfilePage() {
                   <Typography variant="h4" color="primary.main">
                     {profile.stats.activeBids}
                   </Typography>
-                  <Typography variant="caption">Active Bids</Typography>
+                  <Typography variant="caption">{t('profile.activeBids')}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
@@ -467,7 +954,7 @@ export default function ProfilePage() {
                   <Typography variant="h4" color="success.main">
                     {profile.stats.auctionsWon}
                   </Typography>
-                  <Typography variant="caption">Won Auctions</Typography>
+                  <Typography variant="caption">{t('profile.wonAuctions')}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
@@ -475,7 +962,7 @@ export default function ProfilePage() {
                   <Typography variant="h4" color="warning.main">
                     {profile.stats.watchedAuctions}
                   </Typography>
-                  <Typography variant="caption">Watched</Typography>
+                  <Typography variant="caption">{t('profile.watched')}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
@@ -483,7 +970,7 @@ export default function ProfilePage() {
                   <Typography variant="h4" color="text.primary">
                     {formatCurrency(profile.stats.totalSpent)}
                   </Typography>
-                  <Typography variant="caption">Total Spent</Typography>
+                  <Typography variant="caption">{t('profile.totalSpent')}</Typography>
                 </Box>
               </Grid>
             </Grid>
@@ -495,13 +982,13 @@ export default function ProfilePage() {
             {editing ? (
               <Box>
                 <Typography variant="h6" gutterBottom>
-                  Edit Profile
+                  {t('profile.editProfile')}
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="First Name"
+                      label={t('auth.firstName')}
                       value={formData.firstName}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                     />
@@ -509,7 +996,7 @@ export default function ProfilePage() {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Last Name"
+                      label={t('auth.lastName')}
                       value={formData.lastName}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                     />
@@ -517,7 +1004,7 @@ export default function ProfilePage() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Phone Number"
+                      label={t('auth.phoneNumber')}
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     />
@@ -530,7 +1017,7 @@ export default function ProfilePage() {
                           onChange={(e) => setFormData({ ...formData, isAnonymousDisplay: e.target.checked })}
                         />
                       }
-                      label="Display anonymously in auctions"
+                      label={t('profile.displayAnonymously')}
                     />
                   </Grid>
                 </Grid>
@@ -542,7 +1029,7 @@ export default function ProfilePage() {
                     onClick={handleSaveProfile}
                     disabled={saving}
                   >
-                    {saving ? 'Saving...' : 'Save Changes'}
+                    {saving ? t('common.saving') : t('common.saveChanges')}
                   </Button>
                   <Button 
                     variant="outlined" 
@@ -550,48 +1037,49 @@ export default function ProfilePage() {
                     onClick={handleCancelEdit}
                     disabled={saving}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                 </Box>
               </Box>
             ) : (
               <Box>
                 <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
-                  <Tab label="Profile Details" />
-                  <Tab label="Recent Transactions" />
-                  <Tab label="Bid History" />
-                  <Tab label="Notifications" />
-                  {profile.agent && <Tab label="Agent Profile" />}
+                  <Tab label={t('profile.profileDetails')} />
+                  <Tab label={t('profile.recentTransactions')} />
+                  <Tab label={t('profile.bidHistory')} />
+                  <Tab label={t('profile.charge')} />
+                  <Tab label={t('profile.notifications')} />
+                  {profile.agent && <Tab label={t('profile.agentProfile')} />}
                 </Tabs>
 
                 {tabValue === 0 && (
                   <Box>
                     <Typography variant="h6" gutterBottom>
-                      Profile Information
+                      {t('profile.profileInformation')}
                     </Typography>
                     <List>
                       <ListItem>
                         <ListItemIcon><EmailIcon /></ListItemIcon>
-                        <ListItemText primary="Email" secondary={profile.email} />
+                        <ListItemText primary={t('common.email')} secondary={profile.email} />
                       </ListItem>
                       <ListItem>
                         <ListItemIcon><PersonIcon /></ListItemIcon>
                         <ListItemText 
-                          primary="Full Name" 
+                          primary={t('profile.fullName')} 
                           secondary={`${profile.firstName} ${profile.lastName}`} 
                         />
                       </ListItem>
                       {profile.phone && (
                         <ListItem>
                           <ListItemIcon><PhoneIcon /></ListItemIcon>
-                          <ListItemText primary="Phone" secondary={profile.phone} />
+                          <ListItemText primary={t('common.phone')} secondary={profile.phone} />
                         </ListItem>
                       )}
                       <ListItem>
                         <ListItemIcon><HistoryIcon /></ListItemIcon>
                         <ListItemText 
-                          primary="Last Login" 
-                          secondary={profile.lastLoginAt ? formatDate(profile.lastLoginAt) : 'Never'} 
+                          primary={t('profile.lastLogin')} 
+                          secondary={profile.lastLoginAt ? formatDate(profile.lastLoginAt) : t('profile.never')} 
                         />
                       </ListItem>
                     </List>
@@ -601,7 +1089,7 @@ export default function ProfilePage() {
                 {tabValue === 1 && (
                   <Box>
                     <Typography variant="h6" gutterBottom>
-                      Recent Transactions
+                      {t('profile.recentTransactions')}
                     </Typography>
                     {profile.transactions.length > 0 ? (
                       <List>
@@ -618,7 +1106,7 @@ export default function ProfilePage() {
                                       {formatCurrency(transaction.amountReal)}
                                     </Typography>
                                     <Typography variant="body2" color="secondary.main">
-                                      Virtual: {formatCurrency(transaction.amountVirtual)}
+                                      {t('wallet.virtual')}: {formatCurrency(transaction.amountVirtual)}
                                     </Typography>
                                   </Box>
                                 </Box>
@@ -640,7 +1128,7 @@ export default function ProfilePage() {
                         ))}
                       </List>
                     ) : (
-                      <Typography color="text.secondary">No transactions found</Typography>
+                      <Typography color="text.secondary">{t('profile.noTransactions')}</Typography>
                     )}
                   </Box>
                 )}
@@ -648,7 +1136,7 @@ export default function ProfilePage() {
                 {tabValue === 2 && (
                   <Box>
                     <Typography variant="h6" gutterBottom>
-                      Recent Bids
+                      {t('profile.recentBids')}
                     </Typography>
                     {profile.bids.length > 0 ? (
                       <List>
@@ -659,7 +1147,7 @@ export default function ProfilePage() {
                               primary={
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
                                   <Typography variant="body1">
-                                    {bid.auction.title}
+                                    {bid.product.title}
                                   </Typography>
                                   <Typography variant="h6" color="primary.main">
                                     {formatCurrency(bid.amount)}
@@ -669,7 +1157,7 @@ export default function ProfilePage() {
                               secondary={
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
                                   <Typography variant="caption">
-                                    Bid placed: {formatDate(bid.createdAt)}
+                                    {t('profile.bidPlaced')}: {formatDate(bid.createdAt)}
                                   </Typography>
                                   <Box display="flex" gap={1}>
                                     <Chip
@@ -678,8 +1166,8 @@ export default function ProfilePage() {
                                       size="small"
                                     />
                                     <Chip
-                                      label={bid.auction.status}
-                                      color={getStatusColor(bid.auction.status)}
+                                      label={bid.product.auctionStatus}
+                                      color={getStatusColor(bid.product.auctionStatus)}
                                       size="small"
                                     />
                                   </Box>
@@ -690,12 +1178,16 @@ export default function ProfilePage() {
                         ))}
                       </List>
                     ) : (
-                      <Typography color="text.secondary">No bids found</Typography>
+                      <Typography color="text.secondary">{t('profile.noBids')}</Typography>
                     )}
                   </Box>
                 )}
 
                 {tabValue === 3 && (
+                  <ChargeTab profile={profile} onBalanceUpdate={fetchProfile} />
+                )}
+
+                {tabValue === 4 && (
                   <Box>
                     <Box 
                       sx={{ 
@@ -1057,10 +1549,10 @@ export default function ProfilePage() {
                   </Box>
                 )}
 
-                {profile.agent && tabValue === 4 && (
+                {profile.agent && tabValue === 5 && (
                   <Box>
                     <Typography variant="h6" gutterBottom>
-                      Agent Profile
+                      {t('profile.agentProfile')}
                     </Typography>
                     <Card>
                       <CardContent>
@@ -1068,7 +1560,7 @@ export default function ProfilePage() {
                           {profile.agent.businessName}
                         </Typography>
                         <Typography variant="body1" paragraph>
-                          {profile.agent.bio || 'No bio provided'}
+                          {profile.agent.bio || t('profile.noBio')}
                         </Typography>
                         <Grid container spacing={2} mt={2}>
                           <Grid item xs={6} sm={3}>
@@ -1076,7 +1568,7 @@ export default function ProfilePage() {
                               <Typography variant="h4" color="primary.main">
                                 {profile.agent.rating?.toFixed(1) || 'N/A'}
                               </Typography>
-                              <Typography variant="caption">Rating</Typography>
+                              <Typography variant="caption">{t('profile.rating')}</Typography>
                             </Box>
                           </Grid>
                           <Grid item xs={6} sm={3}>
@@ -1084,7 +1576,7 @@ export default function ProfilePage() {
                               <Typography variant="h4" color="success.main">
                                 {profile.agent.reviewCount}
                               </Typography>
-                              <Typography variant="caption">Reviews</Typography>
+                              <Typography variant="caption">{t('auction.reviews')}</Typography>
                             </Box>
                           </Grid>
                           <Grid item xs={6} sm={3}>
@@ -1092,7 +1584,7 @@ export default function ProfilePage() {
                               <Typography variant="h4" color="info.main">
                                 {profile.agent.totalAuctions}
                               </Typography>
-                              <Typography variant="caption">Total Auctions</Typography>
+                              <Typography variant="caption">{t('auction.totalAuctions')}</Typography>
                             </Box>
                           </Grid>
                           <Grid item xs={6} sm={3}>
@@ -1100,7 +1592,7 @@ export default function ProfilePage() {
                               <Typography variant="h4" color="warning.main">
                                 {formatCurrency(profile.agent.totalSales)}
                               </Typography>
-                              <Typography variant="caption">Total Sales</Typography>
+                              <Typography variant="caption">{t('auction.totalSales')}</Typography>
                             </Box>
                           </Grid>
                         </Grid>

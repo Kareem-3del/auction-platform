@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { refreshTokens } from '@/lib/auth';
+import { refreshTokens } from 'src/lib/auth';
 import { 
   ErrorCodes, 
   errorResponse, 
@@ -9,7 +9,7 @@ import {
   validateMethod,
   successResponse,
   validateContentType
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // Validation schema
 const refreshSchema = z.object({

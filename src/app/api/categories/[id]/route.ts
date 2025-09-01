@@ -1,14 +1,14 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/middleware/auth';
+import { prisma } from 'src/lib/prisma';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse, 
   validateContentType 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 import { slugify } from 'src/lib/utils';
 

@@ -12,6 +12,13 @@ const axiosInstance = axios.create({ baseURL: CONFIG.serverUrl });
 const getAuthToken = () => {
   if (typeof localStorage !== 'undefined') {
     try {
+      // Try the direct accessToken storage first (current system)
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        return accessToken;
+      }
+      
+      // Fallback to auth_tokens format for compatibility
       const authTokens = localStorage.getItem('auth_tokens');
       if (authTokens) {
         const parsedTokens = JSON.parse(authTokens);

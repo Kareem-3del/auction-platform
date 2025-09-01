@@ -22,7 +22,7 @@ export function SignOutButton({ onClose, sx, ...other }: Props) {
     try {
       logout();
       onClose?.();
-      router.push('/login');
+      router.push('/auth/login');
     } catch (error) {
       console.error(error);
     }

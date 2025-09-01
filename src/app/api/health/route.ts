@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 
-import { checkDatabaseHealth } from '@/lib/prisma';
-import { handleAPIError, successResponse } from '@/lib/api-response';
+import { checkDatabaseHealth } from 'src/lib/prisma';
+import { handleAPIError, successResponse } from 'src/lib/api-response';
 
 export async function GET(request: NextRequest) {
   try {

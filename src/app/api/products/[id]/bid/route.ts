@@ -1,13 +1,16 @@
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/middleware/auth';
+import { prisma } from 'src/lib/prisma';
+import { withAuth } from 'src/lib/middleware/auth';
+import { NotificationService } from 'src/lib/notification-service';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse, 
-  validateContentType 
-} from '@/lib/api-response';
+  validateContentType,
+  errorResponse,
+  ErrorCodes
+} from 'src/lib/api-response';
 
 // Validation schema for placing bids
 const placeBidSchema = z.object({
@@ -50,26 +53,17 @@ export const POST = withAuth(async (request, { params }: RouteParams) => {
     });
 
     if (!product) {
-      return handleAPIError({
-        name: 'ProductNotFoundError',
-        message: 'Product not found',
-      });
+      return errorResponse(ErrorCodes.PRODUCT_NOT_FOUND, 'Product not found', 404);
     }
 
     // Check if auction is active
     if (product.auctionStatus !== 'LIVE') {
-      return handleAPIError({
-        name: 'AuctionNotActiveError',
-        message: 'This auction is not currently active',
-      });
+      return errorResponse(ErrorCodes.AUCTION_NOT_LIVE, 'This auction is not currently active', 400);
     }
 
     // Check if auction has ended
     if (product.endTime && new Date(product.endTime) < new Date()) {
-      return handleAPIError({
-        name: 'AuctionEndedError',
-        message: 'This auction has already ended',
-      });
+      return errorResponse(ErrorCodes.AUCTION_ENDED, 'This auction has already ended', 400);
     }
 
     // Calculate minimum bid (convert Decimal to number for arithmetic)
@@ -80,13 +74,10 @@ export const POST = withAuth(async (request, { params }: RouteParams) => {
 
     // Validate bid amount
     if (validatedData.amount < minimumBid) {
-      return handleAPIError({
-        name: 'InvalidBidAmountError',
-        message: `Minimum bid amount is $${minimumBid.toFixed(2)}`,
-      });
+      return errorResponse(ErrorCodes.BID_TOO_LOW, `Minimum bid amount is $${minimumBid.toFixed(2)}`, 400);
     }
 
-    // Check user's virtual balance
+    // Check user's virtual balance and account for their existing bid if they are the current highest bidder
     const user = await prisma.user.findUnique({
       where: { id: request.user.id },
       select: {
@@ -98,47 +89,117 @@ export const POST = withAuth(async (request, { params }: RouteParams) => {
     });
 
     if (!user) {
-      return handleAPIError({
-        name: 'UserNotFoundError',
-        message: 'User not found',
-      });
+      return errorResponse(ErrorCodes.USER_NOT_FOUND, 'User not found', 404);
     }
 
     const userVirtualBalance = user.balanceVirtual.toNumber();
+    let requiredBalance = validatedData.amount;
     
-    // Check if user has enough virtual balance
-    if (userVirtualBalance < validatedData.amount) {
-      return handleAPIError({
-        name: 'InsufficientBalanceError',
-        message: `Insufficient virtual balance. Required: $${validatedData.amount.toFixed(2)}, Available: $${userVirtualBalance.toFixed(2)}`,
-      });
+    // If the user is already the highest bidder, they only need to pay the difference
+    if (product.highestBidderId === request.user.id && product.currentBid) {
+      const currentBidAmount = product.currentBid.toNumber();
+      requiredBalance = validatedData.amount - currentBidAmount;
+    }
+    
+    // Check if user has enough virtual balance for the required amount
+    if (userVirtualBalance < requiredBalance) {
+      return errorResponse(
+        ErrorCodes.INSUFFICIENT_BALANCE, 
+        `Insufficient virtual balance. Required: $${requiredBalance.toFixed(2)}, Available: $${userVirtualBalance.toFixed(2)}`, 
+        400
+      );
     }
 
-    // Prevent self-outbidding (user can't outbid themselves)
-    if (product.highestBidderId === request.user.id) {
-      return handleAPIError({
-        name: 'SelfOutbidError',
-        message: 'You are already the highest bidder',
-      });
-    }
+    // Allow users to increase their own bids (self-outbidding allowed)
 
-    // Create the bid
-    const bid = await prisma.bid.create({
-      data: {
-        amount: validatedData.amount,
-        userId: request.user.id,
-        productId: id,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+    // Create the bid and deduct balance in a transaction
+    const bid = await prisma.$transaction(async (tx) => {
+      let actualDeductionAmount = validatedData.amount;
+      
+      // If there's a previous highest bidder who isn't the current user, refund their bid
+      if (product.highestBidderId && product.highestBidderId !== request.user.id && product.currentBid) {
+        const previousBidAmount = product.currentBid.toNumber();
+        
+        // Refund the previous highest bidder
+        await tx.user.update({
+          where: { id: product.highestBidderId },
+          data: {
+            balanceVirtual: {
+              increment: previousBidAmount,
+            },
+          },
+        });
+
+        // Create refund transaction record
+        await tx.transaction.create({
+          data: {
+            userId: product.highestBidderId,
+            transactionType: 'REFUND',
+            amountReal: 0,
+            amountVirtual: previousBidAmount,
+            currency: 'USD',
+            description: `Bid refund for ${product.title} - $${previousBidAmount} (outbid)`,
+            externalReference: `REFUND_${id}_${Date.now()}`,
+            status: 'COMPLETED',
+          },
+        });
+      } else if (product.highestBidderId === request.user.id && product.currentBid) {
+        // User is increasing their own bid, only deduct the difference
+        const currentBidAmount = product.currentBid.toNumber();
+        actualDeductionAmount = validatedData.amount - currentBidAmount;
+      }
+
+      // Create the bid
+      const newBid = await tx.bid.create({
+        data: {
+          amount: validatedData.amount,
+          userId: request.user.id,
+          productId: id,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
           },
         },
-      },
+      });
+
+      // Deduct the required amount from user's virtual balance
+      if (actualDeductionAmount > 0) {
+        await tx.user.update({
+          where: { id: request.user.id },
+          data: {
+            balanceVirtual: {
+              decrement: actualDeductionAmount,
+            },
+          },
+        });
+
+        // Create transaction record for the bid deduction
+        await tx.transaction.create({
+          data: {
+            userId: request.user.id,
+            transactionType: 'BID_PLACEMENT',
+            amountReal: 0,
+            amountVirtual: actualDeductionAmount,
+            currency: 'USD',
+            description: `Bid placed on ${product.title} - $${validatedData.amount} (deducted: $${actualDeductionAmount})`,
+            externalReference: `BID_${newBid.id}`,
+            status: 'COMPLETED',
+          },
+        });
+      }
+
+      return newBid;
+    });
+
+    // Send notification about the bid (async - don't fail if this fails)
+    NotificationService.sendBidPlacedNotification(bid.id).catch(error => {
+      console.error('❌ Failed to send bid notification:', error);
     });
 
     // Update product with new bid information
@@ -170,35 +231,53 @@ export const POST = withAuth(async (request, { params }: RouteParams) => {
       },
     });
 
-    // Broadcast real-time bid update to all connected clients
-    try {
-      // Initialize WebSocket server if not already initialized
-      await import('@/lib/websocket/server-init');
-      const { getBiddingServer } = await import('@/lib/websocket/bidding-server');
-      const biddingServer = getBiddingServer();
-      
-      const bidderName = validatedData.customName || `${user.firstName} ${user.lastName}`;
+    // Broadcast real-time bid update to all connected clients via WebSocket server
+    setImmediate(async () => {
+      try {
+        const bidderName = validatedData.customName || `${user.firstName} ${user.lastName}`;
+        
+        const bidUpdate = {
+          type: 'bid_update',
+          productId: id,
+          bid: {
+            id: bid.id,
+            amount: bid.amount.toNumber(),
+            bidTime: bid.createdAt.toISOString(),
+            userId: bid.userId,
+            bidderName: validatedData.isAnonymous ? 'Anonymous Bidder' : bidderName,
+          },
+          currentBid: validatedData.amount,
+          bidCount: (product.bidCount || 0) + 1,
+          message: `New bid: $${validatedData.amount.toFixed(2)} by ${validatedData.isAnonymous ? 'Anonymous Bidder' : bidderName}`,
+        };
 
-      biddingServer.broadcastBidUpdate(id, {
-        type: 'bid_update',
-        productId: id,
-        bid: {
-          id: bid.id,
-          amount: bid.amount.toNumber(),
-          bidTime: bid.createdAt.toISOString(),
-          userId: bid.userId,
-          bidderName,
-        },
-        currentBid: validatedData.amount,
-        bidCount: (product.bidCount || 0) + 1,
-        message: `New bid placed: $${validatedData.amount.toFixed(2)} by ${bidderName}`,
-      });
+        // Make HTTP request to WebSocket server's internal broadcast endpoint
+        const wsServerUrl = process.env.WS_SERVER_URL || 'http://localhost:8081';
+        
+        const response = await fetch(`${wsServerUrl}/broadcast`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'bid_update',
+            data: bidUpdate
+          }),
+        }).catch(error => {
+          console.error('❌ HTTP broadcast request failed:', error);
+          return null;
+        });
 
-      console.log(`📡 Broadcast bid update for product ${id}: $${validatedData.amount} by ${bidderName}`);
-    } catch (error) {
-      console.error('❌ Failed to broadcast bid update:', error);
-      // Don't fail the bid if WebSocket fails
-    }
+        if (response && response.ok) {
+          console.log(`📡 Broadcast bid update for product ${id}: $${validatedData.amount} by ${bidderName}`);
+        } else {
+          console.warn('⚠️ Failed to broadcast bid update via HTTP');
+        }
+      } catch (error) {
+        console.error('❌ Failed to broadcast bid update:', error);
+        // Don't fail the bid if WebSocket broadcast fails - this runs async
+      }
+    });
 
     return successResponse({
       bid: {

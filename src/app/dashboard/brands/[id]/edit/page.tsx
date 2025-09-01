@@ -64,14 +64,14 @@ export default function EditBrandPage() {
         const data = await apiClient.get(`/api/brands/${brandId}`);
 
         if (data.success) {
-          const b = data.data || data;
+          const b = data.data.brand || data.data || data;
           setBrand(b);
           setLogoUrl(b.logoUrl || '');
           
           setFormData({
             name: b.name || '',
             description: b.description || '',
-            website: b.website || '',
+            website: b.websiteUrl || '',
             isActive: b.isActive ?? true,
           });
         }
@@ -142,7 +142,10 @@ export default function EditBrandPage() {
 
     try {
       const data = await apiClient.put(`/api/brands/${brandId}`, {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        websiteUrl: formData.website,
+        isActive: formData.isActive,
         logoUrl,
       });
 

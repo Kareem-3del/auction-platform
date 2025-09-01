@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 
-import { handleAPIError } from '@/lib/api-response';
+import { handleAPIError } from 'src/lib/api-response';
 
 // Deprecated: Auction functionality has been unified into Products
 export async function GET(request: NextRequest) {

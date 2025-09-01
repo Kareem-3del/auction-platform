@@ -21,6 +21,9 @@ import {
 } from '@mui/icons-material';
 
 import { FeaturedCard } from 'src/components/product-card/featured-card';
+import { useLocale } from 'src/hooks/useLocale';
+import { productsAPI, isSuccessResponse } from 'src/lib/api-client';
+import type { ProductCard } from 'src/types/common';
 
 interface Product {
   id: string;
@@ -54,7 +57,8 @@ export const TrendingSection: FC<TrendingSectionProps> = ({
   section = 'trending',
 }) => {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
+  const { t } = useLocale();
+  const [products, setProducts] = useState<ProductCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,19 +68,14 @@ export const TrendingSection: FC<TrendingSectionProps> = ({
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/products/showcase?section=${section}&limit=${limit}`);
+        const response = await productsAPI.getShowcaseProducts(section, limit);
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (data.success) {
-          const products = data.data?.data?.data || [];
+        if (isSuccessResponse(response)) {
+          const products = response.data.data || [];
+          console.log(`${section} products:`, products, 'isArray:', Array.isArray(products));
           setProducts(Array.isArray(products) ? products : []);
         } else {
-          throw new Error(data.message || 'Failed to fetch products');
+          throw new Error(response.error.message || 'Failed to fetch products');
         }
       } catch (err) {
         console.error(`Error fetching ${section} products:`, err);
@@ -143,18 +142,18 @@ export const TrendingSection: FC<TrendingSectionProps> = ({
 
   const sectionConfig = {
     trending: {
-      title: 'Trending Auctions',
-      subtitle: 'Most Popular Items',
+      title: t('homepage.sections.trendingAuctions'),
+      subtitle: t('homepage.sections.mostPopular'),
       color: '#CE0E2D',
       icon: TrendingIcon,
-      buttonText: 'View All Trending',
+      buttonText: t('homepage.sections.trending'),
     },
     featured: {
-      title: 'Featured Collection',
-      subtitle: 'Editor\'s Choice',
+      title: t('homepage.sections.featuredCollection'),
+      subtitle: t('homepage.sections.editorsChoice'),
       color: '#CE0E2D',
       icon: StarIcon,
-      buttonText: 'View All Featured',
+      buttonText: t('homepage.sections.featuredCollection'),
     },
   };
 

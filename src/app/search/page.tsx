@@ -1,22 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import {
   Star as StarIcon,
   Search as SearchIcon,
-  Gavel as AuctionIcon,
-  Person as PersonIcon,
-  Schedule as ScheduleIcon,
+  FilterList as FilterIcon,
+  GridView as GridViewIcon,
+  ViewList as ListViewIcon,
   LocationOn as LocationIcon,
-  ShoppingCart as ProductIcon,
+  Schedule as ScheduleIcon,
+  Gavel as AuctionIcon,
+  ShoppingBag as ProductIcon,
+  Person as PersonIcon,
+  Category as CategoryIcon,
+  AttachMoney as PriceIcon,
+  Clear as ClearIcon,
+  Sort as SortIcon,
 } from '@mui/icons-material';
+
 import {
   Box,
-  Tab,
   Grid,
-  Tabs,
   Card,
   Chip,
   Paper,
@@ -24,202 +30,124 @@ import {
   Alert,
   Button,
   Avatar,
+  Dialog,
+  Drawer,
+  Select,
+  Slider,
+  Switch,
   Skeleton,
+  MenuItem,
   CardMedia,
   TextField,
   Typography,
   Pagination,
   CardContent,
   Breadcrumbs,
+  IconButton,
+  FormControl,
+  DialogTitle,
+  DialogContent,
   InputAdornment,
+  FormControlLabel,
   Link as MuiLink,
+  Autocomplete,
+  ToggleButton,
+  ToggleButtonGroup,
+  Collapse,
+  Divider,
 } from '@mui/material';
 
+import { useAuth } from 'src/hooks/useAuth';
+import { useLocale } from 'src/hooks/useLocale';
 import { formatCurrency, formatTimeRemaining } from 'src/lib/utils';
+import { searchAPI, isSuccessResponse } from 'src/lib/api-client';
+import HomepageLayout from 'src/components/layout/HomepageLayout';
+import type { 
+  SearchFilters as BaseSearchFilters, 
+  SearchResponse, 
+  ProductCard,
+  SearchSuggestion 
+} from 'src/types/common';
 
-interface SearchResult {
-  type: 'auction' | 'product';
-  id: string;
-  title: string;
-  description: string;
-  images: string[];
-  price: number;
-  location: string;
-  createdAt: string;
-  agent: {
-    displayName: string;
-    logoUrl?: string;
-    rating?: number;
-  };
-  // Auction specific
-  status?: string;
-  endTime?: string;
-  bidCount?: number;
-  // Product specific
-  condition?: string;
-  category?: {
-    name: string;
-  };
+// Extended search filters for UI
+interface SearchFilters extends BaseSearchFilters {
+  priceRange: [number, number];
+  dateRange: string;
+  viewMode: 'grid' | 'list';
 }
+
+const initialFilters: SearchFilters = {
+  category: [],
+  priceRange: [0, 100000],
+  location: [],
+  condition: [],
+  auctionStatus: [],
+  dateRange: 'all',
+  sortBy: 'relevance',
+  sortOrder: 'desc',
+  viewMode: 'grid',
+};
 
 export default function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const query = searchParams.get('q') || '';
+  const { user } = useAuth();
+  const { t } = useLocale();
   
+  const query = searchParams.get('q') || '';
   const [searchQuery, setSearchQuery] = useState(query);
-  const [tabValue, setTabValue] = useState(0);
-  const [results, setResults] = useState<{
-    auctions: SearchResult[];
-    products: SearchResult[];
-    agents: any[];
-  }>({
-    auctions: [],
-    products: [],
-    agents: [],
-  });
+  const [filters, setFilters] = useState<SearchFilters>(initialFilters);
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'auctions' | 'products'>('all');
+  
+  const [results, setResults] = useState<ProductCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({
-    auctions: { page: 1, totalPages: 1, totalCount: 0 },
-    products: { page: 1, totalPages: 1, totalCount: 0 },
-    agents: { page: 1, totalPages: 1, totalCount: 0 },
-  });
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  
+  // Mock data for filters
+  const categories = ['Cars', 'Jewelry', 'Art', 'Electronics', 'Collectibles', 'Real Estate'];
+  const locations = ['Beirut', 'Dubai', 'Riyadh', 'Kuwait City', 'Doha'];
+  const conditions = ['New', 'Like New', 'Good', 'Fair', 'Poor'];
+  const auctionStatuses = ['Live', 'Scheduled', 'Ended'];
 
   useEffect(() => {
     if (query) {
-      performSearch(query);
+      performSearch(query, 1);
     }
-  }, [query]);
+  }, [query, filters, activeTab]);
 
-  const performSearch = async (searchTerm: string, tab?: number) => {
+  const performSearch = async (searchTerm: string, page: number = 1) => {
     if (!searchTerm.trim()) return;
 
     try {
       setLoading(true);
       setError(null);
 
-      const currentTab = tab !== undefined ? tab : tabValue;
-      let endpoint = '';
-      const params = new URLSearchParams({
+      const searchFilters: Partial<BaseSearchFilters> = {
         search: searchTerm,
-        page: '1',
-        limit: '12',
-      });
+        categories: filters.category.length > 0 ? filters.category : undefined,
+        locations: filters.location.length > 0 ? filters.location : undefined,
+        conditions: filters.condition.length > 0 ? filters.condition as any : undefined,
+        minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
+        maxPrice: filters.priceRange[1] < 100000 ? filters.priceRange[1] : undefined,
+        auctionStatuses: filters.auctionStatus.length > 0 ? filters.auctionStatus as any : undefined,
+        sortBy: filters.sortBy as any,
+        sortOrder: filters.sortOrder,
+      };
 
-      // Determine which endpoint to call based on active tab
-      switch (currentTab) {
-        case 0: // All
-          // We'll make parallel requests to both endpoints
-          const [auctionsRes, productsRes] = await Promise.all([
-            fetch(`/api/products?auctionOnly=true&${params.toString()}`),
-            fetch(`/api/products?${params.toString()}`),
-          ]);
+      const response = await searchAPI.searchProducts(searchTerm, searchFilters);
 
-          const [auctionsData, productsData] = await Promise.all([
-            auctionsRes.json(),
-            productsRes.json(),
-          ]);
-
-          if (auctionsData.success && productsData.success) {
-            // Map auction products (with auction status)
-            const auctionResults = auctionsData.data.products.map((item: any) => ({
-              type: 'auction' as const,
-              id: item.id,
-              title: item.title,
-              description: item.description,
-              images: item.images,
-              price: item.currentBid || item.startingBid || item.estimatedValueMin,
-              location: item.location,
-              createdAt: item.createdAt,
-              agent: item.agent,
-              status: item.auctionStatus,
-              endTime: item.endTime,
-              bidCount: item.bidCount || 0,
-            }));
-
-            // Map regular products
-            const productResults = productsData.data.products.map((item: any) => ({
-              type: 'product' as const,
-              id: item.id,
-              title: item.title,
-              description: item.description,
-              images: item.images,
-              price: item.estimatedValueMin,
-              location: item.location,
-              createdAt: item.createdAt,
-              agent: item.agent,
-              condition: item.condition,
-              category: item.category,
-            }));
-
-            setResults({
-              auctions: auctionResults,
-              products: productResults,
-              agents: [],
-            });
-
-            setPagination({
-              auctions: auctionsData.data.pagination,
-              products: productsData.data.pagination,
-              agents: { page: 1, totalPages: 1, totalCount: 0 },
-            });
-          }
-          break;
-
-        case 1: // Auctions
-          endpoint = '/api/products';
-          params.append('auctionOnly', 'true');
-          break;
-
-        case 2: // Products
-          endpoint = '/api/products';
-          break;
-
-        case 3: // Agents
-          // Placeholder for agents search
-          setResults({ auctions: [], products: [], agents: [] });
-          break;
+      if (isSuccessResponse(response)) {
+        setResults(response.data.items || []);
+        setTotalCount(response.data.total || 0);
+        setCurrentPage(response.data.page || 1);
+        setTotalPages(response.data.totalPages || 1);
+      } else {
+        setError(response.error?.message || 'Search failed');
       }
-
-      if (endpoint) {
-        const response = await fetch(`${endpoint}?${params.toString()}`);
-        const data = await response.json();
-
-        if (data.success) {
-          const isAuctionTab = params.has('auctionOnly') && params.get('auctionOnly') === 'true';
-          const mappedResults = data.data.products.map((item: any) => {
-            const hasAuctionStatus = item.auctionStatus && ['SCHEDULED', 'LIVE', 'ENDED'].includes(item.auctionStatus);
-            
-            return {
-              type: (isAuctionTab || hasAuctionStatus) ? 'auction' : 'product' as const,
-              id: item.id,
-              title: item.title,
-              description: item.description,
-              images: item.images,
-              price: (isAuctionTab || hasAuctionStatus) ? (item.currentBid || item.startingBid || item.estimatedValueMin) : item.estimatedValueMin,
-              location: item.location,
-              createdAt: item.createdAt,
-              agent: item.agent,
-              condition: item.condition,
-              category: item.category,
-              // Auction-specific fields (will be undefined for regular products)
-              status: item.auctionStatus,
-              endTime: item.endTime,
-              bidCount: item.bidCount || 0,
-            };
-          });
-
-          if (currentTab === 1) {
-            setResults(prev => ({ ...prev, auctions: mappedResults }));
-            setPagination(prev => ({ ...prev, auctions: data.data.pagination }));
-          } else if (currentTab === 2) {
-            setResults(prev => ({ ...prev, products: mappedResults }));
-            setPagination(prev => ({ ...prev, products: data.data.pagination }));
-          }
-        }
-      }
-
     } catch (err) {
       setError('Failed to perform search');
       console.error('Search error:', err);
@@ -235,31 +163,221 @@ export default function SearchPage() {
     }
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-    if (query) {
-      performSearch(query, newValue);
-    }
+  const handleFilterChange = (key: keyof SearchFilters, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
-  const getTotalResults = () => pagination.auctions.totalCount + pagination.products.totalCount + pagination.agents.totalCount;
+  const clearFilters = () => {
+    setFilters(initialFilters);
+  };
 
-  const renderSearchResult = (item: SearchResult) => {
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (filters.category.length > 0) count++;
+    if (filters.location.length > 0) count++;
+    if (filters.condition.length > 0) count++;
+    if (filters.auctionStatus.length > 0) count++;
+    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 100000) count++;
+    if (filters.dateRange !== 'all') count++;
+    return count;
+  };
+
+  // Filter Panel Component
+  const FilterPanel = () => (
+    <Paper sx={{ p: 3, height: 'fit-content' }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h6">Filters</Typography>
+        {getActiveFilterCount() > 0 && (
+          <Button size="small" onClick={clearFilters} startIcon={<ClearIcon />}>
+            Clear ({getActiveFilterCount()})
+          </Button>
+        )}
+      </Box>
+
+      <Stack spacing={3}>
+        {/* Categories */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom>Category</Typography>
+          <Autocomplete
+            multiple
+            options={categories}
+            value={filters.category}
+            onChange={(_, value) => handleFilterChange('category', value)}
+            renderInput={(params) => (
+              <TextField {...params} placeholder="Select categories" size="small" />
+            )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip {...getTagProps({ index })} key={option} label={option} size="small" />
+              ))
+            }
+          />
+        </Box>
+
+        {/* Price Range */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom>Price Range</Typography>
+          <Box px={1}>
+            <Slider
+              value={filters.priceRange}
+              onChange={(_, value) => handleFilterChange('priceRange', value as [number, number])}
+              valueLabelDisplay="auto"
+              min={0}
+              max={100000}
+              step={1000}
+              valueLabelFormat={(value) => formatCurrency(value)}
+            />
+          </Box>
+          <Box display="flex" justifyContent="space-between" mt={1}>
+            <Typography variant="caption">{formatCurrency(filters.priceRange[0])}</Typography>
+            <Typography variant="caption">{formatCurrency(filters.priceRange[1])}</Typography>
+          </Box>
+        </Box>
+
+        {/* Location */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom>Location</Typography>
+          <Autocomplete
+            multiple
+            options={locations}
+            value={filters.location}
+            onChange={(_, value) => handleFilterChange('location', value)}
+            renderInput={(params) => (
+              <TextField {...params} placeholder="Select locations" size="small" />
+            )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip {...getTagProps({ index })} key={option} label={option} size="small" />
+              ))
+            }
+          />
+        </Box>
+
+        {/* Condition */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom>Condition</Typography>
+          <Stack spacing={1}>
+            {conditions.map((condition) => (
+              <FormControlLabel
+                key={condition}
+                control={
+                  <Switch
+                    checked={filters.condition.includes(condition)}
+                    onChange={(e) => {
+                      const newConditions = e.target.checked
+                        ? [...filters.condition, condition]
+                        : filters.condition.filter(c => c !== condition);
+                      handleFilterChange('condition', newConditions);
+                    }}
+                    size="small"
+                  />
+                }
+                label={condition}
+                sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.875rem' } }}
+              />
+            ))}
+          </Stack>
+        </Box>
+
+        {/* Auction Status (only when auctions tab is active) */}
+        {activeTab === 'auctions' && (
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>Auction Status</Typography>
+            <Stack spacing={1}>
+              {auctionStatuses.map((status) => (
+                <FormControlLabel
+                  key={status}
+                  control={
+                    <Switch
+                      checked={filters.auctionStatus.includes(status)}
+                      onChange={(e) => {
+                        const newStatuses = e.target.checked
+                          ? [...filters.auctionStatus, status]
+                          : filters.auctionStatus.filter(s => s !== status);
+                        handleFilterChange('auctionStatus', newStatuses);
+                      }}
+                      size="small"
+                    />
+                  }
+                  label={status}
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.875rem' } }}
+                />
+              ))}
+            </Stack>
+          </Box>
+        )}
+
+        {/* Date Range */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom>Date Range</Typography>
+          <FormControl fullWidth size="small">
+            <Select
+              value={filters.dateRange}
+              onChange={(e) => handleFilterChange('dateRange', e.target.value)}
+            >
+              <MenuItem value="all">All Time</MenuItem>
+              <MenuItem value="today">Today</MenuItem>
+              <MenuItem value="week">This Week</MenuItem>
+              <MenuItem value="month">This Month</MenuItem>
+              <MenuItem value="year">This Year</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      </Stack>
+    </Paper>
+  );
+
+  // Result Card Component
+  const ResultCard = ({ item }: { item: ProductCard }) => {
     const mainImage = item.images?.[0] || '/placeholder-image.jpg';
+    const isGridView = filters.viewMode === 'grid';
 
     return (
       <Card 
-        key={`${item.type}-${item.id}`}
         sx={{ 
           cursor: 'pointer',
-          '&:hover': { boxShadow: 4 },
+          height: '100%',
+          display: 'flex',
+          flexDirection: isGridView ? 'column' : 'row',
+          '&:hover': { 
+            boxShadow: 4,
+            transform: 'translateY(-2px)',
+            transition: 'all 0.2s ease-in-out',
+          },
+          position: 'relative',
         }}
-        onClick={() => router.push(`/${item.type === 'auction' ? 'auctions' : 'products'}/${item.id}`)}
+        onClick={() => router.push(`/products/${item.id}`)}
       >
-        <Box position="relative">
+        {/* Featured Badge */}
+        {item.featured && (
+          <Chip
+            label="Featured"
+            color="warning"
+            size="small"
+            sx={{ 
+              position: 'absolute', 
+              top: 8, 
+              left: 8, 
+              zIndex: 1,
+              fontWeight: 'bold',
+            }}
+          />
+        )}
+
+        <Box 
+          position="relative" 
+          sx={{ 
+            width: isGridView ? '100%' : { xs: '100%', md: 280 },
+            height: isGridView ? 200 : { xs: 200, md: 180 },
+            flexShrink: 0,
+          }}
+        >
           <CardMedia
             component="img"
-            height="200"
+            height="100%"
             image={mainImage}
             alt={item.title}
             sx={{ objectFit: 'cover' }}
@@ -268,279 +386,405 @@ export default function SearchPage() {
           {/* Type Badge */}
           <Chip
             label={item.type === 'auction' ? 'Auction' : 'Product'}
-            color={item.type === 'auction' ? 'primary' : 'secondary'}
+            color={item.type === 'auction' ? 'error' : 'primary'}
             size="small"
-            sx={{ position: 'absolute', top: 8, left: 8 }}
+            sx={{ position: 'absolute', top: 8, right: 8 }}
           />
 
           {/* Status Badge for Auctions */}
           {item.type === 'auction' && item.status && (
             <Chip
               label={item.status.replace('_', ' ')}
-              color={item.status === 'LIVE' ? 'error' : item.status === 'ENDING_SOON' ? 'warning' : 'info'}
+              color={
+                item.status === 'LIVE' ? 'error' : 
+                item.status === 'ENDING_SOON' ? 'warning' : 'info'
+              }
               size="small"
-              sx={{ position: 'absolute', top: 8, right: 8 }}
+              sx={{ position: 'absolute', bottom: 8, left: 8 }}
             />
           )}
         </Box>
 
-        <CardContent>
-          <Typography variant="h6" component="h3" gutterBottom noWrap>
-            {item.title}
-          </Typography>
+        <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Box flex={1}>
+            <Typography 
+              variant={isGridView ? "h6" : "h5"} 
+              component="h3" 
+              gutterBottom 
+              noWrap={isGridView}
+              sx={{ 
+                fontSize: isGridView ? '1rem' : '1.25rem',
+                fontWeight: 600,
+                color: 'text.primary',
+              }}
+            >
+              {item.title}
+            </Typography>
 
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {item.description.substring(0, 100)}...
-          </Typography>
+            <Typography 
+              variant="body2" 
+              color="text.secondary" 
+              sx={{ 
+                mb: 2,
+                display: '-webkit-box',
+                WebkitLineClamp: isGridView ? 2 : 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {item.description || 'No description available'}
+            </Typography>
 
-          {/* Price */}
-          <Typography variant="h6" color="primary.main" gutterBottom>
-            {item.type === 'auction' ? 'Current Bid: ' : 'From: '}
-            {formatCurrency(item.price)}
-          </Typography>
+            {/* Price */}
+            <Typography 
+              variant={isGridView ? "h6" : "h5"} 
+              color="primary.main" 
+              gutterBottom
+              sx={{ fontWeight: 700 }}
+            >
+              {item.type === 'auction' ? 'Current Bid: ' : 'From: '}
+              {formatCurrency(item.price)}
+            </Typography>
 
-          {/* Additional Info */}
-          <Stack spacing={1} mb={2}>
-            <Box display="flex" alignItems="center" color="text.secondary">
-              <LocationIcon sx={{ fontSize: 16, mr: 0.5 }} />
-              <Typography variant="caption">
-                {item.location}
-              </Typography>
-            </Box>
-
-            {item.type === 'auction' && item.endTime && (
-              <Box display="flex" alignItems="center" color="text.secondary">
-                <ScheduleIcon sx={{ fontSize: 16, mr: 0.5 }} />
-                <Typography variant="caption">
-                  Ends: {formatTimeRemaining(item.endTime)}
+            {/* Additional Info */}
+            <Stack spacing={1} mb={2}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <LocationIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                <Typography variant="body2" color="text.secondary">
+                  {item.location || 'Location not specified'}
                 </Typography>
+                {item.category && (
+                  <>
+                    <CategoryIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {item.category.name}
+                    </Typography>
+                  </>
+                )}
               </Box>
-            )}
 
-            {item.type === 'product' && item.condition && (
-              <Chip 
-                label={item.condition.replace('_', ' ')} 
-                size="small"
-                sx={{ width: 'fit-content' }}
-              />
-            )}
-          </Stack>
+              {item.type === 'auction' && item.endTime && (
+                <Box display="flex" alignItems="center" gap={1}>
+                  <ScheduleIcon sx={{ fontSize: 16, color: 'error.main' }} />
+                  <Typography variant="body2" color="error.main" fontWeight={500}>
+                    Ends: {formatTimeRemaining(item.endTime)}
+                  </Typography>
+                </Box>
+              )}
 
-          {/* Agent Info */}
-          <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Box display="flex" alignItems="center">
-              <Avatar 
-                src={item.agent.logoUrl} 
-                alt={item.agent.displayName}
-                sx={{ width: 24, height: 24, mr: 1 }}
-              >
-                <PersonIcon sx={{ fontSize: 14 }} />
-              </Avatar>
-              <Typography variant="caption" color="text.secondary">
-                {item.agent.displayName}
-              </Typography>
-            </Box>
+              {item.type === 'product' && item.condition && (
+                <Chip 
+                  label={item.condition.replace('_', ' ')} 
+                  size="small"
+                  variant="outlined"
+                  sx={{ width: 'fit-content' }}
+                />
+              )}
 
-            {item.agent.rating && (
-              <Box display="flex" alignItems="center">
-                <StarIcon sx={{ fontSize: 14, color: 'warning.main' }} />
-                <Typography variant="caption" color="warning.main">
-                  {Number(item.agent.rating).toFixed(1)}
+              {item.type === 'auction' && item.bidCount && (
+                <Typography variant="body2" color="text.secondary">
+                  {item.bidCount} bid{item.bidCount !== 1 ? 's' : ''}
                 </Typography>
-              </Box>
-            )}
+              )}
+            </Stack>
           </Box>
 
-          {/* Action Button */}
-          <Button
-            fullWidth
-            variant="outlined"
-            size="small"
-            startIcon={item.type === 'auction' ? <AuctionIcon /> : <ProductIcon />}
-            sx={{ mt: 2 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/${item.type === 'auction' ? 'auctions' : 'products'}/${item.id}`);
-            }}
-          >
-            {item.type === 'auction' ? 'View Auction' : 'View Product'}
-          </Button>
+          {/* Agent Info & Actions */}
+          <Box>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+              <Box display="flex" alignItems="center">
+                <Avatar 
+                  src={item.agent?.logoUrl} 
+                  alt={item.agent?.displayName || 'Agent'}
+                  sx={{ width: 28, height: 28, mr: 1 }}
+                >
+                  <PersonIcon sx={{ fontSize: 16 }} />
+                </Avatar>
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                  {item.agent?.displayName || 'Unknown Agent'}
+                </Typography>
+              </Box>
+
+              {item.agent?.rating && (
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <StarIcon sx={{ fontSize: 16, color: 'warning.main' }} />
+                  <Typography variant="body2" color="warning.main" fontWeight={600}>
+                    {Number(item.agent.rating).toFixed(1)}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* Action Button */}
+            <Button
+              fullWidth
+              variant={item.type === 'auction' ? "contained" : "outlined"}
+              startIcon={item.type === 'auction' ? <AuctionIcon /> : <ProductIcon />}
+              sx={{ 
+                fontWeight: 600,
+                ...(item.type === 'auction' && {
+                  background: 'linear-gradient(45deg, #CE0E2D 30%, #FF1744 90%)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #B00C24 30%, #E91E63 90%)',
+                  }
+                })
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/products/${item.id}`);
+              }}
+            >
+              {item.type === 'auction' ? 'View & Bid' : 'View Details'}
+            </Button>
+          </Box>
         </CardContent>
       </Card>
     );
   };
 
-  const renderResults = () => {
-    let items: SearchResult[] = [];
-    
-    switch (tabValue) {
-      case 0: // All
-        items = [...results.auctions, ...results.products];
-        break;
-      case 1: // Auctions
-        items = results.auctions;
-        break;
-      case 2: // Products
-        items = results.products;
-        break;
-      case 3: // Agents
-        items = results.agents;
-        break;
-    }
-
-    if (loading) {
-      return (
-        <Grid container spacing={3}>
-          {[...Array(8)].map((_, index) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-              <Card>
-                <Skeleton variant="rectangular" height={200} />
-                <CardContent>
-                  <Skeleton variant="text" height={32} />
-                  <Skeleton variant="text" height={20} width="80%" />
-                  <Skeleton variant="text" height={24} width="60%" />
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      );
-    }
-
-    if (items.length === 0) {
-      return (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" gutterBottom>
-            No results found
-          </Typography>
-          <Typography color="text.secondary" paragraph>
-            We couldn't find anything matching "{query}". Try different keywords or browse our categories.
-          </Typography>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
-            <Button variant="outlined" onClick={() => router.push('/auctions')}>
-              Browse Auctions
-            </Button>
-            <Button variant="outlined" onClick={() => router.push('/products')}>
-              Browse Products
-            </Button>
-          </Stack>
-        </Paper>
-      );
-    }
-
-    return (
-      <Grid container spacing={3}>
-        {items.map((item) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={`${item.type}-${item.id}`}>
-            {renderSearchResult(item)}
-          </Grid>
-        ))}
-      </Grid>
-    );
-  };
-
   return (
-    <Box p={3} maxWidth="1400px" mx="auto">
-      {/* Header */}
-      <Box mb={4}>
-        <Breadcrumbs sx={{ mb: 2 }}>
-          <MuiLink href="/" underline="hover" color="inherit">
-            Home
-          </MuiLink>
-          <Typography color="text.primary">Search</Typography>
-        </Breadcrumbs>
-        
-        <Typography variant="h4" gutterBottom>
-          Search Results
-        </Typography>
-        
-        {query && (
-          <Typography variant="body1" color="text.secondary" gutterBottom>
-            Showing results for "{query}"
+    <HomepageLayout>
+      <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh' }}>
+        <Box maxWidth="1400px" mx="auto" p={3}>
+        {/* Header */}
+        <Box mb={4}>
+          <Breadcrumbs sx={{ mb: 2 }}>
+            <MuiLink href="/" underline="hover" color="inherit">
+              Home
+            </MuiLink>
+            <Typography color="text.primary">Search</Typography>
+          </Breadcrumbs>
+          
+          <Typography variant="h4" gutterBottom fontWeight="bold">
+            Search Results
           </Typography>
+          
+          {query && (
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              "{query}" • {totalCount.toLocaleString()} results found
+            </Typography>
+          )}
+        </Box>
+
+        {/* Enhanced Search Bar */}
+        <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+          <Box component="form" onSubmit={handleSearch}>
+            <TextField
+              fullWidth
+              placeholder="Search for auctions, products, brands, and more..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                  fontSize: '1.1rem',
+                  backgroundColor: 'white',
+                },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: 'primary.main', fontSize: 28 }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <Button 
+                    type="submit" 
+                    variant="contained" 
+                    size="large"
+                    sx={{ 
+                      ml: 1, 
+                      borderRadius: 2,
+                      minWidth: 120,
+                      fontWeight: 600,
+                    }}
+                    disabled={!searchQuery.trim()}
+                  >
+                    Search
+                  </Button>
+                ),
+              }}
+            />
+          </Box>
+        </Paper>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
         )}
-      </Box>
 
-      {/* Search Bar */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Box component="form" onSubmit={handleSearch}>
-          <TextField
-            fullWidth
-            placeholder="Search auctions, products, and more..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <Button 
-                  type="submit" 
-                  variant="contained" 
-                  sx={{ ml: 1 }}
-                  disabled={!searchQuery.trim()}
-                >
-                  Search
-                </Button>
-              ),
-            }}
-          />
-        </Box>
-      </Paper>
+        <Grid container spacing={3}>
+          {/* Filters Sidebar */}
+          <Grid item xs={12} lg={3}>
+            <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+              <FilterPanel />
+            </Box>
+          </Grid>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+          {/* Main Content */}
+          <Grid item xs={12} lg={9}>
+            {/* Controls Bar */}
+            <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+                {/* Tab Buttons */}
+                <Box display="flex" gap={1}>
+                  <Button
+                    variant={activeTab === 'all' ? 'contained' : 'outlined'}
+                    onClick={() => setActiveTab('all')}
+                    size="small"
+                  >
+                    All ({totalCount})
+                  </Button>
+                  <Button
+                    variant={activeTab === 'auctions' ? 'contained' : 'outlined'}
+                    onClick={() => setActiveTab('auctions')}
+                    size="small"
+                    color="error"
+                  >
+                    Auctions
+                  </Button>
+                  <Button
+                    variant={activeTab === 'products' ? 'contained' : 'outlined'}
+                    onClick={() => setActiveTab('products')}
+                    size="small"
+                  >
+                    Products
+                  </Button>
+                </Box>
 
-      {/* Results Tabs */}
-      <Paper sx={{ mb: 3 }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={handleTabChange}
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+                <Box display="flex" alignItems="center" gap={2}>
+                  {/* Mobile Filter Button */}
+                  <Button
+                    variant="outlined"
+                    startIcon={<FilterIcon />}
+                    onClick={() => setShowFilters(true)}
+                    sx={{ display: { xs: 'flex', lg: 'none' } }}
+                  >
+                    Filters {getActiveFilterCount() > 0 && `(${getActiveFilterCount()})`}
+                  </Button>
+
+                  {/* Sort */}
+                  <FormControl size="small" sx={{ minWidth: 140 }}>
+                    <Select
+                      value={filters.sortBy}
+                      onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                      startAdornment={<SortIcon sx={{ mr: 1, fontSize: 18 }} />}
+                    >
+                      <MenuItem value="relevance">Relevance</MenuItem>
+                      <MenuItem value="price_low">Price: Low to High</MenuItem>
+                      <MenuItem value="price_high">Price: High to Low</MenuItem>
+                      <MenuItem value="newest">Newest First</MenuItem>
+                      <MenuItem value="ending_soon">Ending Soon</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  {/* View Mode */}
+                  <ToggleButtonGroup
+                    value={filters.viewMode}
+                    exclusive
+                    onChange={(_, value) => value && handleFilterChange('viewMode', value)}
+                    size="small"
+                  >
+                    <ToggleButton value="grid">
+                      <GridViewIcon />
+                    </ToggleButton>
+                    <ToggleButton value="list">
+                      <ListViewIcon />
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+              </Box>
+            </Paper>
+
+            {/* Results */}
+            {loading ? (
+              <Grid container spacing={3}>
+                {[...Array(8)].map((_, index) => (
+                  <Grid item xs={12} sm={6} md={filters.viewMode === 'grid' ? 4 : 12} key={index}>
+                    <Card>
+                      <Skeleton variant="rectangular" height={200} />
+                      <CardContent>
+                        <Skeleton variant="text" height={32} />
+                        <Skeleton variant="text" height={20} width="80%" />
+                        <Skeleton variant="text" height={24} width="60%" />
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : results.length === 0 ? (
+              <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 3 }}>
+                <SearchIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                <Typography variant="h5" gutterBottom fontWeight="bold">
+                  No results found
+                </Typography>
+                <Typography color="text.secondary" paragraph>
+                  We couldn't find anything matching "{query}". Try different keywords or browse our categories.
+                </Typography>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
+                  <Button variant="contained" onClick={() => router.push('/auctions')}>
+                    Browse Auctions
+                  </Button>
+                  <Button variant="outlined" onClick={() => router.push('/products')}>
+                    Browse Products
+                  </Button>
+                </Stack>
+              </Paper>
+            ) : (
+              <>
+                <Grid container spacing={3}>
+                  {results.map((item) => (
+                    <Grid 
+                      item 
+                      xs={12} 
+                      sm={filters.viewMode === 'grid' ? 6 : 12}
+                      md={filters.viewMode === 'grid' ? 4 : 12}
+                      key={`${item.type}-${item.id}`}
+                    >
+                      <ResultCard item={item} />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <Box display="flex" justifyContent="center" mt={4}>
+                    <Pagination
+                      count={totalPages}
+                      page={currentPage}
+                      onChange={(_, page) => performSearch(query, page)}
+                      color="primary"
+                      size="large"
+                      showFirstButton
+                      showLastButton
+                    />
+                  </Box>
+                )}
+              </>
+            )}
+          </Grid>
+        </Grid>
+
+        {/* Mobile Filter Drawer */}
+        <Drawer
+          anchor="left"
+          open={showFilters}
+          onClose={() => setShowFilters(false)}
+          sx={{ display: { xs: 'block', lg: 'none' } }}
         >
-          <Tab 
-            label={`All (${getTotalResults()})`} 
-            disabled={loading}
-          />
-          <Tab 
-            label={`Auctions (${pagination.auctions.totalCount})`} 
-            disabled={loading}
-          />
-          <Tab 
-            label={`Products (${pagination.products.totalCount})`} 
-            disabled={loading}
-          />
-          <Tab 
-            label={`Agents (${pagination.agents.totalCount})`} 
-            disabled={loading}
-          />
-        </Tabs>
-      </Paper>
-
-      {/* Results */}
-      <Box mb={4}>
-        {renderResults()}
-      </Box>
-
-      {/* Pagination */}
-      {!loading && (tabValue === 1 || tabValue === 2) && (
-        <Box display="flex" justifyContent="center">
-          <Pagination
-            count={tabValue === 1 ? pagination.auctions.totalPages : pagination.products.totalPages}
-            page={tabValue === 1 ? pagination.auctions.page : pagination.products.page}
-            onChange={(_, page) => {
-              // Handle pagination for specific tabs
-              // This would typically trigger a new search with the page parameter
-            }}
-            color="primary"
-          />
+          <Box sx={{ width: 320, p: 2 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h6">Filters</Typography>
+              <IconButton onClick={() => setShowFilters(false)}>
+                <ClearIcon />
+              </IconButton>
+            </Box>
+            <FilterPanel />
+          </Box>
+        </Drawer>
         </Box>
-      )}
-    </Box>
+      </Box>
+    </HomepageLayout>
   );
 }

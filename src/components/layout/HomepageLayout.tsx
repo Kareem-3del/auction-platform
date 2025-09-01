@@ -18,12 +18,17 @@ import {
 } from '@mui/material';
 
 import { useAuth } from 'src/hooks/useAuth';
+import { useLocale } from 'src/hooks/useLocale';
+import { useNotificationContext } from 'src/contexts/NotificationContext';
 
-import { _notifications } from 'src/_mock';
 import { NotificationsDrawer } from 'src/layouts/components/notifications-drawer';
 
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
+import SearchDialog from 'src/components/search/SearchDialog';
+import { LanguageSwitcher } from 'src/components/language-switcher';
+
+import SearchIcon from '@mui/icons-material/Search';
 
 import Footer from './Footer';
 import CursorTrail from '../animations/CursorTrail';
@@ -43,9 +48,12 @@ interface Category {
 export default function HomepageLayout({ children }: HomepageLayoutProps) {
   const router = useRouter();
   const theme = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
+  const { t } = useLocale();
+  const { notifications, unreadCount } = useNotificationContext();
   const [categories, setCategories] = useState<Category[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 
   useEffect(() => {
     // Add smooth scroll behavior
@@ -194,7 +202,22 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                 },
               }}
             >
-              About EA
+              {t('navigation.aboutEA', 'About EA')}
+            </Box>
+            <Box
+              onClick={() => router.push('/contact')}
+              sx={{
+                cursor: 'pointer',
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '11px',
+                fontWeight: 400,
+                transition: 'color 0.3s ease',
+                '&:hover': { 
+                  color: '#CE0E2D',
+                },
+              }}
+            >
+              {t('navigation.contact', 'Contact')}
             </Box>
             <Box
               onClick={() => router.push('/help')}
@@ -209,26 +232,14 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                 },
               }}
             >
-              Help
+              {t('navigation.help', 'Help')}
             </Box>
-            <Box
-              sx={{
-                cursor: 'pointer',
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: '11px',
-                fontWeight: 400,
-                transition: 'color 0.3s ease',
-                '&:hover': { 
-                  color: '#CE0E2D',
-                },
-              }}
-            >
-              العربية
-            </Box>
+            <LanguageSwitcher />
           </Box>
 
           {/* Search Icon */}
           <Box
+            onClick={() => setSearchDialogOpen(true)}
             sx={{
               cursor: 'pointer',
               color: 'rgba(255, 255, 255, 0.7)',
@@ -241,13 +252,24 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
               },
             }}
           >
-            <Iconify icon="eva:search-outline" width={18} height={18} />
+            <SearchIcon sx={{ fontSize: 18 }} />
           </Box>
 
           {/* Auth Buttons */}
-          {user ? (
+          {loading ? (
+            // Show loading placeholder to prevent layout shift
+            <Box sx={{ width: 140, height: 32 }} />
+          ) : user ? (
             <>
-              <NotificationsDrawer data={_notifications} />
+              <NotificationsDrawer data={notifications.map(notif => ({
+                id: notif.id,
+                title: notif.title,
+                description: notif.message,
+                type: notif.notificationType || notif.type,
+                avatarUrl: '/logo.png',
+                isUnRead: !notif.isRead,
+                postedAt: notif.createdAt,
+              }))} />
               
               {/* User Profile Dropdown Menu */}
               <IconButton
@@ -299,7 +321,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                   {/* Account Balance */}
                   <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(206, 14, 45, 0.1)', borderRadius: 1 }}>
                     <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.6)', display: 'block' }}>
-                      Account Balance
+                      {t('wallet.balance')}
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#CE0E2D', fontWeight: 600 }}>
                       ${user?.balanceReal?.toFixed(2) || '0.00'}
@@ -312,39 +334,39 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                   <ListItemIcon>
                     <Iconify icon="solar:user-bold-duotone" sx={{ color: 'rgba(255, 255, 255, 0.8)' }} />
                   </ListItemIcon>
-                  My Profile
+                  {t('navigation.profile', 'My Profile')}
                 </MenuItem>
 
                 <MenuItem onClick={() => handleMenuItemClick('/profile')}>
                   <ListItemIcon>
                     <Iconify icon="solar:auction-bold-duotone" sx={{ color: 'rgba(255, 255, 255, 0.8)' }} />
                   </ListItemIcon>
-                  My Bids
+                  {t('navigation.bids')}
                 </MenuItem>
                 
                 <MenuItem onClick={() => handleMenuItemClick('/profile')}>
                   <ListItemIcon>
                     <Iconify icon="solar:settings-bold-duotone" sx={{ color: 'rgba(255, 255, 255, 0.8)' }} />
                   </ListItemIcon>
-                  Settings
+                  {t('navigation.settings', 'Settings')}
                 </MenuItem>
 
                 <MenuItem onClick={() => handleMenuItemClick('/profile?tab=charge')}>
                   <ListItemIcon>
                     <Iconify icon="solar:wallet-money-bold-duotone" sx={{ color: '#22C55E' }} />
                   </ListItemIcon>
-                  <Typography sx={{ color: '#22C55E' }}>Charge Account</Typography>
+                  <Typography sx={{ color: '#22C55E' }}>{t('wallet.recharge')}</Typography>
                 </MenuItem>
 
                 {/* Dashboard for Agent/Admin */}
-                {(user?.userType === 'AGENT' || user?.userType === 'ADMIN') && (
+                {(user?.userType === 'AGENT' || user?.userType === 'ADMIN' || user?.userType === 'SUPER_ADMIN') && (
                   <>
                     <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 1 }} />
                     <MenuItem onClick={() => handleMenuItemClick('/dashboard')}>
                       <ListItemIcon>
                         <Iconify icon="solar:widget-4-bold-duotone" sx={{ color: '#1976D2' }} />
                       </ListItemIcon>
-                      <Typography sx={{ color: '#1976D2' }}>Dashboard</Typography>
+                      <Typography sx={{ color: '#1976D2' }}>{t('navigation.dashboard')}</Typography>
                     </MenuItem>
                   </>
                 )}
@@ -355,7 +377,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                   <ListItemIcon>
                     <Iconify icon="solar:logout-2-bold-duotone" sx={{ color: '#CE0E2D' }} />
                   </ListItemIcon>
-                  <Typography sx={{ color: '#CE0E2D' }}>Sign Out</Typography>
+                  <Typography sx={{ color: '#CE0E2D' }}>{t('auth.signOut')}</Typography>
                 </MenuItem>
               </Menu>
             </>
@@ -379,7 +401,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                   },
                 }}
               >
-                Create Account
+                {t('auth.createAccount')}
               </Box>
               <Box
                 onClick={() => router.push('/auth/login')}
@@ -398,7 +420,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                   },
                 }}
               >
-                Login
+                {t('auth.login')}
               </Box>
             </Box>
           )}
@@ -419,6 +441,12 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
       </Box>
       
       <Footer />
+
+      {/* Search Dialog */}
+      <SearchDialog
+        open={searchDialogOpen}
+        onClose={() => setSearchDialogOpen(false)}
+      />
     </Box>
   );
 }

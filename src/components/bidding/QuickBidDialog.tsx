@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import {
   Gavel as BidIcon,
@@ -24,17 +24,9 @@ import {
 } from '@mui/material';
 
 import { useAuth, useAuthenticatedFetch } from 'src/hooks/useAuth';
-
+import { useLocale } from 'src/hooks/useLocale';
 import { formatCurrency } from 'src/lib/utils';
-
-interface QuickBidDialogProps {
-  productId: string;
-  currentBid: number;
-  bidIncrement: number;
-  timeLeft?: string;
-  auctionStatus?: 'SCHEDULED' | 'LIVE' | 'ENDED';
-  onBidPlaced?: () => void;
-}
+import type { BidDialogProps } from 'src/types/common';
 
 export default function QuickBidDialog({
   productId,
@@ -43,21 +35,65 @@ export default function QuickBidDialog({
   timeLeft,
   auctionStatus,
   onBidPlaced,
-}: QuickBidDialogProps) {
+  isConnected = true,
+  connectionError,
+  onReconnect,
+  lastBidUpdate,
+  liveCurrentBid,
+  liveBidCount,
+  bidButtonDisabled = false,
+  bidCooldownTime = 0,
+}: BidDialogProps) {
   const { user } = useAuth();
   const authenticatedFetch = useAuthenticatedFetch();
+  const { t } = useLocale();
   
   const [open, setOpen] = useState(false);
   const [customAmount, setCustomAmount] = useState('');
   const [selectedBid, setSelectedBid] = useState<number>(currentBid + bidIncrement);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [liveUserBalance, setLiveUserBalance] = useState<number | null>(null);
+  
+  // Real-time bid tracking
+  const [displayCurrentBid, setDisplayCurrentBid] = useState<number>(currentBid);
+  const [bidUpdateAnimation, setBidUpdateAnimation] = useState(false);
+  const [newBidNotification, setNewBidNotification] = useState<string | null>(null);
 
-  // Calculate quick bid amounts with affordability check
+  // Update display current bid when live bid comes in
+  useEffect(() => {
+    const newCurrentBid = liveCurrentBid ?? currentBid;
+    if (newCurrentBid > displayCurrentBid) {
+      setDisplayCurrentBid(newCurrentBid);
+      setBidUpdateAnimation(true);
+      
+      // Show new bid notification if it's not from the current user (reduced timeout)
+      if (lastBidUpdate && lastBidUpdate.amount === newCurrentBid) {
+        setNewBidNotification(`New bid: ${formatCurrency(lastBidUpdate.amount)} by ${lastBidUpdate.bidderName}`);
+        setTimeout(() => setNewBidNotification(null), 2000); // Reduced from 5 seconds to 2 seconds
+      }
+      
+      // Animate and then remove animation (reduced timeout)
+      setTimeout(() => setBidUpdateAnimation(false), 500); // Reduced from 1000ms to 500ms
+    }
+  }, [liveCurrentBid, currentBid, displayCurrentBid, lastBidUpdate]);
+
+  // Auto-increment selected bid when current bid increases
+  useEffect(() => {
+    const newMinimumBid = displayCurrentBid + bidIncrement;
+    
+    // If selected bid is no longer valid (too low), auto-increment it
+    if (selectedBid <= displayCurrentBid) {
+      setSelectedBid(newMinimumBid);
+      setCustomAmount(''); // Clear custom amount if it becomes invalid
+    }
+  }, [displayCurrentBid, bidIncrement, selectedBid]);
+
+  // Calculate quick bid amounts with affordability check based on display current bid
   const allQuickBids = [
-    currentBid + bidIncrement, // x1
-    currentBid + bidIncrement * 2, // x2
-    currentBid + bidIncrement * 3, // x3
+    displayCurrentBid + bidIncrement, // x1
+    displayCurrentBid + bidIncrement * 2, // x2
+    displayCurrentBid + bidIncrement * 3, // x3
   ];
   
   // Add affordability information to each bid
@@ -70,7 +106,7 @@ export default function QuickBidDialog({
 
   const handleBidSubmit = async () => {
     // Basic validation
-    if (!selectedBid || selectedBid <= currentBid) {
+    if (!selectedBid || selectedBid <= displayCurrentBid) {
       setError('Bid amount must be higher than the current bid');
       return;
     }
@@ -81,7 +117,7 @@ export default function QuickBidDialog({
     }
 
     // Frontend validation before API call
-    const minimumBid = currentBid + bidIncrement;
+    const minimumBid = displayCurrentBid + bidIncrement;
     if (selectedBid < minimumBid) {
       setError(`Minimum bid amount is ${formatCurrency(minimumBid)}`);
       return;
@@ -103,18 +139,41 @@ export default function QuickBidDialog({
       setLoading(true);
       setError(null);
       
+      // Use a more responsive fetch with shorter timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await authenticatedFetch(`/api/products/${productId}/bid`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: selectedBid }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        // Handle HTTP error responses
+        const errorData = await response.json().catch(() => ({ error: { message: 'Network error occurred' } }));
+        const errorMessage = errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+        setError(errorMessage);
+        return;
+      }
 
       const data = await response.json();
       if (data.success) {
+        // Update live balance immediately
+        if (user) {
+          setLiveUserBalance(user.balanceVirtual - selectedBid);
+        }
+        
         setOpen(false);
         setCustomAmount('');
-        setSelectedBid(currentBid + bidIncrement);
-        if (onBidPlaced) onBidPlaced();
+        setSelectedBid(displayCurrentBid + bidIncrement);
+        // Trigger parent component refresh
+        if (onBidPlaced) {
+          onBidPlaced();
+        }
       } else {
         // Handle specific error types
         const errorMessage = data.error?.message || 'Failed to place bid';
@@ -133,7 +192,9 @@ export default function QuickBidDialog({
     } catch (error) {
       console.error('Error placing bid:', error);
       if (error instanceof Error) {
-        if (error.message.includes('No authentication token')) {
+        if (error.name === 'AbortError') {
+          setError('Request was cancelled due to timeout. Please try again.');
+        } else if (error.message.includes('No authentication token')) {
           setError('Please log in to place a bid');
         } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
           setError('Network error occurred. Please check your connection and try again.');
@@ -223,9 +284,122 @@ export default function QuickBidDialog({
             )}
           </Box>
 
-          <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontSize: '0.9rem' }}>
-            Current bid: <strong style={{ color: '#CE0E2D' }}>{formatCurrency(currentBid)}</strong>
-          </Typography>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontSize: '0.9rem' }}>
+              Current bid: 
+              <strong 
+                style={{ 
+                  color: '#CE0E2D',
+                  marginLeft: '8px',
+                  transition: 'all 0.3s ease',
+                  ...(bidUpdateAnimation ? {
+                    transform: 'scale(1.1)',
+                    background: 'rgba(206, 14, 45, 0.1)',
+                    padding: '2px 6px',
+                    borderRadius: '4px'
+                  } : {})
+                }}
+              >
+                {formatCurrency(displayCurrentBid)}
+              </strong>
+              {liveBidCount && liveBidCount > 0 && (
+                <span style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#666' }}>
+                  ({liveBidCount} bids)
+                </span>
+              )}
+            </Typography>
+            
+            {/* New bid notification */}
+            {newBidNotification && (
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: '#28a745', 
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1,
+                  animation: 'fadeInOut 5s ease-in-out',
+                  '@keyframes fadeInOut': {
+                    '0%': { opacity: 0, transform: 'translateY(-5px)' },
+                    '10%': { opacity: 1, transform: 'translateY(0)' },
+                    '90%': { opacity: 1, transform: 'translateY(0)' },
+                    '100%': { opacity: 0, transform: 'translateY(-5px)' }
+                  }
+                }}
+              >
+                🎯 {newBidNotification}
+              </Typography>
+            )}
+          </Box>
+
+          {/* Enhanced Balance Display */}
+          {user && (
+            <Box sx={{ 
+              mb: 2,
+              p: 2,
+              background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.05), rgba(206, 14, 45, 0.1))',
+              borderRadius: 2,
+              border: '1px solid rgba(206, 14, 45, 0.2)'
+            }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, textAlign: 'center' }}>
+                💰 {t('auction.yourBalance')}
+              </Typography>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ flex: 1, textAlign: 'center' }}>
+                  <Typography variant="caption" sx={{ color: '#666', fontSize: '0.7rem' }}>{t('auction.virtualBalance')}</Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: user.balanceVirtual >= (displayCurrentBid + bidIncrement) ? '#2E7D32' : '#d32f2f',
+                      fontWeight: 'bold',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    ${(liveUserBalance ?? user.balanceVirtual).toFixed(2)}
+                  </Typography>
+                </Box>
+                
+                {user.balanceReal && user.balanceReal > 0 && (
+                  <Box sx={{ flex: 1, textAlign: 'center' }}>
+                    <Typography variant="caption" sx={{ color: '#666', fontSize: '0.7rem' }}>{t('auction.realBalance')}</Typography>
+                    <Typography variant="body2" sx={{ color: '#2E7D32', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                      ${user.balanceReal.toFixed(2)}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+              
+              <Box sx={{ textAlign: 'center', mt: 1 }}>
+                {user.balanceVirtual < (displayCurrentBid + bidIncrement) ? (
+                  <Typography variant="caption" sx={{ 
+                    color: '#d32f2f', 
+                    fontSize: '0.65rem',
+                    backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                    px: 1,
+                    py: 0.3,
+                    borderRadius: 1
+                  }}>
+                    ⚠️ {t('auction.insufficientForNext')}
+                  </Typography>
+                ) : (
+                  <Typography variant="caption" sx={{ 
+                    color: '#2e7d32', 
+                    fontSize: '0.65rem',
+                    backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                    px: 1,
+                    py: 0.3,
+                    borderRadius: 1
+                  }}>
+                    ✓ {t('auction.readyToBid')}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          )}
 
           <Stack direction="row" spacing={1} mb={2}>
             {quickBids.map((bid, index) => (
@@ -296,14 +470,31 @@ export default function QuickBidDialog({
             </Button>
           </Stack>
 
+          {/* Connection Status Warning */}
+          {!isConnected && connectionError && (
+            <Alert 
+              severity="warning" 
+              sx={{ mb: 1, fontSize: '0.8rem' }}
+              action={
+                onReconnect && (
+                  <Button size="small" onClick={onReconnect} sx={{ color: '#CE0E2D' }}>
+                    {t('auction.reconnect')}
+                  </Button>
+                )
+              }
+            >
+              {t('auction.connectionIssue')}: {connectionError}
+            </Alert>
+          )}
+
           <Button
             variant="contained"
             fullWidth
             startIcon={<BidIcon />}
             onClick={handleBidSubmit}
-            disabled={auctionStatus !== 'LIVE' || loading}
+            disabled={auctionStatus !== 'LIVE' || loading || !isConnected || bidButtonDisabled}
             sx={{
-              backgroundColor: '#CE0E2D',
+              backgroundColor: bidButtonDisabled ? '#ff9800' : (isConnected ? '#CE0E2D' : '#666'),
               color: 'white',
               fontWeight: 600,
               py: 1.5,
@@ -312,16 +503,20 @@ export default function QuickBidDialog({
               textTransform: 'none',
               boxShadow: 'none',
               '&:hover': {
-                backgroundColor: '#B00C24',
+                backgroundColor: bidButtonDisabled ? '#ff9800' : (isConnected ? '#B00C24' : '#666'),
                 boxShadow: 'none',
               },
               '&:disabled': {
-                backgroundColor: '#CE0E2D',
-                opacity: 0.6,
+                backgroundColor: bidButtonDisabled ? '#ff9800' : '#ccc',
+                color: bidButtonDisabled ? 'white' : '#888',
+                opacity: bidButtonDisabled ? 1 : 0.6,
               }
             }}
           >
-            {loading ? 'Placing Bid...' : `Place Bid - ${formatCurrency(selectedBid)}`}
+            {bidButtonDisabled ? `⏱️ Wait ${bidCooldownTime}s` : 
+             loading ? t('auction.placingBid') : 
+             !isConnected ? `🔄 ${t('auction.reconnecting')}...` : 
+             `${t('auction.placeBid')} - ${formatCurrency(selectedBid)}`}
           </Button>
         </CardContent>
       </Card>
@@ -357,17 +552,17 @@ export default function QuickBidDialog({
           
           <Box mb={3} p={2} sx={{ backgroundColor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0' }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Current highest bid: <strong style={{ color: '#CE0E2D' }}>{formatCurrency(currentBid)}</strong>
+              Current highest bid: <strong style={{ color: '#CE0E2D' }}>{formatCurrency(displayCurrentBid)}</strong>
             </Typography>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Minimum bid: <strong style={{ color: '#CE0E2D' }}>{formatCurrency(currentBid + bidIncrement)}</strong>
+              Minimum bid: <strong style={{ color: '#CE0E2D' }}>{formatCurrency(displayCurrentBid + bidIncrement)}</strong>
             </Typography>
             {user && (
               <Typography variant="body2" color="text.secondary">
-                Your available balance: <strong style={{ color: user.balanceVirtual >= (currentBid + bidIncrement) ? '#28a745' : '#CE0E2D' }}>
+                Your available balance: <strong style={{ color: user.balanceVirtual >= (displayCurrentBid + bidIncrement) ? '#28a745' : '#CE0E2D' }}>
                   {formatCurrency(user.balanceVirtual)}
                 </strong>
-                {user.balanceVirtual < (currentBid + bidIncrement) && (
+                {user.balanceVirtual < (displayCurrentBid + bidIncrement) && (
                   <Typography variant="caption" display="block" sx={{ color: '#CE0E2D', mt: 0.5, fontSize: '0.7rem' }}>
                     ⚠️ Insufficient balance for minimum bid
                   </Typography>
@@ -481,13 +676,13 @@ export default function QuickBidDialog({
                   },
                 }}
                 helperText={
-                  customAmount && parseFloat(customAmount) <= currentBid
-                    ? `Must be higher than current bid (${formatCurrency(currentBid)})`
+                  customAmount && parseFloat(customAmount) <= displayCurrentBid
+                    ? `Must be higher than current bid (${formatCurrency(displayCurrentBid)})`
                     : customAmount && user && parseFloat(customAmount) > user.balanceVirtual
                     ? `Amount exceeds your available balance (${formatCurrency(user.balanceVirtual)})`
                     : 'Enter an amount higher than the current bid'
                 }
-                error={customAmount !== '' && (parseFloat(customAmount) <= currentBid || (user && parseFloat(customAmount) > user.balanceVirtual))}
+                error={customAmount !== '' && (parseFloat(customAmount) <= displayCurrentBid || (user && parseFloat(customAmount) > user.balanceVirtual))}
                 fullWidth
               />
             </Box>
@@ -523,7 +718,7 @@ export default function QuickBidDialog({
           <Button 
             variant="contained" 
             onClick={handleBidSubmit}
-            disabled={loading || selectedBid <= currentBid || (user && user.balanceVirtual < selectedBid)}
+            disabled={loading || selectedBid <= displayCurrentBid || (user && user.balanceVirtual < selectedBid) || bidButtonDisabled}
             startIcon={<BidIcon />}
             sx={{
               backgroundColor: '#CE0E2D',
@@ -544,7 +739,7 @@ export default function QuickBidDialog({
               }
             }}
           >
-            {loading ? 'Placing Bid...' : `Confirm Bid - ${formatCurrency(selectedBid)}`}
+            {bidButtonDisabled ? `⏱️ Wait ${bidCooldownTime}s` : loading ? 'Placing Bid...' : `Confirm Bid - ${formatCurrency(selectedBid)}`}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,14 +1,14 @@
 import type { NextRequest } from 'next/server';
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/middleware/auth';
+import { prisma } from 'src/lib/prisma';
+import { withAuth } from 'src/lib/middleware/auth';
 import { 
   handleAPIError, 
   validateMethod, 
   successResponse, 
   validateContentType 
-} from '@/lib/api-response';
+} from 'src/lib/api-response';
 
 // Validation schema for creating products
 const createProductSchema = z.object({
@@ -40,14 +40,19 @@ const searchParamsSchema = z.object({
   limit: z.string().transform(val => Math.min(parseInt(val) || 20, 100)),
   search: z.string().optional(),
   categoryId: z.string().optional(),
+  categories: z.string().optional(), // Comma-separated category names
   condition: z.string().optional(),
+  conditions: z.string().optional(), // Comma-separated conditions
   minPrice: z.string().transform(val => val ? parseFloat(val) : undefined).optional(),
   maxPrice: z.string().transform(val => val ? parseFloat(val) : undefined).optional(),
   location: z.string().optional(),
+  locations: z.string().optional(), // Comma-separated locations
   agentId: z.string().optional(),
   featured: z.string().transform(val => val === 'true').optional(),
   auctionOnly: z.string().transform(val => val === 'true' ? true : val === 'false' ? false : undefined).optional(),
-  sortBy: z.enum(['newest', 'oldest', 'priceAsc', 'priceDesc', 'titleAsc', 'titleDesc']).default('newest'),
+  auctionStatus: z.string().optional(), // Comma-separated auction statuses
+  sortBy: z.enum(['relevance', 'newest', 'oldest', 'price_low', 'price_high', 'priceAsc', 'priceDesc', 'titleAsc', 'titleDesc', 'ending_soon']).default('newest'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
   status: z.enum(['PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'ALL']).default('APPROVED'),
 }).partial();
 
@@ -59,13 +64,41 @@ export async function GET(request: NextRequest) {
     const { searchParams: urlParams } = new URL(request.url);
     const searchParams = searchParamsSchema.parse(Object.fromEntries(urlParams.entries()));
 
-    const { page = 1, limit = 20, search, categoryId, condition, minPrice, maxPrice, location, agentId, featured, auctionOnly, sortBy, status } = searchParams;
+    const { 
+      page = 1, 
+      limit = 20, 
+      search, 
+      categoryId, 
+      categories, 
+      condition, 
+      conditions, 
+      minPrice, 
+      maxPrice, 
+      location, 
+      locations, 
+      agentId, 
+      featured, 
+      auctionOnly, 
+      auctionStatus,
+      sortBy, 
+      sortOrder,
+      status 
+    } = searchParams;
 
     // Build where clause
     const whereClause: any = {};
 
     if (status !== 'ALL') {
       whereClause.status = status;
+      
+      // For public display (APPROVED), exclude sold items and ended auctions
+      if (status === 'APPROVED') {
+        whereClause.NOT = [
+          { status: 'SOLD' },
+          { auctionStatus: 'ENDED' },
+          { auctionStatus: 'CANCELLED' }
+        ];
+      }
     }
 
     if (search) {
@@ -73,40 +106,67 @@ export async function GET(request: NextRequest) {
         { title: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
         { provenance: { contains: search, mode: 'insensitive' } },
+        { materials: { contains: search, mode: 'insensitive' } },
+        { authenticity: { contains: search, mode: 'insensitive' } },
+        {
+          category: {
+            name: { contains: search, mode: 'insensitive' }
+          }
+        },
+        {
+          brand: {
+            name: { contains: search, mode: 'insensitive' }
+          }
+        },
       ];
     }
 
-    if (categoryId) {
-      // Include subcategories
-      const category = await prisma.category.findUnique({
-        where: { id: categoryId },
-        include: {
-          children: {
-            include: {
-              children: true,
+    // Handle category filtering (by ID or names)
+    if (categoryId || categories) {
+      if (categoryId) {
+        // Single category by ID - include subcategories
+        const category = await prisma.category.findUnique({
+          where: { id: categoryId },
+          include: {
+            children: {
+              include: {
+                children: true,
+              },
             },
           },
-        },
-      });
-
-      if (category) {
-        const categoryIds = [categoryId];
-        
-        // Add direct children
-        category.children.forEach((child: any) => {
-          categoryIds.push(child.id);
-          // Add grandchildren
-          child.children.forEach((grandchild: any) => {
-            categoryIds.push(grandchild.id);
-          });
         });
 
-        whereClause.categoryId = { in: categoryIds };
+        if (category) {
+          const categoryIds = [categoryId];
+          
+          // Add direct children
+          category.children.forEach((child: any) => {
+            categoryIds.push(child.id);
+            // Add grandchildren
+            child.children.forEach((grandchild: any) => {
+              categoryIds.push(grandchild.id);
+            });
+          });
+
+          whereClause.categoryId = { in: categoryIds };
+        }
+      } else if (categories) {
+        // Multiple categories by name
+        const categoryNames = categories.split(',').map(name => name.trim());
+        whereClause.category = {
+          name: { in: categoryNames, mode: 'insensitive' }
+        };
       }
     }
 
-    if (condition) {
-      whereClause.condition = condition;
+    // Handle condition filtering (single or multiple)
+    if (condition || conditions) {
+      if (condition) {
+        whereClause.condition = condition;
+      } else if (conditions) {
+        const conditionValues = conditions.split(',').map(cond => cond.trim().toUpperCase());
+        whereClause.condition = { in: conditionValues };
+      }
     }
 
     if (minPrice !== undefined || maxPrice !== undefined) {
@@ -119,8 +179,19 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (location) {
-      whereClause.location = { contains: location, mode: 'insensitive' };
+    // Handle location filtering (single or multiple)
+    if (location || locations) {
+      if (location) {
+        whereClause.location = { contains: location, mode: 'insensitive' };
+      } else if (locations) {
+        const locationValues = locations.split(',').map(loc => loc.trim());
+        whereClause.OR = whereClause.OR ? [...whereClause.OR] : [];
+        locationValues.forEach(loc => {
+          whereClause.OR.push({
+            location: { contains: loc, mode: 'insensitive' }
+          });
+        });
+      }
     }
 
     if (agentId) {
@@ -139,12 +210,22 @@ export async function GET(request: NextRequest) {
       whereClause.auctionStatus = {
         in: ['SCHEDULED', 'LIVE', 'ENDED']
       };
+      
+      // Add auction status filtering if specified
+      if (auctionStatus) {
+        const statusValues = auctionStatus.split(',').map(status => status.trim().toUpperCase());
+        whereClause.auctionStatus = { in: statusValues };
+      }
     } else if (auctionOnly === false) {
       // Only regular products without auction functionality
       whereClause.OR = [
         { auctionStatus: null },
         { auctionStatus: { notIn: ['SCHEDULED', 'LIVE', 'ENDED'] } }
       ];
+    } else if (auctionStatus) {
+      // Filter by auction status even if not explicitly auction-only
+      const statusValues = auctionStatus.split(',').map(status => status.trim().toUpperCase());
+      whereClause.auctionStatus = { in: statusValues };
     }
 
     // Build order by clause
@@ -158,13 +239,25 @@ export async function GET(request: NextRequest) {
         { createdAt: 'desc' }
       ];
     } else {
+      const direction = sortOrder || 'desc';
       switch (sortBy) {
-        case 'oldest':
-          orderBy = { createdAt: 'asc' };
+        case 'relevance':
+          // For relevance, prioritize by creation date and featured status
+          orderBy = [
+            { featured: 'desc' },
+            { viewCount: 'desc' },
+            { createdAt: 'desc' }
+          ];
           break;
+        case 'newest':
+        case 'oldest':
+          orderBy = { createdAt: sortBy === 'newest' ? 'desc' : 'asc' };
+          break;
+        case 'price_low':
         case 'priceAsc':
           orderBy = { estimatedValueMin: 'asc' };
           break;
+        case 'price_high':
         case 'priceDesc':
           orderBy = { estimatedValueMax: 'desc' };
           break;
@@ -174,8 +267,15 @@ export async function GET(request: NextRequest) {
         case 'titleDesc':
           orderBy = { title: 'desc' };
           break;
+        case 'ending_soon':
+          // For auction items ending soon
+          orderBy = [
+            { endTime: 'asc' },
+            { createdAt: 'desc' }
+          ];
+          break;
         default:
-          orderBy = { createdAt: 'desc' };
+          orderBy = { createdAt: direction };
           break;
       }
     }
@@ -249,8 +349,7 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    return successResponse({
-      data: productsData,
+    return successResponse(productsData, {
       pagination: {
         page,
         limit,
@@ -262,12 +361,19 @@ export async function GET(request: NextRequest) {
       filters: {
         search,
         categoryId,
+        categories,
         condition,
+        conditions,
         minPrice,
         maxPrice,
         location,
+        locations,
         agentId,
+        featured,
+        auctionOnly,
+        auctionStatus,
         sortBy,
+        sortOrder,
         status,
       },
       message: 'Products retrieved successfully',
@@ -386,10 +492,7 @@ export const POST = withAuth(async (request) => {
       reservePrice: product.reservePrice ? Number(product.reservePrice) : null,
     };
 
-    return successResponse({
-      data: productData,
-      message: 'Product created successfully and is pending approval',
-    });
+    return successResponse(productData);
 
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 
 import jwt from 'jsonwebtoken';
-import { handleAPIError } from '@/lib/api-response';
+import { handleAPIError } from 'src/lib/api-response';
 
 export async function GET(request: NextRequest) {
   try {
