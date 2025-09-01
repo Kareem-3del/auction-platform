@@ -890,13 +890,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             )}
 
             {/* QUICK BID INTERFACE */}
-            {product.auctionStatus === 'LIVE' && (
+            {product.auctionStatus === 'LIVE' && timeLeft && timeLeft !== 'Auction Ended' && timeLeft !== t('auction.ended') && (
               <Box sx={{ flex: '0 0 auto' }}>
                 <QuickBidDialog
                   productId={product.id}
                   currentBid={displayCurrentBid}
                   bidIncrement={product.bidIncrement || 1}
                   timeLeft={timeLeft}
+                  endTime={product.endTime}
                   auctionStatus={product.auctionStatus}
                   onBidPlaced={handleBidPlaced}
                   isConnected={isConnected}

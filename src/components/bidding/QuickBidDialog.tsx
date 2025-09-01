@@ -37,6 +37,7 @@ export default function QuickBidDialog({
   currentBid,
   bidIncrement,
   timeLeft,
+  endTime,
   auctionStatus,
   onBidPlaced,
   isConnected = true,
@@ -109,6 +110,12 @@ export default function QuickBidDialog({
   }));
 
   const handleBidSubmit = async () => {
+    // Check if auction has ended first
+    if (isAuctionEnded()) {
+      setError('This auction has ended and no longer accepts bids');
+      return;
+    }
+
     // Basic validation
     if (!selectedBid || selectedBid <= displayCurrentBid) {
       setError('Bid amount must be higher than the current bid');
@@ -133,7 +140,7 @@ export default function QuickBidDialog({
       return;
     }
 
-    // Validate auction status
+    // Validate auction status and time
     if (auctionStatus !== 'LIVE') {
       setError('This auction is not currently active');
       return;
@@ -218,12 +225,29 @@ export default function QuickBidDialog({
   const handleCustomAmountChange = (value: string) => {
     setCustomAmount(value);
     const numValue = parseFloat(value);
-    if (!isNaN(numValue)) {
+    if (!isNaN(numValue) && numValue > 0) {
       setSelectedBid(numValue);
+    }
+    // Clear any previous errors when user starts typing
+    if (error) {
+      setError(null);
     }
   };
 
-  if (auctionStatus !== 'LIVE') {
+  // Check if auction has actually ended based on time, not just status
+  const isAuctionEnded = () => {
+    if (auctionStatus !== 'LIVE') return true;
+    if (timeLeft === 'Auction Ended' || timeLeft === t('auction.ended')) return true;
+    // Additional time check - if timeLeft is empty and we have an endTime, check it
+    if (!timeLeft && endTime) {
+      const now = new Date().getTime();
+      const end = new Date(endTime).getTime();
+      return now >= end;
+    }
+    return false;
+  };
+
+  if (isAuctionEnded()) {
     return null;
   }
 
@@ -824,7 +848,15 @@ export default function QuickBidDialog({
           <Button 
             variant="contained" 
             onClick={handleBidSubmit}
-            disabled={loading || selectedBid <= displayCurrentBid || (user && user.balanceVirtual < selectedBid) || bidButtonDisabled}
+            disabled={
+              loading || 
+              bidButtonDisabled || 
+              isAuctionEnded() ||
+              !selectedBid || 
+              selectedBid <= displayCurrentBid || 
+              selectedBid < (displayCurrentBid + bidIncrement) ||
+              (user && user.balanceVirtual < selectedBid)
+            }
             startIcon={<BidIcon />}
             sx={{
               backgroundColor: '#CE0E2D',

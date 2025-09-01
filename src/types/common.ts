@@ -561,6 +561,7 @@ export interface BidDialogProps {
   currentBid: number;
   bidIncrement: number;
   timeLeft?: string;
+  endTime?: string;
   auctionStatus?: AuctionStatus;
   onBidPlaced?: () => void;
   isConnected?: boolean;
