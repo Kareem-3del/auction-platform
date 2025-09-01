@@ -10,7 +10,6 @@ import {
 
 import { ErrorBoundary } from 'src/components/ErrorBoundary';
 import { ModernHeroSection } from 'src/components/sections/ModernHeroSection';
-import { LiveAuctionTicker } from 'src/components/sections/LiveAuctionTicker';
 import { ModernPremiumAuctions } from 'src/components/sections/ModernPremiumAuctions';
 import { SimpleCategoryShowcase } from 'src/components/sections/SimpleCategoryShowcase';
 import { TrustAndTestimonials } from 'src/components/sections/TrustAndTestimonials';
@@ -54,10 +53,6 @@ export default function NewHomePageClient() {
           <ModernHeroSection />
         </ErrorBoundary>
 
-        {/* Live Auction Ticker */}
-        <ErrorBoundary>
-          <LiveAuctionTicker />
-        </ErrorBoundary>
 
         {/* Premium Auction Collections - Individual Sections */}
         <ErrorBoundary>
