@@ -32,59 +32,79 @@ import {
 const StyledCard = styled(Card)(({ theme }) => ({
   position: 'relative',
   height: '100%',
-  maxHeight: '580px',
-  borderRadius: '24px',
+  maxHeight: '640px',
+  borderRadius: '28px',
   overflow: 'hidden',
-  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)',
+  background: 'rgba(255, 255, 255, 0.98)',
   backdropFilter: 'blur(20px)',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  boxShadow: '0 8px 40px rgba(0, 0, 0, 0.12)',
+  border: '1px solid rgba(0, 0, 0, 0.06)',
+  boxShadow: '0 12px 48px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04)',
   cursor: 'pointer',
-  transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
   transformOrigin: 'center bottom',
   '&:hover': {
-    transform: 'translateY(-16px) scale(1.02)',
-    boxShadow: '0 25px 80px rgba(0, 0, 0, 0.25)',
+    transform: 'translateY(-20px) scale(1.03)',
+    boxShadow: '0 32px 64px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.08)',
+    border: '1px solid rgba(206, 14, 45, 0.15)',
     '& .card-image': {
-      transform: 'scale(1.1)',
+      transform: 'scale(1.08) rotate(0.5deg)',
+      filter: 'brightness(1.05) contrast(1.05)',
     },
-    '& .card-overlay': {
+    '& .card-image-overlay': {
       opacity: 1,
     },
     '& .card-content': {
-      transform: 'translateY(-8px)',
+      transform: 'translateY(-4px)',
     },
     '& .hover-actions': {
       opacity: 1,
-      transform: 'translateY(0)',
+      transform: 'translateY(0) scale(1)',
+    },
+    '& .price-section': {
+      background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.08), rgba(255, 68, 68, 0.08))',
     },
   },
 }));
 
 const ImageContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
-  height: '280px',
+  height: '320px',
   overflow: 'hidden',
-  background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
+  background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+  borderRadius: '0 0 20px 20px',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.15) 100%)',
+    zIndex: 1,
+    pointerEvents: 'none',
+  },
 }));
 
 const ProductImage = styled('img')(({ theme }) => ({
   width: '100%',
   height: '100%',
   objectFit: 'cover',
-  transition: 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+  objectPosition: 'center',
+  transition: 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+  filter: 'brightness(1.0) contrast(1.0) saturate(1.1)',
 }));
 
-const CardOverlay = styled(Box)(({ theme }) => ({
+const ImageOverlay = styled(Box)(({ theme }) => ({
   position: 'absolute',
   inset: 0,
-  background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%)',
+  background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%)',
   opacity: 0,
-  transition: 'opacity 0.5s ease',
+  transition: 'opacity 0.4s ease',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
   padding: theme.spacing(3),
+  zIndex: 2,
 }));
 
 const StatusBadge = styled(Chip)<{ variant: 'live' | 'ending' | 'featured' | 'trending' | 'upcoming' | 'recent' }>(
@@ -165,13 +185,14 @@ const FavoriteButton = styled(IconButton)(({ theme }) => ({
 }));
 
 const ContentContainer = styled(CardContent)(({ theme }) => ({
-  padding: theme.spacing(3),
-  paddingBottom: `${theme.spacing(3)} !important`,
+  padding: theme.spacing(3.5),
+  paddingBottom: `${theme.spacing(2)} !important`,
   transition: 'transform 0.4s ease',
-  height: '280px',
+  minHeight: '280px',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
+  gap: theme.spacing(2),
 }));
 
 const CountdownContainer = styled(Box)(({ theme }) => ({
@@ -191,28 +212,82 @@ const CountdownItem = styled(Box)(({ theme }) => ({
 
 const PriceSection = styled(Box)(({ theme }) => ({
   position: 'relative',
-  padding: theme.spacing(2.5),
+  padding: theme.spacing(3),
   marginTop: 'auto',
-  background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.05), rgba(255, 68, 68, 0.05))',
-  borderTop: '1px solid rgba(206, 14, 45, 0.1)',
+  background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.04), rgba(255, 68, 68, 0.04))',
+  borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+  borderRadius: '20px 20px 0 0',
+  margin: `-${theme.spacing(0.5)} -${theme.spacing(3.5)} -${theme.spacing(2)}`,
+  transition: 'all 0.3s ease',
   '&::before': {
     content: '""',
     position: 'absolute',
     top: 0,
-    left: 0,
-    right: 0,
+    left: '10%',
+    right: '10%',
     height: 1,
-    background: 'linear-gradient(90deg, transparent, rgba(206, 14, 45, 0.3), transparent)',
+    background: 'linear-gradient(90deg, transparent, rgba(206, 14, 45, 0.2), transparent)',
   },
 }));
 
 const HoverActions = styled(Box)(({ theme }) => ({
   opacity: 0,
-  transform: 'translateY(20px)',
-  transition: 'all 0.4s ease 0.1s',
+  transform: 'translateY(24px) scale(0.9)',
+  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s',
   display: 'flex',
-  gap: theme.spacing(1),
+  gap: theme.spacing(1.5),
   justifyContent: 'center',
+  alignItems: 'center',
+}));
+
+const ImageSkeleton = styled(Box)(({ theme }) => ({
+  width: '100%',
+  height: '100%',
+  background: `
+    linear-gradient(90deg, 
+      rgba(240, 240, 240, 0.8) 0%, 
+      rgba(250, 250, 250, 1) 50%, 
+      rgba(240, 240, 240, 0.8) 100%
+    )`,
+  backgroundSize: '200% 100%',
+  animation: 'shimmer 1.5s ease-in-out infinite',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: theme.palette.text.disabled,
+  fontSize: '0.875rem',
+  fontWeight: 500,
+  '@keyframes shimmer': {
+    '0%': { backgroundPosition: '200% 0' },
+    '100%': { backgroundPosition: '-200% 0' },
+  },
+}));
+
+const AgentSection = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(2),
+  padding: theme.spacing(2, 0),
+  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+  marginBottom: theme.spacing(2),
+}));
+
+const MetricsRow = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginTop: theme.spacing(1.5),
+  paddingTop: theme.spacing(1.5),
+  borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+}));
+
+const MetricItem = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(0.5),
+  color: theme.palette.text.secondary,
+  fontSize: '0.8rem',
+  fontWeight: 500,
 }));
 
 // ----------------------------------------------------------------------
@@ -260,6 +335,16 @@ export function PremiumAuctionCard({
   const [isFavorited, setIsFavorited] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  const handleImageLoad = () => {
+    setImageLoading(false);
+    setImageLoaded(true);
+  };
+
+  const handleImageError = () => {
+    setImageLoading(false);
+    setImageError(true);
+  };
+
   const endTime = product.auction?.endTime;
   const startTime = product.auction?.startTime;
 
@@ -291,7 +376,7 @@ export function PremiumAuctionCard({
     return () => clearInterval(timer);
   }, [endTime, startTime, variant]);
 
-  const primaryImage = product.images?.[0] || 'https://images.unsplash.com/photo-1606220945770-b5b6c2c5bdc5?w=400&h=300&fit=crop&crop=center';
+  const primaryImage = product.images?.[0] || 'https://images.unsplash.com/photo-1606220945770-b5b6c2c5bdc5?w=640&h=480&fit=crop&crop=center&auto=format&q=85';
   const displayPrice = product.currentBid || product.estimatedValueMin;
   const priceLabel = product.currentBid ? 'Current Bid' : 'Starting Price';
 
@@ -324,30 +409,29 @@ export function PremiumAuctionCard({
     <Grow in timeout={600} style={{ transformOrigin: '0 0 0' }}>
       <StyledCard onClick={onClick}>
         <ImageContainer>
+          {/* Image Loading Skeleton */}
           {imageLoading && (
-            <Skeleton
-              variant="rectangular"
-              width="100%"
-              height="100%"
-              sx={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
-            />
+            <ImageSkeleton>
+              <Typography variant="body2" sx={{ opacity: 0.6 }}>
+                Loading image...
+              </Typography>
+            </ImageSkeleton>
           )}
           
+          {/* Product Image */}
           {!imageError ? (
             <ProductImage
               className="card-image"
               src={primaryImage}
               alt={product.title}
               loading="lazy"
-              onLoad={() => {
-                setImageLoading(false);
-                setImageLoaded(true);
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              style={{ 
+                display: imageLoading ? 'none' : 'block',
+                opacity: imageLoaded ? 1 : 0,
+                transition: 'opacity 0.3s ease'
               }}
-              onError={() => {
-                setImageError(true);
-                setImageLoading(false);
-              }}
-              style={{ display: imageLoading ? 'none' : 'block' }}
             />
           ) : (
             <Box
@@ -358,13 +442,15 @@ export function PremiumAuctionCard({
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexDirection: 'column',
-                bgcolor: 'grey.100',
+                background: 'linear-gradient(135deg, #f1f3f4 0%, #e8eaed 100%)',
                 color: 'text.secondary',
                 gap: 2,
               }}
             >
-              <ViewIcon sx={{ fontSize: 48, opacity: 0.5 }} />
-              <Typography variant="body2">Image unavailable</Typography>
+              <ViewIcon sx={{ fontSize: 48, opacity: 0.4 }} />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                Image unavailable
+              </Typography>
             </Box>
           )}
 
@@ -391,24 +477,30 @@ export function PremiumAuctionCard({
             </FavoriteButton>
           )}
 
-          {/* Overlay with Actions */}
-          <CardOverlay className="card-overlay">
+          {/* Image Overlay with Actions */}
+          <ImageOverlay className="card-image-overlay">
             <Box />
             <HoverActions className="hover-actions">
               <IconButton
                 sx={{
-                  bgcolor: 'rgba(255, 255, 255, 0.9)',
-                  '&:hover': { bgcolor: 'white', transform: 'scale(1.1)' },
+                  bgcolor: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                  '&:hover': { 
+                    bgcolor: 'white', 
+                    transform: 'scale(1.15) rotate(5deg)',
+                    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.2)',
+                  },
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onQuickView?.();
                 }}
               >
-                <LaunchIcon sx={{ color: '#CE0E2D' }} />
+                <LaunchIcon sx={{ color: '#CE0E2D', fontSize: 20 }} />
               </IconButton>
             </HoverActions>
-          </CardOverlay>
+          </ImageOverlay>
         </ImageContainer>
 
         <ContentContainer className="card-content">
