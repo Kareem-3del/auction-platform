@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import {
   Gavel as BidIcon,
   AccessTime as TimerIcon,
+  TrendingUp as TrendingUpIcon,
+  AccountBalance as BalanceIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -21,6 +23,8 @@ import {
   DialogContent,
   DialogActions,
   InputAdornment,
+  Divider,
+  Fade,
 } from '@mui/material';
 
 import { useAuth, useAuthenticatedFetch } from 'src/hooks/useAuth';
@@ -262,262 +266,369 @@ export default function QuickBidDialog({
 
   return (
     <>
-      {/* Quick Bid Card */}
-      <Card sx={{ mb: 2, borderRadius: 3, boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)', border: '1px solid #e0e0e0' }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h6" sx={{ color: '#0F1419', fontWeight: 'bold' }}>
-              Quick Bid
-            </Typography>
+      {/* Enhanced Quick Bid Card */}
+      <Card sx={{ 
+        borderRadius: 4,
+        boxShadow: '0 8px 32px rgba(206, 14, 45, 0.12)',
+        border: '2px solid rgba(206, 14, 45, 0.1)',
+        background: 'linear-gradient(135deg, #ffffff 0%, rgba(206, 14, 45, 0.02) 100%)',
+        overflow: 'hidden',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 4,
+          background: 'linear-gradient(90deg, #CE0E2D 0%, #FF4444 100%)',
+        }
+      }}>
+        <CardContent sx={{ p: 0 }}>
+          {/* Header Section */}
+          <Box sx={{ 
+            p: 3, 
+            pb: 0,
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center' 
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(206, 14, 45, 0.3)'
+              }}>
+                <BidIcon sx={{ color: 'white', fontSize: 20 }} />
+              </Box>
+              <Typography variant="h6" sx={{ 
+                color: '#0F1419', 
+                fontWeight: 'bold',
+                fontSize: '1.1rem'
+              }}>
+                Quick Bid
+              </Typography>
+            </Box>
+            
             {timeLeft && timeLeft !== 'Auction Ended' && (
               <Chip 
                 icon={<TimerIcon />}
                 label={timeLeft}
                 sx={{ 
-                  backgroundColor: '#CE0E2D', 
+                  background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
                   color: 'white',
                   fontWeight: 600,
-                  '& .MuiChip-icon': { color: 'white' }
+                  fontSize: '0.8rem',
+                  height: 32,
+                  borderRadius: 2,
+                  '& .MuiChip-icon': { color: 'white', fontSize: 16 }
                 }}
-                size="small"
               />
             )}
           </Box>
 
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontSize: '0.9rem' }}>
-              Current bid: 
-              <strong 
-                style={{ 
-                  color: '#CE0E2D',
-                  marginLeft: '8px',
-                  transition: 'all 0.3s ease',
-                  ...(bidUpdateAnimation ? {
-                    transform: 'scale(1.1)',
-                    background: 'rgba(206, 14, 45, 0.1)',
-                    padding: '2px 6px',
-                    borderRadius: '4px'
-                  } : {})
-                }}
-              >
-                {formatCurrency(displayCurrentBid)}
-              </strong>
-              {liveBidCount && liveBidCount > 0 && (
-                <span style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#666' }}>
-                  ({liveBidCount} bids)
-                </span>
-              )}
-            </Typography>
-            
-            {/* New bid notification */}
-            {newBidNotification && (
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#28a745', 
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 1,
-                  animation: 'fadeInOut 5s ease-in-out',
-                  '@keyframes fadeInOut': {
-                    '0%': { opacity: 0, transform: 'translateY(-5px)' },
-                    '10%': { opacity: 1, transform: 'translateY(0)' },
-                    '90%': { opacity: 1, transform: 'translateY(0)' },
-                    '100%': { opacity: 0, transform: 'translateY(-5px)' }
-                  }
-                }}
-              >
-                🎯 {newBidNotification}
-              </Typography>
-            )}
-          </Box>
-
-          {/* Enhanced Balance Display */}
-          {user && (
+          {/* Current Bid Section */}
+          <Box sx={{ px: 3, py: 2 }}>
             <Box sx={{ 
-              mb: 2,
-              p: 2,
-              background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.05), rgba(206, 14, 45, 0.1))',
-              borderRadius: 2,
-              border: '1px solid rgba(206, 14, 45, 0.2)'
+              p: 2.5,
+              background: 'linear-gradient(135deg, rgba(15, 20, 25, 0.03), rgba(15, 20, 25, 0.06))',
+              borderRadius: 3,
+              border: '1px solid rgba(15, 20, 25, 0.08)',
+              position: 'relative'
             }}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, textAlign: 'center' }}>
-                💰 {t('auction.yourBalance')}
-              </Typography>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box sx={{ flex: 1, textAlign: 'center' }}>
-                  <Typography variant="caption" sx={{ color: '#666', fontSize: '0.7rem' }}>{t('auction.virtualBalance')}</Typography>
-                  <Typography 
-                    variant="body2" 
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                <Typography variant="body2" sx={{ 
+                  color: '#6c757d',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  Current High Bid
+                </Typography>
+                {liveBidCount && liveBidCount > 0 && (
+                  <Chip 
+                    label={`${liveBidCount} bids`}
+                    size="small"
                     sx={{ 
-                      color: user.balanceVirtual >= (displayCurrentBid + bidIncrement) ? '#2E7D32' : '#d32f2f',
-                      fontWeight: 'bold',
-                      fontSize: '0.85rem'
+                      backgroundColor: 'rgba(206, 14, 45, 0.1)',
+                      color: '#CE0E2D',
+                      fontWeight: 600,
+                      fontSize: '0.7rem',
+                      height: 24
                     }}
-                  >
-                    ${(liveUserBalance ?? user.balanceVirtual).toFixed(2)}
-                  </Typography>
-                </Box>
-                
-                {user.balanceReal && user.balanceReal > 0 && (
-                  <Box sx={{ flex: 1, textAlign: 'center' }}>
-                    <Typography variant="caption" sx={{ color: '#666', fontSize: '0.7rem' }}>{t('auction.realBalance')}</Typography>
-                    <Typography variant="body2" sx={{ color: '#2E7D32', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                      ${user.balanceReal.toFixed(2)}
-                    </Typography>
-                  </Box>
+                  />
                 )}
               </Box>
               
-              <Box sx={{ textAlign: 'center', mt: 1 }}>
-                {user.balanceVirtual < (displayCurrentBid + bidIncrement) ? (
-                  <Typography variant="caption" sx={{ 
-                    color: '#d32f2f', 
-                    fontSize: '0.65rem',
-                    backgroundColor: 'rgba(211, 47, 47, 0.1)',
-                    px: 1,
-                    py: 0.3,
-                    borderRadius: 1
-                  }}>
-                    ⚠️ {t('auction.insufficientForNext')}
-                  </Typography>
-                ) : (
-                  <Typography variant="caption" sx={{ 
-                    color: '#2e7d32', 
-                    fontSize: '0.65rem',
-                    backgroundColor: 'rgba(46, 125, 50, 0.1)',
-                    px: 1,
-                    py: 0.3,
-                    borderRadius: 1
-                  }}>
-                    ✓ {t('auction.readyToBid')}
-                  </Typography>
+              <Typography variant="h4" sx={{ 
+                color: '#CE0E2D',
+                fontWeight: 'bold',
+                fontSize: '2rem',
+                lineHeight: 1.2,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                ...(bidUpdateAnimation && {
+                  transform: 'scale(1.05)',
+                  textShadow: '0 0 20px rgba(206, 14, 45, 0.3)'
+                })
+              }}>
+                {formatCurrency(displayCurrentBid)}
+              </Typography>
+            </Box>
+            
+            {/* New bid notification */}
+            <Fade in={!!newBidNotification} timeout={300}>
+              <Box sx={{ mt: 1.5 }}>
+                {newBidNotification && (
+                  <Alert 
+                    severity="success" 
+                    sx={{ 
+                      backgroundColor: 'rgba(40, 167, 69, 0.08)',
+                      border: '1px solid rgba(40, 167, 69, 0.2)',
+                      borderRadius: 2,
+                      fontSize: '0.8rem',
+                      py: 0.5,
+                      '& .MuiAlert-icon': {
+                        fontSize: '1rem'
+                      }
+                    }}
+                  >
+                    🎯 {newBidNotification}
+                  </Alert>
                 )}
+              </Box>
+            </Fade>
+          </Box>
+
+          {/* Balance Section - Simplified */}
+          {user && (
+            <Box sx={{ px: 3, pb: 2 }}>
+              <Box sx={{ 
+                p: 2,
+                background: user.balanceVirtual >= (displayCurrentBid + bidIncrement) 
+                  ? 'linear-gradient(135deg, rgba(46, 125, 50, 0.08), rgba(76, 175, 80, 0.05))'
+                  : 'linear-gradient(135deg, rgba(211, 47, 47, 0.08), rgba(244, 67, 54, 0.05))',
+                borderRadius: 2,
+                border: `1px solid ${user.balanceVirtual >= (displayCurrentBid + bidIncrement) ? 'rgba(46, 125, 50, 0.2)' : 'rgba(211, 47, 47, 0.2)'}`
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BalanceIcon sx={{ 
+                      fontSize: 18, 
+                      color: user.balanceVirtual >= (displayCurrentBid + bidIncrement) ? '#2E7D32' : '#d32f2f'
+                    }} />
+                    <Typography variant="body2" sx={{ 
+                      fontWeight: 600, 
+                      color: '#374151'
+                    }}>
+                      Available Balance
+                    </Typography>
+                  </Box>
+                  
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 'bold',
+                    color: user.balanceVirtual >= (displayCurrentBid + bidIncrement) ? '#2E7D32' : '#d32f2f'
+                  }}>
+                    {formatCurrency(liveUserBalance ?? user.balanceVirtual)}
+                  </Typography>
+                </Box>
+                
+                <Typography variant="caption" sx={{ 
+                  display: 'block',
+                  mt: 1,
+                  textAlign: 'center',
+                  fontWeight: 600,
+                  color: user.balanceVirtual >= (displayCurrentBid + bidIncrement) ? '#2E7D32' : '#d32f2f'
+                }}>
+                  {user.balanceVirtual >= (displayCurrentBid + bidIncrement) 
+                    ? `✓ Ready to bid (min: ${formatCurrency(displayCurrentBid + bidIncrement)})`
+                    : `⚠️ Insufficient funds for next bid`
+                  }
+                </Typography>
               </Box>
             </Box>
           )}
 
-          <Stack direction="row" spacing={1} mb={2}>
-            {quickBids.map((bid, index) => (
-              <Button
-                key={index}
-                variant={selectedBid === bid.amount ? 'contained' : 'outlined'}
-                size="small"
-                onClick={() => {
-                  setSelectedBid(bid.amount);
-                  setCustomAmount('');
-                }}
-                disabled={!bid.affordable}
-                sx={{ 
-                  flex: 1,
-                  borderRadius: 2,
-                  fontWeight: 600,
-                  position: 'relative',
-                  ...(selectedBid === bid.amount ? {
-                    backgroundColor: '#CE0E2D',
-                    '&:hover': { backgroundColor: '#B00C24' }
-                  } : {
-                    borderColor: bid.affordable ? '#CE0E2D' : '#e0e0e0',
-                    color: bid.affordable ? '#CE0E2D' : '#999',
-                    '&:hover': { 
-                      borderColor: bid.affordable ? '#CE0E2D' : '#e0e0e0',
-                      backgroundColor: bid.affordable ? 'rgba(206, 14, 45, 0.04)' : 'transparent'
-                    }
-                  }),
-                  '&:disabled': {
-                    borderColor: '#e0e0e0',
-                    color: '#999',
-                    backgroundColor: '#f5f5f5',
-                    opacity: 0.6,
-                    cursor: 'not-allowed'
-                  }
-                }}
-              >
-                <Box textAlign="center" sx={{ position: 'relative' }}>
-                  <Typography variant="body2" fontWeight="bold">
-                    +{formatCurrency(bidIncrement * bid.multiplier)}
-                  </Typography>
-                  {!bid.affordable && (
-                    <Typography variant="caption" sx={{ 
-                      color: '#999', 
-                      fontSize: '0.6rem',
-                      position: 'absolute',
-                      bottom: -8,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      Can't afford
+          <Divider sx={{ mx: 3, borderColor: 'rgba(206, 14, 45, 0.1)' }} />
+
+          {/* Quick Bid Buttons - Enhanced */}
+          <Box sx={{ px: 3, py: 3 }}>
+            <Typography variant="body2" sx={{ 
+              color: '#6c757d',
+              fontWeight: 600,
+              mb: 2,
+              fontSize: '0.85rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Quick Bid Options
+            </Typography>
+            
+            <Stack direction="row" spacing={1.5} sx={{ mb: 3 }}>
+              {quickBids.map((bid, index) => (
+                <Button
+                  key={index}
+                  variant={selectedBid === bid.amount ? 'contained' : 'outlined'}
+                  onClick={() => {
+                    setSelectedBid(bid.amount);
+                    setCustomAmount('');
+                  }}
+                  disabled={!bid.affordable}
+                  sx={{ 
+                    flex: 1,
+                    borderRadius: 3,
+                    fontWeight: 700,
+                    py: 1.5,
+                    position: 'relative',
+                    minHeight: 56,
+                    fontSize: '0.9rem',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    ...(selectedBid === bid.amount ? {
+                      background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
+                      boxShadow: '0 4px 16px rgba(206, 14, 45, 0.3)',
+                      transform: 'translateY(-2px)',
+                      '&:hover': { 
+                        background: 'linear-gradient(135deg, #B00C24, #e63939)',
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 6px 20px rgba(206, 14, 45, 0.4)'
+                      }
+                    } : {
+                      borderColor: bid.affordable ? 'rgba(206, 14, 45, 0.3)' : 'rgba(224, 224, 224, 0.5)',
+                      backgroundColor: bid.affordable ? 'rgba(206, 14, 45, 0.02)' : 'rgba(245, 245, 245, 0.5)',
+                      color: bid.affordable ? '#CE0E2D' : '#999',
+                      '&:hover': { 
+                        borderColor: bid.affordable ? '#CE0E2D' : 'rgba(224, 224, 224, 0.5)',
+                        backgroundColor: bid.affordable ? 'rgba(206, 14, 45, 0.08)' : 'rgba(245, 245, 245, 0.5)',
+                        transform: bid.affordable ? 'translateY(-1px)' : 'none',
+                        boxShadow: bid.affordable ? '0 2px 8px rgba(206, 14, 45, 0.15)' : 'none'
+                      }
+                    })
+                  }}
+                >
+                  <Box textAlign="center">
+                    <Typography variant="body2" fontWeight="bold" sx={{ fontSize: '0.85rem' }}>
+                      +{formatCurrency(bidIncrement * bid.multiplier)}
                     </Typography>
-                  )}
-                </Box>
-              </Button>
-            ))}
+                    <Typography variant="caption" sx={{ 
+                      opacity: 0.8,
+                      fontSize: '0.7rem',
+                      color: 'inherit'
+                    }}>
+                      {bid.multiplier}x increment
+                    </Typography>
+                  </Box>
+                </Button>
+              ))}
+            </Stack>
+
             <Button
               variant="outlined"
-              size="small"
+              fullWidth
               onClick={() => {
                 setOpen(true);
                 setError(null);
               }}
-              sx={{ flex: 1, borderColor: '#CE0E2D', color: '#CE0E2D', '&:hover': { borderColor: '#CE0E2D', backgroundColor: 'rgba(206, 14, 45, 0.04)' } }}
+              sx={{ 
+                borderColor: 'rgba(206, 14, 45, 0.3)',
+                color: '#CE0E2D',
+                borderRadius: 3,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                transition: 'all 0.3s ease',
+                '&:hover': { 
+                  borderColor: '#CE0E2D',
+                  backgroundColor: 'rgba(206, 14, 45, 0.04)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 2px 8px rgba(206, 14, 45, 0.15)'
+                }
+              }}
             >
-              Enter Amount
+              💰 Custom Bid Amount
             </Button>
-          </Stack>
+          </Box>
 
-          {/* Connection Status Warning */}
+          {/* Connection Status */}
           {!isConnected && connectionError && (
-            <Alert 
-              severity="warning" 
-              sx={{ mb: 1, fontSize: '0.8rem' }}
-              action={
-                onReconnect && (
-                  <Button size="small" onClick={onReconnect} sx={{ color: '#CE0E2D' }}>
-                    {t('auction.reconnect')}
-                  </Button>
-                )
-              }
-            >
-              {t('auction.connectionIssue')}: {connectionError}
-            </Alert>
+            <Box sx={{ px: 3, pb: 2 }}>
+              <Alert 
+                severity="warning" 
+                sx={{ 
+                  borderRadius: 2,
+                  fontSize: '0.85rem'
+                }}
+                action={
+                  onReconnect && (
+                    <Button 
+                      size="small" 
+                      onClick={onReconnect} 
+                      sx={{ 
+                        color: '#CE0E2D',
+                        fontWeight: 600
+                      }}
+                    >
+                      Reconnect
+                    </Button>
+                  )
+                }
+              >
+                Connection Issue: {connectionError}
+              </Alert>
+            </Box>
           )}
 
-          <Button
-            variant="contained"
-            fullWidth
-            startIcon={<BidIcon />}
-            onClick={handleBidSubmit}
-            disabled={auctionStatus !== 'LIVE' || loading || !isConnected || bidButtonDisabled}
-            sx={{
-              backgroundColor: bidButtonDisabled ? '#ff9800' : (isConnected ? '#CE0E2D' : '#666'),
-              color: 'white',
-              fontWeight: 600,
-              py: 1.5,
-              borderRadius: 2,
-              fontSize: '1rem',
-              textTransform: 'none',
-              boxShadow: 'none',
-              '&:hover': {
-                backgroundColor: bidButtonDisabled ? '#ff9800' : (isConnected ? '#B00C24' : '#666'),
-                boxShadow: 'none',
-              },
-              '&:disabled': {
-                backgroundColor: bidButtonDisabled ? '#ff9800' : '#ccc',
-                color: bidButtonDisabled ? 'white' : '#888',
-                opacity: bidButtonDisabled ? 1 : 0.6,
-              }
-            }}
-          >
-            {bidButtonDisabled ? `⏱️ Wait ${bidCooldownTime}s` : 
-             loading ? t('auction.placingBid') : 
-             !isConnected ? `🔄 ${t('auction.reconnecting')}...` : 
-             `${t('auction.placeBid')} - ${formatCurrency(selectedBid)}`}
-          </Button>
+          {/* Main Bid Button */}
+          <Box sx={{ p: 3, pt: 0 }}>
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<BidIcon />}
+              onClick={handleBidSubmit}
+              disabled={auctionStatus !== 'LIVE' || loading || !isConnected || bidButtonDisabled}
+              sx={{
+                background: bidButtonDisabled 
+                  ? 'linear-gradient(135deg, #ff9800, #ffb74d)' 
+                  : isConnected 
+                    ? 'linear-gradient(135deg, #CE0E2D, #FF4444)'
+                    : 'linear-gradient(135deg, #666, #888)',
+                color: 'white',
+                fontWeight: 700,
+                py: 2,
+                borderRadius: 3,
+                fontSize: '1.1rem',
+                textTransform: 'none',
+                boxShadow: bidButtonDisabled 
+                  ? '0 4px 16px rgba(255, 152, 0, 0.3)'
+                  : isConnected 
+                    ? '0 6px 20px rgba(206, 14, 45, 0.4)'
+                    : '0 4px 12px rgba(102, 102, 102, 0.3)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  background: bidButtonDisabled 
+                    ? 'linear-gradient(135deg, #ff9800, #ffb74d)'
+                    : isConnected 
+                      ? 'linear-gradient(135deg, #B00C24, #e63939)'
+                      : 'linear-gradient(135deg, #666, #888)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: bidButtonDisabled 
+                    ? '0 6px 20px rgba(255, 152, 0, 0.4)'
+                    : isConnected 
+                      ? '0 8px 24px rgba(206, 14, 45, 0.5)'
+                      : '0 6px 16px rgba(102, 102, 102, 0.4)'
+                }
+              }}
+            >
+              {bidButtonDisabled ? `⏱️ Wait ${bidCooldownTime}s` : 
+               loading ? 'Placing Bid...' : 
+               !isConnected ? `🔄 Reconnecting...` : 
+               `Place Bid - ${formatCurrency(selectedBid)}`}
+            </Button>
+          </Box>
         </CardContent>
       </Card>
 
