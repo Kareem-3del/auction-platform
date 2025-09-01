@@ -794,13 +794,13 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             {/* CURRENT BID CARD */}
             <Card sx={{ 
               mb: 2,
-              p: 3, 
+              p: 2, 
               backgroundColor: '#ffffff',
-              border: '3px solid',
+              border: '2px solid',
               borderColor: product.auctionStatus === 'LIVE' ? '#CE0E2D' : 
                           product.auctionStatus === 'ENDED' ? '#FFD700' : '#e0e0e0',
-              borderRadius: 3,
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
+              borderRadius: 2,
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
               textAlign: 'center',
               position: 'relative',
               flex: '0 0 auto'
@@ -891,14 +891,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
             {/* QUICK BID INTERFACE */}
             {product.auctionStatus === 'LIVE' && (
-              <Card sx={{
-                p: 2,
-                backgroundColor: '#ffffff',
-                border: '2px solid #CE0E2D',
-                borderRadius: 2,
-                boxShadow: '0 8px 24px rgba(206, 14, 45, 0.2)',
-                flex: '0 0 auto'
-              }}>
+              <Box sx={{ flex: '0 0 auto' }}>
                 <QuickBidDialog
                   productId={product.id}
                   currentBid={displayCurrentBid}
@@ -920,7 +913,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   liveCurrentBid={liveCurrentBid}
                   liveBidCount={liveBidCount}
                 />
-              </Card>
+              </Box>
             )}
           </Grid>
         </Grid>
