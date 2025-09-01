@@ -25,7 +25,7 @@ const HERO_ITEMS = [
     category: "Luxury Watches",
     currentBid: 45000,
     timeLeft: "2h 15m",
-    image: "/api/placeholder/600/400",
+    image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=600&h=400&fit=crop&crop=center",
     participants: 127,
   },
   {
@@ -34,7 +34,7 @@ const HERO_ITEMS = [
     category: "Classic Cars",
     currentBid: 2400000,
     timeLeft: "1d 8h",
-    image: "/api/placeholder/600/400",
+    image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=600&h=400&fit=crop&crop=center",
     participants: 89,
   },
   {
@@ -43,7 +43,7 @@ const HERO_ITEMS = [
     category: "Fine Art",
     currentBid: 180000,
     timeLeft: "45m",
-    image: "/api/placeholder/600/400",
+    image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=600&h=400&fit=crop&crop=center",
     participants: 234,
   },
 ];

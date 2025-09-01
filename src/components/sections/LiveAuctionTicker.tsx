@@ -31,7 +31,7 @@ const LIVE_AUCTIONS = [
     lastBidder: "Collector_92",
     timeLeft: "2h 45m",
     participants: 23,
-    image: "/api/placeholder/120/80",
+    image: "https://images.unsplash.com/photo-1606220945770-b5b6c2c5bdc5?w=120&h=80&fit=crop&crop=center",
     isHot: true,
   },
   {
@@ -42,7 +42,7 @@ const LIVE_AUCTIONS = [
     lastBidder: "TimeKeeper",
     timeLeft: "1h 22m",
     participants: 45,
-    image: "/api/placeholder/120/80",
+    image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=120&h=80&fit=crop&crop=center",
     isHot: true,
   },
   {
@@ -53,7 +53,7 @@ const LIVE_AUCTIONS = [
     lastBidder: "ArtLover_99",
     timeLeft: "4h 18m",
     participants: 67,
-    image: "/api/placeholder/120/80",
+    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=120&h=80&fit=crop&crop=center",
     isHot: false,
   },
   {
@@ -64,7 +64,7 @@ const LIVE_AUCTIONS = [
     lastBidder: "SpeedDemon",
     timeLeft: "6h 12m",
     participants: 89,
-    image: "/api/placeholder/120/80",
+    image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=120&h=80&fit=crop&crop=center",
     isHot: true,
   },
   {
@@ -75,7 +75,7 @@ const LIVE_AUCTIONS = [
     lastBidder: "LuxuryQueen",
     timeLeft: "3h 8m",
     participants: 34,
-    image: "/api/placeholder/120/80",
+    image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=120&h=80&fit=crop&crop=center",
     isHot: false,
   },
 ];
