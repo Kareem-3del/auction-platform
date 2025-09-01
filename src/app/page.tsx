@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import HomePageClient from './HomePageClient';
+import NewHomePageClient from './NewHomePageClient';
 
 export const metadata: Metadata = {
   title: 'Lebanon Auction - Premier Online Auction House | Luxury Items, Cars, Real Estate & Collectibles',
@@ -298,7 +298,7 @@ export default async function HomePage() {
           __html: JSON.stringify(structuredData)
         }}
       />
-      <HomePageClient />
+      <NewHomePageClient />
     </>
   );
 }
