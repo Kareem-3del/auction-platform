@@ -223,11 +223,26 @@ export default function QuickBidDialog({
   };
 
   const handleCustomAmountChange = (value: string) => {
-    setCustomAmount(value);
-    const numValue = parseFloat(value);
-    if (!isNaN(numValue) && numValue > 0) {
-      setSelectedBid(numValue);
+    // Allow only numbers and decimal point, filter out any other characters
+    const numericValue = value.replace(/[^0-9.]/g, '');
+    
+    // Prevent multiple decimal points
+    const parts = numericValue.split('.');
+    const cleanValue = parts.length <= 2 ? numericValue : parts[0] + '.' + parts.slice(1).join('');
+    
+    setCustomAmount(cleanValue);
+    
+    // Update selectedBid for any valid numeric input (including 0 and decimals during typing)
+    if (cleanValue.trim() !== '') {
+      const numValue = parseFloat(cleanValue);
+      if (!isNaN(numValue)) {
+        setSelectedBid(numValue);
+      }
+    } else {
+      // If field is empty, reset to minimum bid for validation purposes
+      setSelectedBid(displayCurrentBid + bidIncrement);
     }
+    
     // Clear any previous errors when user starts typing
     if (error) {
       setError(null);
@@ -789,9 +804,15 @@ export default function QuickBidDialog({
                 label="Your bid amount"
                 value={customAmount}
                 onChange={(e) => handleCustomAmountChange(e.target.value)}
-                type="number"
+                type="text"
+                inputMode="decimal"
                 InputProps={{
                   startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  inputProps: {
+                    pattern: '[0-9]*\\.?[0-9]*',
+                    min: 0,
+                    step: 'any'
+                  }
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
