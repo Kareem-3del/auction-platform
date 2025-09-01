@@ -291,7 +291,7 @@ export function PremiumAuctionCard({
     return () => clearInterval(timer);
   }, [endTime, startTime, variant]);
 
-  const primaryImage = product.images?.[0] || '/api/placeholder/400/300';
+  const primaryImage = product.images?.[0] || 'https://images.unsplash.com/photo-1606220945770-b5b6c2c5bdc5?w=400&h=300&fit=crop&crop=center';
   const displayPrice = product.currentBid || product.estimatedValueMin;
   const priceLabel = product.currentBid ? 'Current Bid' : 'Starting Price';
 
