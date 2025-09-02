@@ -608,29 +608,6 @@ export function ModernHeroSection() {
                 ))}
               </Box>
             </Box>
-            ) : (
-              // Fallback when no products are available
-              <Box
-                sx={{
-                  position: 'relative',
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  p: 4,
-                  textAlign: 'center',
-                  color: 'white',
-                }}
-              >
-                <Typography variant="h5" sx={{ mb: 2, opacity: 0.7 }}>
-                  No Live Auctions Available
-                </Typography>
-                <Typography variant="body1" sx={{ opacity: 0.5 }}>
-                  Check back soon for exciting new auctions
-                </Typography>
-              </Box>
-            )}
           </Box>
         </Box>
       </Container>
