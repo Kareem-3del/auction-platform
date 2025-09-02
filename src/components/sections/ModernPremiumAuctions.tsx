@@ -31,30 +31,30 @@ interface ModernPremiumAuctionsProps {
   showTabs?: boolean;
 }
 
-// Mock data generator for demonstration
+// Mock data generator for demonstration - realistic auction items
 const createMockProducts = (section: string, count: number): ProductCard[] => {
   const baseProducts = [
     {
       id: '1',
-      title: '1955 Mercedes-Benz 300SL Gullwing',
-      category: { name: 'Classic Cars' },
-      images: ['https://images.unsplash.com/photo-1606220945770-b5b6c2c5bdc5?w=400&h=300&fit=crop&crop=center'],
-      estimatedValueMin: 1200000,
-      estimatedValueMax: 1800000,
-      currentBid: 1450000,
+      title: 'Picasso Original Sketch',
+      category: { name: 'Fine Art' },
+      images: ['https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop&crop=center'],
+      estimatedValueMin: 150000,
+      estimatedValueMax: 200000,
+      currentBid: 180000,
       agent: {
-        displayName: 'Classic Car Specialists',
-        businessName: 'Heritage Motors',
-        logoUrl: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop&crop=center',
+        displayName: 'Elite Art Gallery',
+        businessName: 'Masterpiece Auctions',
+        logoUrl: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=80&h=80&fit=crop&crop=center',
         rating: 4.9,
       },
       viewCount: 2847,
-      favoriteCount: 156,
+      favoriteCount: 234,
       startTime: new Date().toISOString(),
-      endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+      endTime: new Date(Date.now() + 45 * 60 * 1000).toISOString(), // 45 minutes from now to match "45m" in HTML
       auction: {
         startTime: new Date().toISOString(),
-        endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+        endTime: new Date(Date.now() + 45 * 60 * 1000).toISOString(),
         status: 'LIVE',
       },
     },
@@ -292,61 +292,89 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
       setLoading(prev => ({ ...prev, [section]: true }));
       setError(prev => ({ ...prev, [section]: null }));
 
-      const apiSection = section === 'ending' ? 'ending-soon' : section;
-      console.log(`Fetching ${section} products from API:`, apiSection);
+      console.log(`Fetching ${section} products...`);
       
-      // Try showcase API first
-      let response = await productsAPI.getShowcaseProducts(apiSection, limit);
+      // Try direct products API with appropriate filters for each section
+      let apiParams: Record<string, any> = {
+        limit: limit,
+        status: 'APPROVED'
+      };
       
-      // If showcase API fails or returns empty, try general products API as fallback
-      if (!isSuccessResponse(response) || !response.data?.data?.length) {
-        console.log(`Showcase API failed for ${section}, trying general products API`);
-        const generalResponse = await fetch(`/api/products?limit=${limit}&status=APPROVED`);
-        if (generalResponse.ok) {
-          const generalData = await generalResponse.json();
-          if (generalData.success && generalData.data?.length) {
-            console.log(`Found ${generalData.data.length} products from general API`);
-            setProducts(prev => ({
-              ...prev,
-              [section]: generalData.data.slice(0, limit)
-            }));
-            return;
-          }
-        }
+      // Apply section-specific filters
+      switch (section) {
+        case 'ending':
+          apiParams.auctionStatus = 'LIVE';
+          apiParams.sortBy = 'ending_soon';
+          break;
+        case 'trending':
+          apiParams.sortBy = 'relevance';
+          apiParams.auctionOnly = 'true';
+          break;
+        case 'featured':
+          apiParams.featured = 'true';
+          apiParams.sortBy = 'relevance';
+          break;
+        case 'recent':
+          apiParams.sortBy = 'newest';
+          break;
       }
       
-      if (isSuccessResponse(response)) {
-        const fetchedProducts = response.data.data || [];
-        console.log(`Successfully fetched ${section} products:`, fetchedProducts.length, fetchedProducts);
-        if (fetchedProducts.length === 0) {
-          console.log(`No products found for ${section}, using mock data`);
-          setProducts(prev => ({
-            ...prev,
-            [section]: createMockProducts(section, limit)
-          }));
-        } else {
-          setProducts(prev => ({
-            ...prev,
-            [section]: Array.isArray(fetchedProducts) ? fetchedProducts : []
-          }));
-        }
-      } else {
-        console.warn(`API error for ${section}:`, response.error);
-        // Use mock data as fallback for demo
-        console.log(`Using mock data fallback for ${section}`);
+      const queryString = Object.entries(apiParams)
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      console.log(`API call: /api/products?${queryString}`);
+      
+      const response = await fetch(`/api/products?${queryString}`);
+      const data = await response.json();
+      
+      if (response.ok && data.success && data.data?.length > 0) {
+        console.log(`Successfully fetched ${data.data.length} real products for ${section}`);
         setProducts(prev => ({
           ...prev,
-          [section]: createMockProducts(section, limit)
+          [section]: data.data
         }));
+      } else {
+        // If no real data, try showcase API as fallback
+        const apiSection = section === 'ending' ? 'ending-soon' : section;
+        const showcaseResponse = await productsAPI.getShowcaseProducts(apiSection, limit);
+        
+        if (isSuccessResponse(showcaseResponse) && showcaseResponse.data?.data?.length > 0) {
+          console.log(`Using showcase API data for ${section}`);
+          setProducts(prev => ({
+            ...prev,
+            [section]: showcaseResponse.data.data
+          }));
+        } else {
+          // Final fallback to mock data with realistic auction properties
+          console.log(`No real data found for ${section}, using enhanced mock data`);
+          const mockProducts = createMockProducts(section, limit);
+          // Enhance mock data with section-appropriate properties
+          const enhancedMockProducts = mockProducts.map(product => ({
+            ...product,
+            // Add realistic auction timing
+            auction: {
+              ...product.auction,
+              status: section === 'ending' ? 'LIVE' : product.auction?.status || 'LIVE',
+              endTime: section === 'ending' 
+                ? new Date(Date.now() + Math.random() * 4 * 60 * 60 * 1000).toISOString() // 0-4 hours from now
+                : product.auction?.endTime || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            }
+          }));
+          
+          setProducts(prev => ({
+            ...prev,
+            [section]: enhancedMockProducts
+          }));
+        }
       }
     } catch (err) {
       console.error(`Error fetching ${section} products:`, err);
-      console.log(`Error details for ${section}:`, err.message);
-      // Use mock data as fallback
-      console.log(`Using mock data fallback for ${section} due to error`);
+      // Fallback to enhanced mock data
+      const mockProducts = createMockProducts(section, limit);
       setProducts(prev => ({
         ...prev,
-        [section]: createMockProducts(section, limit)
+        [section]: mockProducts
       }));
       setError(prev => ({
         ...prev,

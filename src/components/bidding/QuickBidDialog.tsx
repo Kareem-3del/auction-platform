@@ -223,24 +223,15 @@ export default function QuickBidDialog({
   };
 
   const handleCustomAmountChange = (value: string) => {
-    // Allow only numbers and decimal point, filter out any other characters
-    const numericValue = value.replace(/[^0-9.]/g, '');
+    console.log('Input value received:', value); // Debug log
     
-    // Prevent multiple decimal points
-    const parts = numericValue.split('.');
-    const cleanValue = parts.length <= 2 ? numericValue : parts[0] + '.' + parts.slice(1).join('');
+    // Store the raw input first (let user type anything)
+    setCustomAmount(value);
     
-    setCustomAmount(cleanValue);
-    
-    // Update selectedBid for any valid numeric input (including 0 and decimals during typing)
-    if (cleanValue.trim() !== '') {
-      const numValue = parseFloat(cleanValue);
-      if (!isNaN(numValue)) {
-        setSelectedBid(numValue);
-      }
-    } else {
-      // If field is empty, reset to minimum bid for validation purposes
-      setSelectedBid(displayCurrentBid + bidIncrement);
+    // Only update selectedBid if we have a valid number
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setSelectedBid(numValue);
     }
     
     // Clear any previous errors when user starts typing
@@ -802,17 +793,23 @@ export default function QuickBidDialog({
               
               <TextField
                 label="Your bid amount"
-                value={customAmount}
-                onChange={(e) => handleCustomAmountChange(e.target.value)}
+                defaultValue=""
+                onChange={(e) => {
+                  console.log('TextField onChange fired with:', e.target.value);
+                  handleCustomAmountChange(e.target.value);
+                }}
+                onInput={(e) => {
+                  console.log('TextField onInput fired with:', (e.target as HTMLInputElement).value);
+                }}
+                onKeyDown={(e) => {
+                  console.log('Key pressed:', e.key);
+                }}
                 type="text"
-                inputMode="decimal"
+                placeholder="Enter amount (e.g. 100.50)"
+                autoComplete="off"
                 InputProps={{
                   startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                  inputProps: {
-                    pattern: '[0-9]*\\.?[0-9]*',
-                    min: 0,
-                    step: 'any'
-                  }
+                  autoComplete: 'off',
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
