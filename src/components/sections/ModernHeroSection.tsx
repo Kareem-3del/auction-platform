@@ -10,6 +10,7 @@ import {
   IconButton,
   useMediaQuery,
   useTheme,
+  CircularProgress,
 } from '@mui/material';
 import {
   PlayArrow as PlayIcon,
@@ -18,35 +19,33 @@ import {
   LocalOffer as OfferIcon,
 } from '@mui/icons-material';
 
-const HERO_ITEMS = [
-  {
-    id: 1,
-    title: "Rare Vintage Rolex Submariner",
-    category: "Luxury Watches",
-    currentBid: 45000,
-    timeLeft: "2h 15m",
-    image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=600&h=400&fit=crop&crop=center",
-    participants: 127,
-  },
-  {
-    id: 2,
-    title: "1965 Ferrari 250 GT",
-    category: "Classic Cars",
-    currentBid: 2400000,
-    timeLeft: "1d 8h",
-    image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=600&h=400&fit=crop&crop=center",
-    participants: 89,
-  },
-  {
-    id: 3,
-    title: "Picasso Original Sketch",
-    category: "Fine Art",
-    currentBid: 180000,
-    timeLeft: "45m",
-    image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=600&h=400&fit=crop&crop=center",
-    participants: 234,
-  },
-];
+interface HeroProduct {
+  id: string;
+  title: string;
+  category: { name: string };
+  currentBid: number;
+  endTime: string;
+  images: string[];
+  favoriteCount: number;
+  viewCount: number;
+}
+
+// Helper function to calculate time left
+function getTimeLeft(endTime: string): string {
+  const now = new Date().getTime();
+  const end = new Date(endTime).getTime();
+  const diff = end - now;
+  
+  if (diff <= 0) return 'Ended';
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
 
 export function ModernHeroSection() {
   const router = useRouter();
@@ -54,18 +53,58 @@ export function ModernHeroSection() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [activeItem, setActiveItem] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [heroProducts, setHeroProducts] = useState<HeroProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real products for hero section
+  useEffect(() => {
+    const fetchHeroProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/products?limit=3&status=APPROVED&auctionStatus=LIVE&sortBy=relevance');
+        const data = await response.json();
+        
+        if (data.success && data.data?.length > 0) {
+          console.log('Hero: Successfully fetched real products:', data.data.length);
+          const products = data.data.map((product: any) => ({
+            id: product.id,
+            title: product.title,
+            category: product.category,
+            currentBid: Number(product.currentBid) || 0,
+            endTime: product.endTime || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            images: Array.isArray(product.images) ? product.images : JSON.parse(product.images || '[]'),
+            favoriteCount: product.favoriteCount || 0,
+            viewCount: product.viewCount || 0,
+          }));
+          setHeroProducts(products);
+        } else {
+          console.log('Hero: No real products found, API response:', data);
+          // If no real products, show message
+          setHeroProducts([]);
+        }
+      } catch (error) {
+        console.error('Hero: Error fetching products:', error);
+        setHeroProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHeroProducts();
+  }, []);
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || heroProducts.length === 0) return;
 
     const interval = setInterval(() => {
-      setActiveItem((prev) => (prev + 1) % HERO_ITEMS.length);
+      setActiveItem((prev) => (prev + 1) % heroProducts.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [isPlaying, heroProducts.length]);
 
-  const currentItem = HERO_ITEMS[activeItem];
+  const currentItem = heroProducts[activeItem];
+  const totalParticipants = heroProducts.reduce((acc, item) => acc + (item.favoriteCount || 0), 0);
 
   return (
     <Box
@@ -196,7 +235,7 @@ export function ModernHeroSection() {
                   fontSize: '0.9rem',
                 }}
               >
-                Live Auctions • {HERO_ITEMS.reduce((acc, item) => acc + item.participants, 0)}+ Active Bidders
+                Live Auctions • {totalParticipants > 0 ? `${totalParticipants}+` : '0'} Active Bidders
               </Typography>
             </Box>
 
@@ -369,24 +408,32 @@ export function ModernHeroSection() {
                     boxShadow: '0 25px 60px rgba(0, 0, 0, 0.4)',
                   },
                 }}
-                onClick={() => router.push(`/auctions/${currentItem.id}`)}
+                onClick={() => currentItem && router.push(`/products/${currentItem.id}`)}
               >
                 {/* Image */}
                 <Box
                   sx={{
                     height: { xs: 300, md: 350 },
-                    backgroundImage: `url(${currentItem.image})`,
+                    backgroundImage: currentItem?.images?.[0] ? `url(${currentItem.images[0]})` : 'none',
+                    backgroundColor: loading || !currentItem ? '#333' : 'transparent',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     '&::before': {
                       content: '""',
                       position: 'absolute',
                       inset: 0,
-                      background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 100%)',
+                      background: currentItem ? 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 100%)' : 'none',
                     },
                   }}
                 >
+                  {loading && (
+                    <CircularProgress sx={{ color: 'white', zIndex: 1 }} />
+                  )}
+                
                   {/* Live Badge */}
                   <Box
                     sx={{
@@ -434,7 +481,7 @@ export function ModernHeroSection() {
                       fontWeight: 600,
                     }}
                   >
-                    {currentItem.timeLeft}
+                    {currentItem ? getTimeLeft(currentItem.endTime) : '--'}
                   </Box>
 
                   {/* Play Button */}
@@ -476,7 +523,7 @@ export function ModernHeroSection() {
                       mb: 1,
                     }}
                   >
-                    {currentItem.category}
+                    {currentItem?.category?.name || 'Loading...'}
                   </Typography>
 
                   <Typography
@@ -488,7 +535,7 @@ export function ModernHeroSection() {
                       lineHeight: 1.3,
                     }}
                   >
-                    {currentItem.title}
+                    {currentItem?.title || 'Loading auction...'}
                   </Typography>
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -507,7 +554,7 @@ export function ModernHeroSection() {
                           fontFamily: '"Roboto Mono", monospace',
                         }}
                       >
-                        ${currentItem.currentBid.toLocaleString()}
+                        ${currentItem?.currentBid?.toLocaleString() || '0'}
                       </Typography>
                     </Box>
 
@@ -522,7 +569,7 @@ export function ModernHeroSection() {
                         variant="h6"
                         sx={{ fontWeight: 700, color: 'white' }}
                       >
-                        {currentItem.participants}
+                        {currentItem?.favoriteCount || 0}
                       </Typography>
                     </Box>
                   </Box>
@@ -538,7 +585,7 @@ export function ModernHeroSection() {
                   mt: 4,
                 }}
               >
-                {HERO_ITEMS.map((_, index) => (
+                {heroProducts.map((_, index) => (
                   <Box
                     key={index}
                     onClick={() => setActiveItem(index)}
@@ -561,6 +608,29 @@ export function ModernHeroSection() {
                 ))}
               </Box>
             </Box>
+            ) : (
+              // Fallback when no products are available
+              <Box
+                sx={{
+                  position: 'relative',
+                  borderRadius: 4,
+                  overflow: 'hidden',
+                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  p: 4,
+                  textAlign: 'center',
+                  color: 'white',
+                }}
+              >
+                <Typography variant="h5" sx={{ mb: 2, opacity: 0.7 }}>
+                  No Live Auctions Available
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.5 }}>
+                  Check back soon for exciting new auctions
+                </Typography>
+              </Box>
+            )}
           </Box>
         </Box>
       </Container>
