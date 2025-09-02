@@ -127,11 +127,12 @@ const TYPE_OPTIONS = [
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest First' },
   { value: 'oldest', label: 'Oldest First' },
-  { value: 'endingSoon', label: 'Ending Soon' },
-  { value: 'startingSoon', label: 'Starting Soon' },
-  { value: 'priceAsc', label: 'Price: Low to High' },
-  { value: 'priceDesc', label: 'Price: High to Low' },
-  { value: 'mostBids', label: 'Most Bids' },
+  { value: 'ending_soon', label: 'Ending Soon' },
+  { value: 'relevance', label: 'Most Relevant' },
+  { value: 'price_low', label: 'Price: Low to High' },
+  { value: 'price_high', label: 'Price: High to Low' },
+  { value: 'titleAsc', label: 'Title A-Z' },
+  { value: 'titleDesc', label: 'Title Z-A' },
 ];
 
 const TIMEFRAME_OPTIONS = [
@@ -162,7 +163,7 @@ export default function AuctionsPage() {
   const getStatusFromFilter = (filter: string | null) => {
     if (!filter) return 'ALL';
     switch (filter) {
-      case 'ending-soon': return 'ENDING_SOON';
+      case 'ending-soon': return 'LIVE'; // ENDING_SOON is computed from LIVE auctions near end time
       case 'live': return 'LIVE';
       case 'scheduled': return 'SCHEDULED';
       case 'ended': return 'ENDED';
@@ -237,49 +238,91 @@ export default function AuctionsPage() {
 
       const queryParams = new URLSearchParams();
       
-      // Convert filter parameter to status if needed
-      if (searchParams.get('filter')) {
-        const filterValue = searchParams.get('filter');
-        const statusValue = getStatusFromFilter(filterValue);
-        queryParams.set('auctionStatus', statusValue);
-      }
-      
-      // Add other search params but transform them appropriately
-      searchParams.forEach((value, key) => {
-        if (key === 'filter') {
-          // Skip filter as we already handled it above
-          return;
-        } else if (key === 'status') {
-          queryParams.set('auctionStatus', value);
-        } else if (key === 'type') {
-          queryParams.set('auctionType', value);
-        } else {
-          queryParams.set(key, value);
-        }
-      });
-
-      // Ensure page is set
-      if (!queryParams.get('page')) {
-        queryParams.set('page', '1');
-      }
-
-      // Filter for products with auction status and add auction-specific params
+      // Always filter for auction products only
       queryParams.set('auctionOnly', 'true');
+      queryParams.set('status', 'APPROVED'); // Only approved products
+      
+      // Handle URL filter parameter
+      const filterParam = searchParams.get('filter');
+      if (filterParam) {
+        if (filterParam === 'ending-soon') {
+          // For ending soon, get LIVE auctions and add sortBy=ending_soon
+          queryParams.set('auctionStatus', 'LIVE');
+          queryParams.set('sortBy', 'ending_soon');
+        } else {
+          const statusValue = getStatusFromFilter(filterParam);
+          if (statusValue !== 'ALL') {
+            queryParams.set('auctionStatus', statusValue);
+          }
+        }
+      }
+
+      // Map current filters to API parameters
+      if (filters.status && filters.status !== 'ALL') {
+        queryParams.set('auctionStatus', filters.status);
+      }
+
+      if (filters.search) {
+        queryParams.set('search', filters.search);
+      }
+
+      if (filters.categoryId) {
+        queryParams.set('categoryId', filters.categoryId);
+      }
+
+      if (filters.minPrice) {
+        queryParams.set('minPrice', filters.minPrice);
+      }
+
+      if (filters.maxPrice) {
+        queryParams.set('maxPrice', filters.maxPrice);
+      }
+
+      if (filters.agentId) {
+        queryParams.set('agentId', filters.agentId);
+      }
+
+      // Map sort options to API parameters
+      if (filters.sortBy) {
+        queryParams.set('sortBy', filters.sortBy);
+      }
+
+      // Set pagination
+      queryParams.set('page', currentPage.toString());
+      queryParams.set('limit', '20'); // Fixed limit for now
+
+      console.log('API call with params:', queryParams.toString());
+
       const response = await fetch(`/api/products?${queryParams.toString()}`);
-      if (!response.ok) throw new Error('Failed to load auctions');
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
       
       const data = await response.json();
+      console.log('API response:', data);
+
       if (data.success) {
-        // The products API returns data.data (array) and data.pagination
-        setAuctions(data.data || []);
+        const products = data.data || [];
+        setAuctions(products);
         setTotalPages(data.pagination?.totalPages || 1);
         setTotalCount(data.pagination?.totalCount || 0);
+        
+        if (products.length === 0) {
+          console.log('No products found with current filters');
+        }
       } else {
-        setError(data.error?.message || 'Failed to load auctions');
+        console.error('API returned error:', data);
+        setError(data.message || 'Failed to load auctions');
+        setAuctions([]);
+        setTotalPages(1);
+        setTotalCount(0);
       }
     } catch (err) {
-      setError('Failed to load auctions');
       console.error('Error loading auctions:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load auctions');
+      setAuctions([]);
+      setTotalPages(1);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -289,17 +332,43 @@ export default function AuctionsPage() {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     
+    // Build URL params for the current page
     const queryParams = new URLSearchParams();
+    
+    // Map internal filter names to URL parameter names
     Object.entries(newFilters).forEach(([filterKey, filterValue]) => {
-      if (filterValue && filterValue !== 'ALL' && filterValue !== 'all') {
-        const paramKey = filterKey === 'sortBy' ? 'sort' : 
-                         filterKey === 'categoryId' ? 'category' : 
-                         filterKey === 'auctionType' ? 'type' : filterKey;
+      if (filterValue && filterValue !== 'ALL' && filterValue !== 'all' && filterValue !== '') {
+        let paramKey = filterKey;
+        
+        // Map filter names to URL parameter names
+        switch (filterKey) {
+          case 'sortBy':
+            paramKey = 'sort';
+            break;
+          case 'categoryId':
+            paramKey = 'category';
+            break;
+          case 'auctionType':
+            paramKey = 'type';
+            break;
+          case 'status':
+            // Map status to filter for URL consistency
+            paramKey = 'filter';
+            filterValue = value.toLowerCase().replace('_', '-');
+            break;
+          default:
+            paramKey = filterKey;
+        }
+        
         queryParams.set(paramKey, filterValue);
       }
     });
     
+    // Reset to first page when filters change
     queryParams.set('page', '1');
+    setCurrentPage(1);
+    
+    // Update URL and trigger reload
     router.push(`/auctions?${queryParams.toString()}`);
   };
 
@@ -367,8 +436,21 @@ export default function AuctionsPage() {
   };
 
   const renderAuctionCard = (product: any) => {
-    // Parse images from JSON string
-    const images = typeof product.images === 'string' ? JSON.parse(product.images) : (product.images || []);
+    if (!product) return null;
+    
+    // Safely parse images from JSON string
+    let images = [];
+    try {
+      if (typeof product.images === 'string') {
+        images = JSON.parse(product.images);
+      } else if (Array.isArray(product.images)) {
+        images = product.images;
+      }
+    } catch (e) {
+      console.warn('Failed to parse product images:', e);
+      images = [];
+    }
+    
     const mainImage = images[0] || '/placeholder-auction.jpg';
 
     return (
