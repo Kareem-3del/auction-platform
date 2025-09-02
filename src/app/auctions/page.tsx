@@ -147,7 +147,7 @@ export default function AuctionsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [auctions, setAuctions] = useState<any[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -302,10 +302,10 @@ export default function AuctionsPage() {
       console.log('API response:', data);
 
       if (data.success) {
-        const products = data.data || [];
+        const products = Array.isArray(data.data) ? data.data : [];
         setAuctions(products);
-        setTotalPages(data.pagination?.totalPages || 1);
-        setTotalCount(data.pagination?.totalCount || 0);
+        setTotalPages(data.meta?.pagination?.totalPages || 1);
+        setTotalCount(data.meta?.pagination?.totalCount || 0);
         
         if (products.length === 0) {
           console.log('No products found with current filters');
@@ -843,7 +843,7 @@ export default function AuctionsPage() {
             </Grid>
           ))}
         </Grid>
-      ) : auctions && auctions.length > 0 ? (
+      ) : Array.isArray(auctions) && auctions.length > 0 ? (
         <>
           <Grid container spacing={3}>
             {auctions.map((product) => (

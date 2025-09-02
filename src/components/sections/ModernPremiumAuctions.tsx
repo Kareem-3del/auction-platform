@@ -104,7 +104,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
           apiParams.auctionOnly = 'true';
           break;
         case 'featured':
-          apiParams.featured = 'true';
+          // Use activity-based sorting instead of featured field
           apiParams.sortBy = 'relevance';
           break;
         case 'recent':
