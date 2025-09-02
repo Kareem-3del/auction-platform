@@ -229,9 +229,10 @@ export default function AuctionsPage() {
       
       const data = await response.json();
       if (data.success) {
-        setAuctions(data.data.auctions);
-        setTotalPages(data.data.pagination.totalPages);
-        setTotalCount(data.data.pagination.totalCount);
+        // The products API returns data.data (array) and data.pagination
+        setAuctions(data.data || []);
+        setTotalPages(data.pagination?.totalPages || 1);
+        setTotalCount(data.pagination?.totalCount || 0);
       } else {
         setError(data.error?.message || 'Failed to load auctions');
       }
@@ -324,12 +325,14 @@ export default function AuctionsPage() {
     return null;
   };
 
-  const renderAuctionCard = (auction: Auction) => {
-    const mainImage = auction.product.images[0] || '/placeholder-auction.jpg';
+  const renderAuctionCard = (product: any) => {
+    // Parse images from JSON string
+    const images = typeof product.images === 'string' ? JSON.parse(product.images) : (product.images || []);
+    const mainImage = images[0] || '/placeholder-auction.jpg';
 
     return (
       <Card 
-        key={auction.id} 
+        key={product.id} 
         sx={{ 
           height: '100%',
           display: 'flex',
@@ -337,28 +340,28 @@ export default function AuctionsPage() {
           cursor: 'pointer',
           '&:hover': { boxShadow: 4 },
         }}
-        onClick={() => router.push(`/auctions/${auction.id}`)}
+        onClick={() => router.push(`/products/${product.id}`)}
       >
         <Box position="relative">
           <CardMedia
             component="img"
             height="240"
             image={mainImage}
-            alt={auction.title}
+            alt={product.title}
             sx={{ objectFit: 'cover' }}
           />
           
           {/* Status Badge */}
           <Chip
-            label={auction.status.replace('_', ' ')}
-            color={getStatusColor(auction.status)}
+            label={product.auctionStatus ? product.auctionStatus.replace('_', ' ') : 'Available'}
+            color={getStatusColor(product.auctionStatus || 'LIVE')}
             size="small"
             sx={{ position: 'absolute', top: 8, left: 8 }}
           />
 
           {/* Auction Type Badge */}
           <Chip
-            label={auction.auctionType}
+            label={product.auctionType || 'TIMED'}
             variant="outlined"
             size="small"
             sx={{ 
@@ -370,9 +373,9 @@ export default function AuctionsPage() {
           />
 
           {/* Bid Count Badge */}
-          {auction.bidCount > 0 && (
+          {product.bidCount && product.bidCount > 0 && (
             <Badge
-              badgeContent={auction.bidCount}
+              badgeContent={product.bidCount}
               color="primary"
               sx={{ 
                 position: 'absolute', 
@@ -392,7 +395,7 @@ export default function AuctionsPage() {
 
         <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <Typography variant="h6" component="h3" gutterBottom noWrap>
-            {auction.title}
+            {product.title}
           </Typography>
 
           {/* Current Bid */}
@@ -402,17 +405,17 @@ export default function AuctionsPage() {
                 Current Bid
               </Typography>
               <Typography variant="h5" color="primary.main" fontWeight="bold">
-                {formatCurrency(auction.currentBid)}
+                {formatCurrency(product.currentBid || product.startingBid || 0)}
               </Typography>
             </Box>
             
-            {auction.reservePrice && (
+            {product.reservePrice && (
               <Box textAlign="right">
                 <Typography variant="caption" color="text.secondary">
                   Reserve
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {formatCurrency(auction.reservePrice)}
+                  {formatCurrency(product.reservePrice)}
                 </Typography>
               </Box>
             )}
@@ -420,27 +423,35 @@ export default function AuctionsPage() {
 
           {/* Product Info */}
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {auction.product.title}
+            {product.description}
           </Typography>
 
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
             <Chip 
-              label={auction.product.condition.replace('_', ' ')} 
+              label={product.condition ? product.condition.replace('_', ' ') : 'Good'} 
               size="small" 
-              color={getConditionColor(auction.product.condition)}
+              color={getConditionColor(product.condition || 'GOOD')}
             />
             
             <Box display="flex" alignItems="center" color="text.secondary">
               <LocationIcon sx={{ fontSize: 16, mr: 0.5 }} />
               <Typography variant="caption">
-                {auction.product.location}
+                {product.location || 'Location TBD'}
               </Typography>
             </Box>
           </Box>
 
           {/* Countdown Timer */}
           <Box mb={2}>
-            {renderCountdown(auction)}
+            {product.auctionEndTime && (
+              <Typography 
+                variant="caption" 
+                color={product.auctionStatus === 'ENDING_SOON' ? 'error.main' : 'warning.main'}
+                fontWeight="medium"
+              >
+                Ends in: {formatTimeRemaining(new Date(product.auctionEndTime))}
+              </Typography>
+            )}
           </Box>
 
           <Divider sx={{ my: 1 }} />
@@ -448,20 +459,20 @@ export default function AuctionsPage() {
           {/* Agent Info */}
           <Box display="flex" alignItems="center" mb={2}>
             <Avatar 
-              src={auction.agent.logoUrl} 
-              alt={auction.agent.displayName}
+              src={product.agent?.logoUrl} 
+              alt={product.agent?.displayName || 'Agent'}
               sx={{ width: 24, height: 24, mr: 1 }}
             >
               <PersonIcon sx={{ fontSize: 14 }} />
             </Avatar>
             <Typography variant="body2" color="text.secondary" noWrap>
-              {auction.agent.displayName}
+              {product.agent?.displayName || 'Auction House'}
             </Typography>
-            {auction.agent.rating && (
+            {product.agent?.rating && (
               <Box display="flex" alignItems="center" ml={1}>
                 <StarIcon sx={{ fontSize: 14, color: 'warning.main' }} />
                 <Typography variant="caption" color="warning.main">
-                  {Number(auction.agent.rating).toFixed(1)}
+                  {Number(product.agent.rating).toFixed(1)}
                 </Typography>
               </Box>
             )}
@@ -470,20 +481,20 @@ export default function AuctionsPage() {
           {/* Action Button */}
           <Button
             fullWidth
-            variant={['LIVE', 'ENDING_SOON'].includes(auction.status) ? 'contained' : 'outlined'}
+            variant={['LIVE', 'ENDING_SOON'].includes(product.auctionStatus || 'LIVE') ? 'contained' : 'outlined'}
             size="large"
-            startIcon={auction.status === 'SCHEDULED' ? <ViewIcon /> : <AuctionIcon />}
-            color={auction.status === 'ENDING_SOON' ? 'warning' : 'primary'}
+            startIcon={product.auctionStatus === 'SCHEDULED' ? <ViewIcon /> : <AuctionIcon />}
+            color={product.auctionStatus === 'ENDING_SOON' ? 'warning' : 'primary'}
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/auctions/${auction.id}`);
+              router.push(`/products/${product.id}`);
             }}
-            disabled={auction.status === 'ENDED' || auction.status === 'CANCELLED'}
+            disabled={product.auctionStatus === 'ENDED' || product.auctionStatus === 'CANCELLED'}
           >
-            {auction.status === 'SCHEDULED' ? 'View Auction' :
-             auction.status === 'LIVE' ? 'Bid Now' :
-             auction.status === 'ENDING_SOON' ? 'Bid Now!' :
-             auction.status === 'ENDED' ? 'Auction Ended' :
+            {product.auctionStatus === 'SCHEDULED' ? 'View Auction' :
+             product.auctionStatus === 'LIVE' ? 'Bid Now' :
+             product.auctionStatus === 'ENDING_SOON' ? 'Bid Now!' :
+             product.auctionStatus === 'ENDED' ? 'Auction Ended' :
              'View Details'}
           </Button>
         </CardContent>
@@ -709,12 +720,12 @@ export default function AuctionsPage() {
             </Grid>
           ))}
         </Grid>
-      ) : auctions.length > 0 ? (
+      ) : auctions && auctions.length > 0 ? (
         <>
           <Grid container spacing={3}>
-            {auctions.map((auction) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={auction.id}>
-                {renderAuctionCard(auction)}
+            {auctions.map((product) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+                {renderAuctionCard(product)}
               </Grid>
             ))}
           </Grid>
