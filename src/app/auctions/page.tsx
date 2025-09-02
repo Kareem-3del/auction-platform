@@ -158,10 +158,22 @@ export default function AuctionsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   
+  // Helper function to map filter parameter to status
+  const getStatusFromFilter = (filter: string | null) => {
+    if (!filter) return 'ALL';
+    switch (filter) {
+      case 'ending-soon': return 'ENDING_SOON';
+      case 'live': return 'LIVE';
+      case 'scheduled': return 'SCHEDULED';
+      case 'ended': return 'ENDED';
+      default: return 'ALL';
+    }
+  };
+
   // Filters
   const [filters, setFilters] = useState<SearchFilters>({
     search: searchParams.get('search') || '',
-    status: searchParams.get('status') || 'ALL',
+    status: searchParams.get('status') || getStatusFromFilter(searchParams.get('filter')),
     auctionType: searchParams.get('type') || 'ALL',
     categoryId: searchParams.get('category') || '',
     minPrice: searchParams.get('minPrice') || '',
@@ -189,6 +201,19 @@ export default function AuctionsPage() {
   useEffect(() => {
     const page = parseInt(searchParams.get('page') || '1');
     setCurrentPage(page);
+    
+    // Update filters when URL parameters change
+    setFilters({
+      search: searchParams.get('search') || '',
+      status: searchParams.get('status') || getStatusFromFilter(searchParams.get('filter')),
+      auctionType: searchParams.get('type') || 'ALL',
+      categoryId: searchParams.get('category') || '',
+      minPrice: searchParams.get('minPrice') || '',
+      maxPrice: searchParams.get('maxPrice') || '',
+      agentId: searchParams.get('agent') || '',
+      sortBy: searchParams.get('sort') || 'newest',
+      timeframe: searchParams.get('timeframe') || 'all',
+    });
   }, [searchParams]);
 
   const loadCategories = async () => {
@@ -212,9 +237,25 @@ export default function AuctionsPage() {
 
       const queryParams = new URLSearchParams();
       
-      // Add all current search params
+      // Convert filter parameter to status if needed
+      if (searchParams.get('filter')) {
+        const filterValue = searchParams.get('filter');
+        const statusValue = getStatusFromFilter(filterValue);
+        queryParams.set('auctionStatus', statusValue);
+      }
+      
+      // Add other search params but transform them appropriately
       searchParams.forEach((value, key) => {
-        queryParams.set(key, value);
+        if (key === 'filter') {
+          // Skip filter as we already handled it above
+          return;
+        } else if (key === 'status') {
+          queryParams.set('auctionStatus', value);
+        } else if (key === 'type') {
+          queryParams.set('auctionType', value);
+        } else {
+          queryParams.set(key, value);
+        }
       });
 
       // Ensure page is set
