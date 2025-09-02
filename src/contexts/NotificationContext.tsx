@@ -41,8 +41,8 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
 
-      // First try the new backend API
-      const response = await fetch('/api/v1/notifications', {
+      // Fetch from notifications API
+      const response = await fetch('/api/notifications', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -50,23 +50,16 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       
       if (response.ok) {
         const result = await response.json();
-        if (result.notifications) {
+        if (result.success && Array.isArray(result.data)) {
+          setNotifications(result.data);
+        } else if (result.notifications && Array.isArray(result.notifications)) {
           setNotifications(result.notifications);
+        } else {
+          setNotifications([]);
         }
       } else {
-        // Fallback to old API structure
-        const fallbackResponse = await fetch('/api/notifications', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        
-        if (fallbackResponse.ok) {
-          const fallbackResult = await fallbackResponse.json();
-          if (fallbackResult.success && fallbackResult.notifications) {
-            setNotifications(fallbackResult.notifications);
-          }
-        }
+        console.log('Failed to fetch notifications:', response.status);
+        setNotifications([]);
       }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);

@@ -605,9 +605,9 @@ export default function ProductsPage() {
                 onChange={(e) => handleFilterChange('categoryId', e.target.value)}
               >
                 <MenuItem value="">All Categories</MenuItem>
-                {categories.map(category => (
+                {categories && Array.isArray(categories) && categories.map(category => (
                   <MenuItem key={category.id} value={category.id}>
-                    {category.name} ({category.productCount})
+                    {category.name} ({category.productCount || 0})
                   </MenuItem>
                 ))}
               </Select>

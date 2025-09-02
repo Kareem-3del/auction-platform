@@ -118,7 +118,7 @@ export function SimplePremiumCard({
         <Box
           component="img"
           className="card-image"
-          src={imageError ? 'https://via.placeholder.com/400x200/f1f5f9/64748b?text=No+Image' : primaryImage}
+          src={imageError ? 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDQwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjFGNUY5Ii8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM2NDc0OEIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+' : primaryImage}
           alt={product.title}
           onError={handleImageError}
           sx={{

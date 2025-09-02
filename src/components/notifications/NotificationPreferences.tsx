@@ -178,7 +178,7 @@ export default function NotificationPreferences() {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
 
-      const response = await fetch('/api/v1/notifications/preferences', {
+      const response = await fetch('/api/notifications/preferences', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -200,7 +200,7 @@ export default function NotificationPreferences() {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
 
-      const response = await fetch('/api/v1/notifications/types', {
+      const response = await fetch('/api/notifications/types', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -227,7 +227,7 @@ export default function NotificationPreferences() {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
 
-      const response = await fetch('/api/v1/notifications/preferences', {
+      const response = await fetch('/api/notifications/preferences', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -266,7 +266,7 @@ export default function NotificationPreferences() {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
 
-      const response = await fetch('/api/v1/notifications/preferences/initialize', {
+      const response = await fetch('/api/notifications/preferences/initialize', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
