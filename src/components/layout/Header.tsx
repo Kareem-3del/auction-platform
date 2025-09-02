@@ -416,9 +416,10 @@ export default function Header({
                     fontSize: { xs: '0.875rem', lg: '1rem' },
                     fontWeight: 500,
                     textTransform: 'none',
-                    px: { xs: 3, md: 5, lg: 8 },
+                    px: { xs: 3, md: 4, lg: 6 },
                     py: { xs: 1.5, md: 1.5, lg: 1.75 },
                     borderRadius: { xs: 1.5, lg: 2 },
+                    minWidth: { md: 140, lg: 160 },
                     '&:hover': {
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
                       borderColor: 'white',
@@ -437,9 +438,10 @@ export default function Header({
                     fontSize: { xs: '0.875rem', lg: '1rem' },
                     fontWeight: 500,
                     textTransform: 'none',
-                    px: { xs: 3, md: 5, lg: 8 },
+                    px: { xs: 3, md: 4, lg: 6 },
                     py: { xs: 1.5, md: 1.5, lg: 1.75 },
                     borderRadius: { xs: 1.5, lg: 2 },
+                    minWidth: { md: 140, lg: 160 },
                     '&:hover': {
                       backgroundColor: '#b00c26',
                     },
