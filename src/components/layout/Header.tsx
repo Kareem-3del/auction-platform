@@ -100,15 +100,15 @@ export default function Header({
       sx={{
         background: '#000000',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        minHeight: { xs: 70, md: 80, lg: 140 },
+        minHeight: { xs: 80, md: 100, lg: 160 },
         zIndex: 109,
       }}
     >
-      <Container maxWidth={false} sx={{ px: { xs: 0, lg: 4, xl: 6 } }}>
+      <Container maxWidth={false} sx={{ px: { xs: 0, lg: 6, xl: 8 } }}>
         {/* Top utility bar - hidden on mobile */}
         <Box sx={{ 
           display: { xs: 'none', lg: 'block' },
-          py: 1.5,
+          py: 2,
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         }}>
           <Box sx={{ 
@@ -190,18 +190,18 @@ export default function Header({
         <Toolbar 
           disableGutters 
           sx={{ 
-            minHeight: { xs: 70, md: 80, lg: 80 },
-            px: { xs: 3, lg: 0 },
-            py: { xs: 1, lg: 2 },
+            minHeight: { xs: 80, md: 100, lg: 100 },
+            px: { xs: 4, lg: 0 },
+            py: { xs: 2, lg: 3 },
           }}
         >
           {/* Logo */}
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center',
-            width: { xs: 120, lg: 160 },
-            height: { xs: 40, lg: 60 },
-            mr: { xs: 2, lg: 4 },
+            width: { xs: 140, lg: 180 },
+            height: { xs: 50, lg: 70 },
+            mr: { xs: 3, lg: 6 },
           }}>
             <Logo
               sx={{ 
@@ -218,7 +218,7 @@ export default function Header({
           <Box sx={{ 
             display: { xs: 'none', xl: 'flex' },
             flex: 1,
-            gap: 1,
+            gap: 2,
             alignItems: 'center',
           }}>
             {navigationItems.map((item) => (
@@ -229,10 +229,10 @@ export default function Header({
                 sx={{
                   color: 'white',
                   fontWeight: 500,
-                  fontSize: { lg: '0.75rem', xl: '0.875rem' },
+                  fontSize: { lg: '0.875rem', xl: '0.9375rem' },
                   textTransform: 'none',
-                  px: { lg: 1, xl: 2 },
-                  py: 2.5,
+                  px: { lg: 2, xl: 3 },
+                  py: 3,
                   minWidth: 'auto',
                   borderRadius: 2,
                   display: 'flex',
@@ -268,7 +268,7 @@ export default function Header({
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center',
-            gap: { xs: 1, md: 2 },
+            gap: { xs: 2, md: 3 },
             ml: 'auto',
           }}>
             {/* Search Icon */}
@@ -276,7 +276,7 @@ export default function Header({
               onClick={() => setSearchDialogOpen(true)}
               sx={{ 
                 color: 'white',
-                p: 1,
+                p: 1.5,
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 },
@@ -412,11 +412,11 @@ export default function Header({
                     display: { xs: 'none', md: 'flex' },
                     color: 'white',
                     borderColor: 'white',
-                    fontSize: { xs: '0.75rem', lg: '1rem' },
+                    fontSize: { xs: '0.875rem', lg: '1rem' },
                     fontWeight: 500,
                     textTransform: 'none',
-                    px: { xs: 2, md: 4, lg: 7 },
-                    py: { xs: 1, md: 1.25, lg: 1.375 },
+                    px: { xs: 3, md: 5, lg: 8 },
+                    py: { xs: 1.5, md: 1.5, lg: 1.75 },
                     borderRadius: { xs: 1.5, lg: 2 },
                     '&:hover': {
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -433,11 +433,11 @@ export default function Header({
                   sx={{
                     backgroundColor: '#CE0E2D',
                     color: 'white',
-                    fontSize: { xs: '0.75rem', lg: '1rem' },
+                    fontSize: { xs: '0.875rem', lg: '1rem' },
                     fontWeight: 500,
                     textTransform: 'none',
-                    px: { xs: 2, md: 4, lg: 7 },
-                    py: { xs: 1, md: 1.25, lg: 1.375 },
+                    px: { xs: 3, md: 5, lg: 8 },
+                    py: { xs: 1.5, md: 1.5, lg: 1.75 },
                     borderRadius: { xs: 1.5, lg: 2 },
                     '&:hover': {
                       backgroundColor: '#b00c26',
@@ -455,7 +455,7 @@ export default function Header({
               sx={{ 
                 display: { xs: 'flex', xl: 'none' },
                 color: 'white',
-                p: 1,
+                p: 1.5,
               }}
             >
               <MenuIcon sx={{ fontSize: 24 }} />
