@@ -272,17 +272,32 @@ export default function ProductsPage() {
       console.log('Products API response:', data);
 
       if (data.success) {
-        const products = Array.isArray(data.data) ? data.data : [];
+        let products = [];
+        
+        // Handle different possible data structures
+        if (Array.isArray(data.data)) {
+          products = data.data;
+        } else if (data.data && Array.isArray(data.data.products)) {
+          products = data.data.products;
+        } else if (data.data && Array.isArray(data.data.items)) {
+          products = data.data.items;
+        } else {
+          console.warn('Unexpected API response structure:', data);
+          products = [];
+        }
+        
         setProducts(products);
         setTotalPages(data.meta?.pagination?.totalPages || 1);
-        setTotalCount(data.meta?.pagination?.totalCount || 0);
+        setTotalCount(data.meta?.pagination?.totalCount || data.meta?.pagination?.total || 0);
         
         if (products.length === 0) {
           console.log('No products found with current filters');
+        } else {
+          console.log(`Loaded ${products.length} products`);
         }
       } else {
         console.error('API returned error:', data);
-        setError(data.message || 'Failed to load products');
+        setError(data.error?.message || data.message || 'Failed to load products');
         setProducts([]);
         setTotalPages(1);
         setTotalCount(0);
@@ -370,13 +385,18 @@ export default function ProductsPage() {
     }
   };
 
-  const getActiveAuction = (product: Product) => product.auctions.find(auction => 
-      ['LIVE', 'ENDING_SOON', 'SCHEDULED'].includes(auction.status)
+  const getActiveAuction = (product: Product) => {
+    if (!product.auctions || !Array.isArray(product.auctions)) return null;
+    return product.auctions.find(auction => 
+      auction && ['LIVE', 'ENDING_SOON', 'SCHEDULED'].includes(auction.status)
     );
+  };
 
   const renderProductCard = (product: Product) => {
     const activeAuction = getActiveAuction(product);
-    const mainImage = product.images[0] || '/placeholder-product.jpg';
+    const mainImage = (product.images && Array.isArray(product.images) && product.images.length > 0) 
+      ? product.images[0] 
+      : '/placeholder-product.jpg';
 
     return (
       <Card 
@@ -766,7 +786,7 @@ export default function ProductsPage() {
             </Grid>
           ))}
         </Grid>
-      ) : products.length > 0 ? (
+      ) : products && Array.isArray(products) && products.length > 0 ? (
         <>
           <Grid container spacing={3}>
             {products.map((product) => (

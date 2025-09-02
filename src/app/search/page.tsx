@@ -163,12 +163,43 @@ export default function SearchPage() {
       console.log('Search API response:', data);
 
       if (data.success) {
-        setResults(data.data.items || []);
-        setTotalCount(data.data.total || 0);
-        setCurrentPage(data.data.page || 1);
-        setTotalPages(data.data.totalPages || 1);
+        let results = [];
+        let totalCount = 0;
+        let currentPage = 1;
+        let totalPages = 1;
+        
+        // Handle different possible data structures
+        if (data.data) {
+          if (Array.isArray(data.data)) {
+            results = data.data;
+          } else if (Array.isArray(data.data.items)) {
+            results = data.data.items;
+            totalCount = data.data.total || 0;
+            currentPage = data.data.page || 1;
+            totalPages = data.data.totalPages || 1;
+          } else if (Array.isArray(data.data.results)) {
+            results = data.data.results;
+            totalCount = data.data.total || 0;
+            currentPage = data.data.page || 1;
+            totalPages = data.data.totalPages || 1;
+          }
+        }
+        
+        // Also check meta for pagination info
+        if (data.meta?.pagination) {
+          totalCount = data.meta.pagination.totalCount || data.meta.pagination.total || totalCount;
+          currentPage = data.meta.pagination.page || currentPage;
+          totalPages = data.meta.pagination.totalPages || totalPages;
+        }
+        
+        setResults(results);
+        setTotalCount(totalCount);
+        setCurrentPage(currentPage);
+        setTotalPages(totalPages);
+        
+        console.log(`Search loaded ${results.length} results`);
       } else {
-        setError(data.message || 'Search failed');
+        setError(data.error?.message || data.message || 'Search failed');
       }
     } catch (err) {
       setError('Failed to perform search');
@@ -750,7 +781,7 @@ export default function SearchPage() {
                   </Grid>
                 ))}
               </Grid>
-            ) : results.length === 0 ? (
+            ) : !results || !Array.isArray(results) || results.length === 0 ? (
               <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 3 }}>
                 <SearchIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
                 <Typography variant="h5" gutterBottom fontWeight="bold">
@@ -771,7 +802,7 @@ export default function SearchPage() {
             ) : (
               <>
                 <Grid container spacing={3}>
-                  {results.map((item) => (
+                  {results && Array.isArray(results) && results.map((item) => (
                     <Grid 
                       item 
                       xs={12} 
