@@ -187,7 +187,7 @@ export default function HomePageClient() {
                 <Button 
                   variant="outlined" 
                   size="large" 
-                  onClick={() => router.push('/auctions')}
+                  onClick={() => router.push('/products')}
                   sx={{ 
                     px: { xs: 4, md: 8 }, 
                     py: { xs: 1.5, md: 2 },

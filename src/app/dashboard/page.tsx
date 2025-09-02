@@ -350,14 +350,14 @@ export default function DashboardPage() {
               <Button
                 variant="contained"
                 startIcon={<GavelIcon />}
-                onClick={() => router.push('/auctions')}
+                onClick={() => router.push('/products')}
               >
                 {t('dashboard.browseAuctions')}
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<AddIcon />}
-                onClick={() => router.push('/auctions/create')}
+                onClick={() => router.push('/products/create')}
                 disabled={user.userType !== 'AGENT'}
               >
                 {t('navigation.createAuction')}
@@ -479,7 +479,7 @@ export default function DashboardPage() {
                         <Button
                           size="small"
                           startIcon={<VisibilityIcon />}
-                          onClick={() => router.push(`/auctions/${auction.id}`)}
+                          onClick={() => router.push(`/products/${auction.id}`)}
                         >
                           {t('common.view')}
                         </Button>
@@ -494,7 +494,7 @@ export default function DashboardPage() {
               <Button
                 fullWidth
                 variant="text"
-                onClick={() => router.push('/auctions')}
+                onClick={() => router.push('/products')}
                 sx={{ mt: 2 }}
               >
                 {t('dashboard.browseAllAuctions')}

@@ -38,7 +38,7 @@ const defaultBanners: Banner[] = [
     description: 'Find unique antiques, art pieces, and collectibles from verified sellers worldwide.',
     image: 'https://images.unsplash.com/photo-1578321272176-b7bbc0679853?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
     ctaText: 'Explore Auctions',
-    ctaLink: '/auctions',
+    ctaLink: '/products',
     backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     textColor: '#ffffff',
     type: 'hero',

@@ -250,7 +250,7 @@ export function FooterCTA() {
             <Button
               variant="contained"
               size="large"
-              onClick={() => router.push('/auctions')}
+              onClick={() => router.push('/products')}
               startIcon={<Icon icon="mdi:gavel" width={22} />}
               sx={{
                 bgcolor: theme.palette.primary.main,
@@ -347,7 +347,7 @@ export function FooterCTA() {
                 icon: 'mdi:clock-fast', 
                 text: t('homepage.trustBadges.realTimeBidding'), 
                 desc: t('homepage.trustBadges.instantUpdates'),
-                action: () => router.push('/auctions')
+                action: () => router.push('/products')
               },
               { 
                 icon: 'mdi:certificate-outline', 

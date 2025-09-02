@@ -97,6 +97,9 @@ interface SearchFilters {
   maxPrice: string;
   location: string;
   sortBy: string;
+  status: string;
+  auctionStatus: string;
+  filter: string;
 }
 
 const CONDITIONS = [
@@ -112,10 +115,19 @@ const CONDITIONS = [
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest First' },
   { value: 'oldest', label: 'Oldest First' },
-  { value: 'priceAsc', label: 'Price: Low to High' },
-  { value: 'priceDesc', label: 'Price: High to Low' },
+  { value: 'ending_soon', label: 'Ending Soon' },
+  { value: 'relevance', label: 'Most Relevant' },
+  { value: 'price_low', label: 'Price: Low to High' },
+  { value: 'price_high', label: 'Price: High to Low' },
   { value: 'titleAsc', label: 'Title: A-Z' },
   { value: 'titleDesc', label: 'Title: Z-A' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'ALL', label: 'All Products' },
+  { value: 'LIVE', label: 'Live Auctions' },
+  { value: 'SCHEDULED', label: 'Scheduled' },
+  { value: 'ENDED', label: 'Ended' },
 ];
 
 export default function ProductsPage() {
@@ -136,6 +148,18 @@ export default function ProductsPage() {
   const [totalCount, setTotalCount] = useState(0);
   
   // Filters
+  // Helper function to map filter parameter to status
+  const getStatusFromFilter = (filter: string | null) => {
+    if (!filter) return 'ALL';
+    switch (filter) {
+      case 'ending-soon': return 'LIVE';
+      case 'live': return 'LIVE';
+      case 'scheduled': return 'SCHEDULED';
+      case 'ended': return 'ENDED';
+      default: return 'ALL';
+    }
+  };
+
   const [filters, setFilters] = useState<SearchFilters>({
     search: searchParams.get('search') || '',
     categoryId: searchParams.get('category') || '',
@@ -144,6 +168,9 @@ export default function ProductsPage() {
     maxPrice: searchParams.get('maxPrice') || '',
     location: searchParams.get('location') || '',
     sortBy: searchParams.get('sort') || 'newest',
+    status: searchParams.get('status') || getStatusFromFilter(searchParams.get('filter')),
+    auctionStatus: searchParams.get('auctionStatus') || '',
+    filter: searchParams.get('filter') || '',
   });
 
   useEffect(() => {
@@ -177,30 +204,95 @@ export default function ProductsPage() {
 
       const queryParams = new URLSearchParams();
       
-      // Add all current search params
-      searchParams.forEach((value, key) => {
-        queryParams.set(key, value);
-      });
-
-      // Ensure page is set
-      if (!queryParams.get('page')) {
-        queryParams.set('page', '1');
+      // Always include approved products
+      queryParams.set('status', 'APPROVED');
+      
+      // Handle URL filter parameter
+      const filterParam = searchParams.get('filter');
+      if (filterParam) {
+        if (filterParam === 'ending-soon') {
+          // For ending soon, get LIVE auctions and add sortBy=ending_soon
+          queryParams.set('auctionStatus', 'LIVE');
+          queryParams.set('sortBy', 'ending_soon');
+        } else {
+          const statusValue = getStatusFromFilter(filterParam);
+          if (statusValue !== 'ALL') {
+            queryParams.set('auctionStatus', statusValue);
+          }
+        }
       }
+
+      // Map current filters to API parameters
+      if (filters.status && filters.status !== 'ALL') {
+        queryParams.set('auctionStatus', filters.status);
+      }
+
+      if (filters.search) {
+        queryParams.set('search', filters.search);
+      }
+
+      if (filters.categoryId) {
+        queryParams.set('categoryId', filters.categoryId);
+      }
+
+      if (filters.condition) {
+        queryParams.set('condition', filters.condition);
+      }
+
+      if (filters.minPrice) {
+        queryParams.set('minPrice', filters.minPrice);
+      }
+
+      if (filters.maxPrice) {
+        queryParams.set('maxPrice', filters.maxPrice);
+      }
+
+      if (filters.location) {
+        queryParams.set('location', filters.location);
+      }
+
+      // Map sort options to API parameters
+      if (filters.sortBy) {
+        queryParams.set('sortBy', filters.sortBy);
+      }
+
+      // Set pagination
+      const currentPage = parseInt(searchParams.get('page') || '1');
+      queryParams.set('page', currentPage.toString());
+      queryParams.set('limit', '20'); // Fixed limit
+
+      console.log('Products API call with params:', queryParams.toString());
 
       const response = await fetch(`/api/products?${queryParams.toString()}`);
-      if (!response.ok) throw new Error('Failed to load products');
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
       
       const data = await response.json();
+      console.log('Products API response:', data);
+
       if (data.success) {
-        setProducts(data.data.products);
-        setTotalPages(data.data.pagination.totalPages);
-        setTotalCount(data.data.pagination.totalCount);
+        const products = Array.isArray(data.data) ? data.data : [];
+        setProducts(products);
+        setTotalPages(data.meta?.pagination?.totalPages || 1);
+        setTotalCount(data.meta?.pagination?.totalCount || 0);
+        
+        if (products.length === 0) {
+          console.log('No products found with current filters');
+        }
       } else {
-        setError(data.error?.message || 'Failed to load products');
+        console.error('API returned error:', data);
+        setError(data.message || 'Failed to load products');
+        setProducts([]);
+        setTotalPages(1);
+        setTotalCount(0);
       }
     } catch (err) {
-      setError('Failed to load products');
       console.error('Error loading products:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load products');
+      setProducts([]);
+      setTotalPages(1);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -211,9 +303,28 @@ export default function ProductsPage() {
     setFilters(newFilters);
     
     const queryParams = new URLSearchParams();
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value) {
-        queryParams.set(key === 'sortBy' ? 'sort' : key === 'categoryId' ? 'category' : key, value);
+    Object.entries(newFilters).forEach(([filterKey, filterValue]) => {
+      if (filterValue && filterValue !== 'ALL' && filterValue !== 'all' && filterValue !== '') {
+        let paramKey = filterKey;
+        
+        // Map filter names to URL parameter names
+        switch (filterKey) {
+          case 'sortBy':
+            paramKey = 'sort';
+            break;
+          case 'categoryId':
+            paramKey = 'category';
+            break;
+          case 'status':
+            // Map status to filter for URL consistency
+            paramKey = 'filter';
+            filterValue = filterValue.toLowerCase().replace('_', '-');
+            break;
+          default:
+            paramKey = filterKey;
+        }
+        
+        queryParams.set(paramKey, filterValue);
       }
     });
     
@@ -413,7 +524,7 @@ export default function ProductsPage() {
                 sx={{ mt: 1 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  router.push(`/auctions/${activeAuction.id}`);
+                  router.push(`/products/${activeAuction.id}`);
                 }}
               >
                 {activeAuction.status === 'SCHEDULED' ? 'View Auction' : 'Bid Now'}
@@ -481,6 +592,22 @@ export default function ProductsPage() {
                 ))}
               </Select>
             </FormControl>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <TextField
+              select
+              fullWidth
+              label="Status"
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+            >
+              {STATUS_OPTIONS.map(option => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
 
           <Grid item xs={12} md={4}>

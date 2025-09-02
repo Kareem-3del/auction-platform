@@ -99,7 +99,7 @@ export function LiveAuctionTicker() {
   }, [isPaused]);
 
   const handleAuctionClick = (auctionId: number) => {
-    router.push(`/auctions/${auctionId}`);
+    router.push(`/products/${auctionId}`);
   };
 
   return (
@@ -348,7 +348,7 @@ export function LiveAuctionTicker() {
           <Box sx={{ flexShrink: 0 }}>
             <Typography
               variant="body2"
-              onClick={() => router.push('/auctions?status=live')}
+              onClick={() => router.push('/products?status=live')}
               sx={{
                 color: '#CE0E2D',
                 fontWeight: 600,

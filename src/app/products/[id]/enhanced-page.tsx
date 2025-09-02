@@ -372,7 +372,7 @@ export default function EnhancedProductPage({ params }: ProductPageProps) {
                   endTime={product.auction.status === 'LIVE' ? product.auction.endTime : undefined}
                   currentBid={product.auction.currentBid}
                   bidsCount={product.auction.bidCount}
-                  onClick={() => router.push(`/auctions/${product.auction!.id}`)}
+                  onClick={() => router.push(`/products/${product.auction!.id}`)}
                 />
               </CardContent>
             </Card>

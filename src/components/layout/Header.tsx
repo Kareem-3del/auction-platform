@@ -43,7 +43,7 @@ const navigationItems = [
 ];
 
 const utilityLinks = [
-  { label: 'Auction Calendar', path: '/auctions' },
+  { label: 'Auction Calendar', path: '/products' },
   { label: 'About', path: '/about' },
   { label: 'Help', path: '/help' },
   { label: 'Contact Us', path: '/contact' },

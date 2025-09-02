@@ -760,11 +760,11 @@ export default function SearchPage() {
                   We couldn't find anything matching "{query}". Try different keywords or browse our categories.
                 </Typography>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
-                  <Button variant="contained" onClick={() => router.push('/auctions')}>
-                    Browse Auctions
-                  </Button>
-                  <Button variant="outlined" onClick={() => router.push('/products')}>
+                  <Button variant="contained" onClick={() => router.push('/products')}>
                     Browse Products
+                  </Button>
+                  <Button variant="outlined" onClick={() => router.push('/products?filter=ending-soon')}>
+                    Browse Ending Soon
                   </Button>
                 </Stack>
               </Paper>
