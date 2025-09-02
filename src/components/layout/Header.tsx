@@ -216,10 +216,12 @@ export default function Header({
 
           {/* Navigation Items - Desktop */}
           <Box sx={{ 
-            display: { xs: 'none', xl: 'flex' },
+            display: { xs: 'none', lg: 'flex' },
             flex: 1,
-            gap: 2,
+            gap: 1.5,
             alignItems: 'center',
+            overflow: 'hidden',
+            minWidth: 0,
           }}>
             {navigationItems.map((item) => (
               <Button
@@ -231,12 +233,14 @@ export default function Header({
                   fontWeight: 500,
                   fontSize: { lg: '0.875rem', xl: '0.9375rem' },
                   textTransform: 'none',
-                  px: { lg: 2, xl: 3 },
+                  px: { lg: 2.5, xl: 3.5 },
                   py: 3,
                   minWidth: 'auto',
                   borderRadius: 2,
                   display: 'flex',
                   gap: 1,
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                   '&:hover': {
                     backgroundColor: 'rgba(107, 107, 107, 0.4)',
                   },
@@ -453,7 +457,7 @@ export default function Header({
             <IconButton
               onClick={handleDrawerToggle}
               sx={{ 
-                display: { xs: 'flex', xl: 'none' },
+                display: { xs: 'flex', lg: 'none' },
                 color: 'white',
                 p: 1.5,
               }}
