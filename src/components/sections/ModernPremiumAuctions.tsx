@@ -215,45 +215,28 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
             <Box key={sectionKey} sx={{ py: { xs: 6, md: 8 }, background: sectionConfig.background }}>
               <Container maxWidth="xl">
                 {/* Section Header */}
-                <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 8 } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 3 }}>
-                    <Box
-                      sx={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: '20px',
-                        background: `linear-gradient(135deg, ${sectionConfig.color}, ${sectionConfig.color}CC)`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: `0 8px 32px ${sectionConfig.color}40`,
-                      }}
-                    >
-                      <sectionConfig.icon sx={{ color: 'white', fontSize: 32 }} />
-                    </Box>
-                  </Box>
-                  
+                <Box sx={{ mb: { xs: 4, md: 6 } }}>
                   <Typography
                     variant="h2"
                     sx={{
-                      fontWeight: 800,
-                      fontSize: { xs: '2rem', md: '3rem' },
+                      fontWeight: 700,
+                      fontSize: { xs: '1.75rem', md: '2.25rem' },
                       color: '#0F1419',
-                      mb: 2,
-                      lineHeight: 1.2,
+                      mb: 1,
+                      lineHeight: 1.3,
+                      letterSpacing: '-0.025em',
                     }}
                   >
                     {sectionConfig.title}
                   </Typography>
                   
                   <Typography
-                    variant="h6"
+                    variant="body1"
                     sx={{
                       color: 'text.secondary',
-                      maxWidth: '500px',
-                      mx: 'auto',
                       fontWeight: 400,
-                      lineHeight: 1.6,
+                      fontSize: '1rem',
+                      opacity: 0.8,
                     }}
                   >
                     {sectionConfig.subtitle}
@@ -357,18 +340,19 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
     <Box sx={{ py: { xs: 6, md: 10 }, background: config.background }}>
       <Container maxWidth="xl">
         {/* Header with Tabs */}
-        <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 8 } }}>
+        <Box sx={{ mb: { xs: 4, md: 6 } }}>
           <Typography
             variant="h2"
             sx={{
-              fontWeight: 800,
-              fontSize: { xs: '2rem', md: '3rem' },
+              fontWeight: 700,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
               color: '#0F1419',
-              mb: 6,
-              lineHeight: 1.2,
+              mb: 4,
+              lineHeight: 1.3,
+              letterSpacing: '-0.025em',
             }}
           >
-            Premium Auction Collections
+            Premium Collections
           </Typography>
 
           <Tabs
@@ -379,7 +363,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
             sx={{
               mb: 6,
               '& .MuiTabs-flexContainer': {
-                justifyContent: 'center',
+                justifyContent: 'flex-start',
               },
               '& .MuiTab-root': {
                 textTransform: 'none',
@@ -409,12 +393,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
               return (
                 <Tab
                   key={sectionKey}
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <sectionConfig.icon sx={{ fontSize: 20 }} />
-                      {sectionConfig.title}
-                    </Box>
-                  }
+                  label={sectionConfig.title}
                 />
               );
             })}

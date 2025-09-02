@@ -141,47 +141,32 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
               gap: 3,
               mb: 2,
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <Box
+              <Box>
+                <Typography
+                  variant="h2"
+                  component="h2"
                   sx={{
-                    width: { xs: 56, md: 64 },
-                    height: { xs: 56, md: 64 },
-                    borderRadius: '20px',
-                    background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 8px 32px rgba(206, 14, 45, 0.3)',
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
+                    fontWeight: 700,
+                    fontSize: { xs: '1.75rem', md: '2.25rem' },
+                    color: '#0F1419',
+                    mb: 1,
+                    lineHeight: 1.3,
+                    letterSpacing: '-0.025em',
                   }}
                 >
-                  <TimeIcon sx={{ color: 'white', fontSize: { xs: 28, md: 32 } }} />
-                </Box>
-                <Box>
-                  <Typography
-                    variant="h2"
-                    component="h2"
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: { xs: '2rem', md: '2.75rem' },
-                      color: '#0F1419',
-                      mb: 1,
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    Ending Soon
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    color="text.secondary"
-                    sx={{ 
-                      fontSize: { xs: '1rem', md: '1.25rem' },
-                      fontWeight: 500,
-                    }}
-                  >
-                    Don&apos;t miss these final opportunities
-                  </Typography>
-                </Box>
+                  Ending Soon
+                </Typography>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ 
+                    fontSize: '1rem',
+                    fontWeight: 400,
+                    opacity: 0.8,
+                  }}
+                >
+                  Don&apos;t miss these final opportunities
+                </Typography>
               </Box>
               
               <Button
