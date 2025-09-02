@@ -158,13 +158,25 @@ export default function SearchDialog({ open, onClose }: SearchDialogProps) {
     try {
       setLoading(true);
       const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}&limit=6`);
+      
+      if (!response.ok) {
+        console.error('Search API error:', response.status, response.statusText);
+        setSuggestions([]);
+        return;
+      }
+      
       const data = await response.json();
+      console.log('Search suggestions response:', data);
 
-      if (data.success) {
-        setSuggestions(data.suggestions || []);
+      if (data.success && data.data && data.data.suggestions) {
+        setSuggestions(data.data.suggestions || []);
+      } else {
+        console.warn('No suggestions found or invalid response format');
+        setSuggestions([]);
       }
     } catch (error) {
       console.error('Search suggestions error:', error);
+      setSuggestions([]);
     } finally {
       setLoading(false);
     }

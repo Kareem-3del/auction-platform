@@ -60,19 +60,18 @@ import {
 import { useAuth } from 'src/hooks/useAuth';
 import { useLocale } from 'src/hooks/useLocale';
 import { formatCurrency, formatTimeRemaining } from 'src/lib/utils';
-import { searchAPI, isSuccessResponse } from 'src/lib/api-client';
 import HomepageLayout from 'src/components/layout/HomepageLayout';
-import type { 
-  SearchFilters as BaseSearchFilters, 
-  SearchResponse, 
-  ProductCard,
-  SearchSuggestion 
-} from 'src/types/common';
 
-// Extended search filters for UI
-interface SearchFilters extends BaseSearchFilters {
+// Local search filters interface for UI
+interface SearchFilters {
+  category: string[];
   priceRange: [number, number];
+  location: string[];
+  condition: string[];
+  auctionStatus: string[];
   dateRange: string;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
   viewMode: 'grid' | 'list';
 }
 
@@ -100,7 +99,7 @@ export default function SearchPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'auctions' | 'products'>('all');
   
-  const [results, setResults] = useState<ProductCard[]>([]);
+  const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
@@ -126,27 +125,50 @@ export default function SearchPage() {
       setLoading(true);
       setError(null);
 
-      const searchFilters: Partial<BaseSearchFilters> = {
-        search: searchTerm,
-        categories: filters.category.length > 0 ? filters.category : undefined,
-        locations: filters.location.length > 0 ? filters.location : undefined,
-        conditions: filters.condition.length > 0 ? filters.condition as any : undefined,
-        minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
-        maxPrice: filters.priceRange[1] < 100000 ? filters.priceRange[1] : undefined,
-        auctionStatuses: filters.auctionStatus.length > 0 ? filters.auctionStatus as any : undefined,
-        sortBy: filters.sortBy as any,
-        sortOrder: filters.sortOrder,
-      };
+      const queryParams = new URLSearchParams();
+      queryParams.set('q', searchTerm);
+      queryParams.set('page', page.toString());
+      queryParams.set('limit', '20');
 
-      const response = await searchAPI.searchProducts(searchTerm, searchFilters);
+      // Add filters to query params
+      if (filters.category.length > 0) {
+        queryParams.set('categories', filters.category.join(','));
+      }
+      if (filters.location.length > 0) {
+        queryParams.set('locations', filters.location.join(','));
+      }
+      if (filters.condition.length > 0) {
+        queryParams.set('conditions', filters.condition.join(','));
+      }
+      if (filters.auctionStatus.length > 0) {
+        queryParams.set('auctionStatuses', filters.auctionStatus.join(','));
+      }
+      if (filters.priceRange[0] > 0) {
+        queryParams.set('minPrice', filters.priceRange[0].toString());
+      }
+      if (filters.priceRange[1] < 100000) {
+        queryParams.set('maxPrice', filters.priceRange[1].toString());
+      }
+      queryParams.set('sortBy', filters.sortBy);
+      queryParams.set('sortOrder', filters.sortOrder);
 
-      if (isSuccessResponse(response)) {
-        setResults(response.data.items || []);
-        setTotalCount(response.data.total || 0);
-        setCurrentPage(response.data.page || 1);
-        setTotalPages(response.data.totalPages || 1);
+      console.log('Search API call:', `/api/search?${queryParams.toString()}`);
+
+      const response = await fetch(`/api/search?${queryParams.toString()}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Search API response:', data);
+
+      if (data.success) {
+        setResults(data.data.items || []);
+        setTotalCount(data.data.total || 0);
+        setCurrentPage(data.data.page || 1);
+        setTotalPages(data.data.totalPages || 1);
       } else {
-        setError(response.error?.message || 'Search failed');
+        setError(data.message || 'Search failed');
       }
     } catch (err) {
       setError('Failed to perform search');
@@ -331,8 +353,23 @@ export default function SearchPage() {
   );
 
   // Result Card Component
-  const ResultCard = ({ item }: { item: ProductCard }) => {
-    const mainImage = item.images?.[0] || '/placeholder-image.jpg';
+  const ResultCard = ({ item }: { item: any }) => {
+    let mainImage = '/placeholder-image.jpg';
+    
+    // Handle different image formats
+    if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+      mainImage = item.images[0];
+    } else if (typeof item.images === 'string') {
+      try {
+        const parsedImages = JSON.parse(item.images);
+        if (Array.isArray(parsedImages) && parsedImages.length > 0) {
+          mainImage = parsedImages[0];
+        }
+      } catch (e) {
+        // If parsing fails, use default image
+      }
+    }
+    
     const isGridView = filters.viewMode === 'grid';
 
     return (
@@ -457,7 +494,7 @@ export default function SearchPage() {
                   <>
                     <CategoryIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                     <Typography variant="body2" color="text.secondary">
-                      {item.category.name}
+                      {item.category?.name || item.category}
                     </Typography>
                   </>
                 )}
@@ -467,7 +504,7 @@ export default function SearchPage() {
                 <Box display="flex" alignItems="center" gap={1}>
                   <ScheduleIcon sx={{ fontSize: 16, color: 'error.main' }} />
                   <Typography variant="body2" color="error.main" fontWeight={500}>
-                    Ends: {formatTimeRemaining(item.endTime)}
+                    Ends: {formatTimeRemaining(new Date(item.endTime))}
                   </Typography>
                 </Box>
               )}

@@ -235,17 +235,17 @@ export async function GET(request: NextRequest) {
       // For featured items, prioritize by activity
       orderBy = [
         { viewCount: 'desc' },
-        { favoriteCount: 'desc' },
+        { bidCount: 'desc' },
         { createdAt: 'desc' }
       ];
     } else {
       const direction = sortOrder || 'desc';
       switch (sortBy) {
         case 'relevance':
-          // For relevance, prioritize by creation date and featured status
+          // For relevance, prioritize by creation date and activity
           orderBy = [
-            { featured: 'desc' },
             { viewCount: 'desc' },
+            { bidCount: 'desc' },
             { createdAt: 'desc' }
           ];
           break;

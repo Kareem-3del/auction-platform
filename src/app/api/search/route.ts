@@ -35,10 +35,11 @@ export async function GET(request: NextRequest) {
         OR: [
           { title: { contains: query.trim(), mode: 'insensitive' } },
           { description: { contains: query.trim(), mode: 'insensitive' } },
-          { keywords: { contains: query.trim(), mode: 'insensitive' } },
+          { shortDescription: { contains: query.trim(), mode: 'insensitive' } },
           { brand: { name: { contains: query.trim(), mode: 'insensitive' } } },
           { category: { name: { contains: query.trim(), mode: 'insensitive' } } },
           { agent: { businessName: { contains: query.trim(), mode: 'insensitive' } } },
+          { agent: { displayName: { contains: query.trim(), mode: 'insensitive' } } },
         ]
       });
     }
@@ -111,12 +112,10 @@ export async function GET(request: NextRequest) {
       searchConditions.AND.push(priceCondition);
     }
 
-    // Only include active products, exclude sold items and ended auctions
+    // Only include approved products, exclude ended/cancelled auctions
     searchConditions.AND.push({
-      isActive: true,
       status: 'APPROVED',
       NOT: [
-        { status: 'SOLD' },
         { auctionStatus: 'ENDED' },
         { auctionStatus: 'CANCELLED' }
       ]
@@ -152,7 +151,6 @@ export async function GET(request: NextRequest) {
       default:
         // For relevance, we'll use a combination of factors
         orderBy = [
-          { featured: 'desc' },
           { bidCount: 'desc' },
           { viewCount: 'desc' },
           { createdAt: 'desc' }
@@ -189,17 +187,9 @@ export async function GET(request: NextRequest) {
               rating: true
             }
           },
-          tags: {
-            select: {
-              id: true,
-              name: true,
-              nameAr: true
-            }
-          },
           _count: {
             select: {
-              bids: true,
-              views: true
+              bids: true
             }
           }
         },
@@ -243,10 +233,9 @@ export async function GET(request: NextRequest) {
           : Number(product.estimatedValueMin || 0),
         location: product.location,
         condition: product.condition,
-        featured: product.featured,
         endTime: product.endTime,
         bidCount: product._count?.bids || 0,
-        viewCount: product._count?.views || 0,
+        viewCount: product.viewCount || 0,
         category: product.category ? {
           id: product.category.id,
           name: product.category.name,
@@ -265,7 +254,7 @@ export async function GET(request: NextRequest) {
           logoUrl: product.agent.logoUrl,
           rating: product.agent.rating ? Number(product.agent.rating) : null
         },
-        tags: product.tags || [],
+        tags: [],
         createdAt: product.createdAt,
         updatedAt: product.updatedAt
       };
