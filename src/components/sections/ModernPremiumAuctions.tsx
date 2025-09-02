@@ -35,7 +35,7 @@ interface ModernPremiumAuctionsProps {
 const createMockProducts = (section: string, count: number): ProductCard[] => {
   const baseProducts = [
     {
-      id: '1',
+      id: 'cmf2k2dbp0004yc8cex2xehet', // Real ID from database
       title: 'Picasso Original Sketch',
       category: { name: 'Fine Art' },
       images: ['https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop&crop=center'],
@@ -59,7 +59,7 @@ const createMockProducts = (section: string, count: number): ProductCard[] => {
       },
     },
     {
-      id: '2',
+      id: 'cmf2k2dbx0006yc8c4ir9kgla', // Realistic database-style ID  
       title: 'Patek Philippe Nautilus 5711/1A',
       category: { name: 'Luxury Watches' },
       images: ['https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=400&h=300&fit=crop&crop=center'],
@@ -83,7 +83,7 @@ const createMockProducts = (section: string, count: number): ProductCard[] => {
       },
     },
     {
-      id: '3',
+      id: 'cmf2k2dc50008yc8c7xm9qnpd', // Realistic database-style ID
       title: 'Picasso - Woman with a Hat (1962)',
       category: { name: 'Fine Art' },
       images: ['https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop&crop=center'],
@@ -107,7 +107,7 @@ const createMockProducts = (section: string, count: number): ProductCard[] => {
       },
     },
     {
-      id: '4',
+      id: 'cmf2k2dcd000ayc8cbt7h4mjk', // Realistic database-style ID
       title: 'Hermès Birkin Himalaya Crocodile',
       category: { name: 'Luxury Goods' },
       images: ['https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400&h=300&fit=crop&crop=center'],
@@ -131,7 +131,7 @@ const createMockProducts = (section: string, count: number): ProductCard[] => {
       },
     },
     {
-      id: '5',
+      id: 'cmf2k2dcl000cyc8ch9x8vqpr', // Realistic database-style ID
       title: 'Rolex Daytona Paul Newman',
       category: { name: 'Luxury Watches' },
       images: ['https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=400&h=300&fit=crop&crop=center'],
@@ -155,7 +155,7 @@ const createMockProducts = (section: string, count: number): ProductCard[] => {
       },
     },
     {
-      id: '6',
+      id: 'cmf2k2dcs000eyc8cqw4n2bxt', // Realistic database-style ID
       title: 'Ferrari 250 GT California Spider',
       category: { name: 'Classic Cars' },
       images: ['https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&h=300&fit=crop&crop=center'],
@@ -179,7 +179,7 @@ const createMockProducts = (section: string, count: number): ProductCard[] => {
       },
     },
     {
-      id: '7',
+      id: 'cmf2k2dd0000gyc8c5lm4pzjh', // Realistic database-style ID
       title: 'Van Gogh Starry Night Sketch',
       category: { name: 'Fine Art' },
       images: ['https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center'],
@@ -203,7 +203,7 @@ const createMockProducts = (section: string, count: number): ProductCard[] => {
       },
     },
     {
-      id: '8',
+      id: 'cmf2k2dd7000iyc8c8nm5rtka', // Realistic database-style ID
       title: 'Cartier Panthère Diamond Necklace',
       category: { name: 'Fine Jewelry' },
       images: ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=300&fit=crop&crop=center'],
