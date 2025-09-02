@@ -36,10 +36,10 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 const navigationItems = [
   { label: 'Motors', path: '/categories/cars', count: 889 },
-  { label: 'Art & Collectibles', path: '/categories/art-collectibles', count: 243 },
-  { label: 'Watches & Jewelry', path: '/categories/watches-jewelry', count: 156 },
   { label: 'Prestigious Numbers', path: '/categories/plates', count: 430 },
   { label: 'Properties', path: '/categories/properties', count: 42 },
+  { label: 'Jewelry', path: '/categories/jewelry', count: 156 },
+  { label: 'Collectibles', path: '/categories/collectibles', count: 85 },
 ];
 
 const utilityLinks = [
@@ -216,13 +216,10 @@ export default function Header({
 
           {/* Navigation Items - Desktop */}
           <Box sx={{ 
-            display: { xs: 'none', lg: 'flex' },
+            display: { xs: 'none', xl: 'flex' },
             flex: 1,
-            gap: 1,
+            gap: 2,
             alignItems: 'center',
-            overflow: 'visible',
-            minWidth: 0,
-            flexWrap: 'nowrap',
           }}>
             {navigationItems.map((item) => (
               <Button
@@ -234,20 +231,19 @@ export default function Header({
                   fontWeight: 500,
                   fontSize: { lg: '0.875rem', xl: '0.9375rem' },
                   textTransform: 'none',
-                  px: { lg: 3, xl: 4 },
+                  px: { lg: 2.5, xl: 3 },
                   py: 3,
-                  minWidth: 'fit-content',
+                  minWidth: 'auto',
                   borderRadius: 2,
                   display: 'flex',
                   gap: 1,
                   whiteSpace: 'nowrap',
-                  flexShrink: 0,
                   '&:hover': {
                     backgroundColor: 'rgba(107, 107, 107, 0.4)',
                   },
                 }}
               >
-                <Typography component="span" sx={{ fontWeight: 'inherit', whiteSpace: 'nowrap' }}>
+                <Typography component="span" sx={{ fontWeight: 'inherit' }}>
                   {item.label}
                 </Typography>
                 <Typography 
@@ -255,7 +251,6 @@ export default function Header({
                   sx={{ 
                     fontWeight: 'inherit',
                     opacity: 0.8,
-                    whiteSpace: 'nowrap',
                   }}
                 >
                   ({item.count})
@@ -459,7 +454,7 @@ export default function Header({
             <IconButton
               onClick={handleDrawerToggle}
               sx={{ 
-                display: { xs: 'flex', lg: 'none' },
+                display: { xs: 'flex', xl: 'none' },
                 color: 'white',
                 p: 1.5,
               }}
