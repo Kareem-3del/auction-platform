@@ -280,7 +280,8 @@ export default function CategoryPage() {
   };
 
   const renderItem = (item: CategoryItem) => {
-    const mainImage = item.images?.[0] || '/placeholder-image.jpg';
+    const mainImage = item.images?.[0] || '/images/placeholder-product.jpg';
+    const isAuction = item.type === 'auction';
 
     return (
       <Grid item xs={12} sm={6} md={4} lg={3} key={`${item.type}-${item.id}`}>
@@ -290,9 +291,18 @@ export default function CategoryPage() {
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            '&:hover': { boxShadow: 4 },
+            borderRadius: 3,
+            overflow: 'hidden',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { 
+              boxShadow: (theme) => `0 12px 32px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
+              transform: 'translateY(-4px)',
+              borderColor: isAuction ? 'error.main' : 'primary.main',
+            },
           }}
-          onClick={() => router.push(`/${item.type === 'auction' ? 'auctions' : 'products'}/${item.id}`)}
+          onClick={() => router.push(`/${isAuction ? 'auctions' : 'products'}/${item.id}`)}
         >
           <Box position="relative">
             <CardMedia
@@ -300,84 +310,179 @@ export default function CategoryPage() {
               height="200"
               image={mainImage}
               alt={item.title}
-              sx={{ objectFit: 'cover' }}
+              sx={{ 
+                objectFit: 'cover',
+                backgroundColor: 'grey.100'
+              }}
             />
             
-            <Chip
-              label={item.type === 'auction' ? 'Auction' : 'Product'}
-              color={item.type === 'auction' ? 'primary' : 'secondary'}
-              size="small"
-              sx={{ position: 'absolute', top: 8, left: 8 }}
-            />
-
-            {item.type === 'auction' && item.status && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 12,
+                left: 12,
+                right: 12,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start'
+              }}
+            >
               <Chip
-                label={item.status.replace('_', ' ')}
-                color={item.status === 'LIVE' ? 'error' : item.status === 'ENDING_SOON' ? 'warning' : 'info'}
+                label={isAuction ? '🔨 Live Auction' : '💎 Premium Item'}
                 size="small"
-                sx={{ position: 'absolute', top: 8, right: 8 }}
+                sx={{
+                  bgcolor: isAuction ? 'error.main' : 'primary.main',
+                  color: 'white',
+                  fontWeight: 600,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                }}
+              />
+
+              {isAuction && item.status && (
+                <Chip
+                  label={item.status === 'LIVE' ? '🔴 LIVE' : item.status.replace('_', ' ')}
+                  size="small"
+                  sx={{
+                    bgcolor: item.status === 'LIVE' ? '#ff1744' : 
+                            item.status === 'SCHEDULED' ? '#ff9800' : 
+                            '#4caf50',
+                    color: 'white',
+                    fontWeight: 600,
+                    animation: item.status === 'LIVE' ? 'pulse 2s ease-in-out infinite alternate' : 'none',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                  }}
+                />
+              )}
+            </Box>
+
+            {/* Condition Badge for Products */}
+            {!isAuction && item.condition && (
+              <Chip 
+                label={item.condition.replace('_', ' ')} 
+                size="small"
+                sx={{ 
+                  position: 'absolute',
+                  bottom: 12,
+                  left: 12,
+                  bgcolor: 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(10px)'
+                }}
               />
             )}
           </Box>
 
-          <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h6" component="h3" gutterBottom noWrap>
+          <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 2.5 }}>
+            <Typography 
+              variant="h6" 
+              component="h3" 
+              sx={{
+                fontWeight: 600,
+                mb: 1,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                lineHeight: 1.3
+              }}
+            >
               {item.title}
             </Typography>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexGrow: 1 }}>
-              {item.description.substring(0, 100)}...
+            <Typography 
+              variant="body2" 
+              color="text.secondary" 
+              sx={{ 
+                mb: 2, 
+                flexGrow: 1,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                fontSize: '0.875rem',
+                lineHeight: 1.4
+              }}
+            >
+              {item.description}
             </Typography>
 
-            <Typography variant="h6" color="primary.main" gutterBottom>
-              {item.type === 'auction' ? 'Current Bid: ' : 'From: '}
-              {formatCurrency(item.price)}
-            </Typography>
-
-            <Stack spacing={1} mb={2}>
-              <Box display="flex" alignItems="center" color="text.secondary">
-                <LocationIcon sx={{ fontSize: 16, mr: 0.5 }} />
-                <Typography variant="caption">
-                  {item.location}
+            {/* Price Section */}
+            <Box sx={{ mb: 2 }}>
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ fontSize: '0.75rem', mb: 0.5 }}
+              >
+                {isAuction ? 'Current Bid' : 'Starting From'}
+              </Typography>
+              <Typography 
+                variant="h5" 
+                sx={{
+                  fontWeight: 700,
+                  color: isAuction ? 'error.main' : 'primary.main',
+                  fontSize: '1.25rem'
+                }}
+              >
+                {formatCurrency(item.price)}
+              </Typography>
+              {isAuction && item.bidCount > 0 && (
+                <Typography variant="caption" color="text.secondary">
+                  {item.bidCount} bid{item.bidCount !== 1 ? 's' : ''}
                 </Typography>
-              </Box>
+              )}
+            </Box>
 
-              {item.type === 'auction' && item.endTime && (
-                <Box display="flex" alignItems="center" color="text.secondary">
+            {/* Auction Timer */}
+            {isAuction && item.endTime && (
+              <Box 
+                sx={{ 
+                  mb: 2,
+                  p: 1.5,
+                  borderRadius: 2,
+                  bgcolor: 'error.50',
+                  border: '1px solid',
+                  borderColor: 'error.100'
+                }}
+              >
+                <Box display="flex" alignItems="center" color="error.main">
                   <ScheduleIcon sx={{ fontSize: 16, mr: 0.5 }} />
-                  <Typography variant="caption">
+                  <Typography variant="caption" sx={{ fontWeight: 600 }}>
                     Ends: {formatTimeRemaining(item.endTime)}
                   </Typography>
                 </Box>
-              )}
+              </Box>
+            )}
 
-              {item.type === 'product' && item.condition && (
-                <Chip 
-                  label={item.condition.replace('_', ' ')} 
-                  size="small"
-                  sx={{ width: 'fit-content' }}
-                />
-              )}
-            </Stack>
+            {/* Location */}
+            <Box display="flex" alignItems="center" color="text.secondary" sx={{ mb: 2 }}>
+              <LocationIcon sx={{ fontSize: 16, mr: 0.5 }} />
+              <Typography variant="caption">
+                {item.location}
+              </Typography>
+            </Box>
 
+            {/* Agent Info */}
             <Box display="flex" alignItems="center" justifyContent="space-between" mt="auto">
               <Box display="flex" alignItems="center">
                 <Avatar 
                   src={item.agent.logoUrl} 
                   alt={item.agent.displayName}
-                  sx={{ width: 20, height: 20, mr: 0.5 }}
+                  sx={{ width: 24, height: 24, mr: 1 }}
                 >
-                  <PersonIcon sx={{ fontSize: 12 }} />
+                  <PersonIcon sx={{ fontSize: 14 }} />
                 </Avatar>
-                <Typography variant="caption" color="text.secondary">
-                  {item.agent.displayName}
-                </Typography>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                    by {item.agent.displayName || 'Premium Seller'}
+                  </Typography>
+                </Box>
               </Box>
 
               {item.agent.rating && (
                 <Box display="flex" alignItems="center">
-                  <StarIcon sx={{ fontSize: 14, color: 'warning.main' }} />
-                  <Typography variant="caption" color="warning.main">
+                  <StarIcon sx={{ fontSize: 14, color: 'warning.main', mr: 0.25 }} />
+                  <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>
                     {Number(item.agent.rating).toFixed(1)}
                   </Typography>
                 </Box>
