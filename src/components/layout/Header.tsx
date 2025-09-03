@@ -100,7 +100,7 @@ export default function Header({
       sx={{
         background: '#000000',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        minHeight: { xs: 60, md: 70, lg: 100 },
+        minHeight: { xs: 80, md: 100, lg: 160 },
         zIndex: 109,
       }}
     >
@@ -108,7 +108,7 @@ export default function Header({
         {/* Top utility bar - hidden on mobile */}
         <Box sx={{ 
           display: { xs: 'none', lg: 'block' },
-          py: 1,
+          py: 2,
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         }}>
           <Box sx={{ 
@@ -190,17 +190,17 @@ export default function Header({
         <Toolbar 
           disableGutters 
           sx={{ 
-            minHeight: { xs: 60, md: 70, lg: 70 },
+            minHeight: { xs: 80, md: 100, lg: 100 },
             px: { xs: 4, lg: 0 },
-            py: { xs: 1, lg: 1.5 },
+            py: { xs: 2, lg: 3 },
           }}
         >
           {/* Logo */}
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center',
-            width: { xs: 120, lg: 140 },
-            height: { xs: 40, lg: 50 },
+            width: { xs: 140, lg: 180 },
+            height: { xs: 50, lg: 70 },
             mr: { xs: 3, lg: 6 },
           }}>
             <Logo
@@ -216,10 +216,13 @@ export default function Header({
 
           {/* Navigation Items - Desktop */}
           <Box sx={{ 
-            display: { xs: 'none', xl: 'flex' },
+            display: { xs: 'none', lg: 'flex' },
             flex: 1,
-            gap: 2,
+            gap: 1,
             alignItems: 'center',
+            justifyContent: 'center',
+            maxWidth: '600px',
+            mx: 'auto',
           }}>
             {navigationItems.map((item) => (
               <Button
@@ -229,36 +232,43 @@ export default function Header({
                 sx={{
                   color: 'white',
                   fontWeight: 500,
-                  fontSize: { lg: '0.8rem', xl: '0.875rem' },
+                  fontSize: { lg: '0.8rem', xl: '0.85rem' },
                   textTransform: 'none',
-                  px: { lg: 2, xl: 2.5 },
-                  py: 1.5,
+                  px: { lg: 1.5, xl: 2 },
+                  py: 2.5,
                   minWidth: 'auto',
                   borderRadius: 2,
                   display: 'flex',
-                  gap: 2,
+                  gap: 1,
                   whiteSpace: 'nowrap',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  height: 'fit-content',
                   '&:hover': {
                     backgroundColor: 'rgba(107, 107, 107, 0.4)',
                   },
                 }}
               >
-                <Typography component="span" sx={{ fontWeight: 'inherit' }}>
-                  {item.label}
-                </Typography>
-                <Typography 
-                  component="span" 
-                  sx={{ 
-                    fontWeight: 'inherit',
-                    opacity: 0.8,
-                  }}
-                >
-                  ({item.count})
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography component="span" sx={{ fontWeight: 'inherit', fontSize: 'inherit' }}>
+                    {item.label}
+                  </Typography>
+                  <Typography 
+                    component="span" 
+                    sx={{ 
+                      fontWeight: 'inherit',
+                      opacity: 0.7,
+                      fontSize: '0.75rem',
+                    }}
+                  >
+                    ({item.count})
+                  </Typography>
+                </Box>
                 <KeyboardArrowDownIcon 
                   sx={{ 
-                    fontSize: 16,
-                    opacity: 0.7 
+                    fontSize: 12,
+                    opacity: 0.6,
+                    mt: -0.5,
                   }}
                 />
               </Button>
@@ -413,14 +423,14 @@ export default function Header({
                     display: { xs: 'none', md: 'flex' },
                     color: 'white',
                     borderColor: 'white',
-                    fontSize: { xs: '0.8rem', lg: '0.875rem' },
+                    fontSize: { xs: '0.875rem', lg: '1rem' },
                     fontWeight: 500,
                     textTransform: 'none',
-                    px: { xs: 2, md: 2.5, lg: 3 },
-                    py: { xs: 0.75, md: 1, lg: 1.25 },
+                    px: { xs: 2, md: 3, lg: 4 },
+                    py: { xs: 1.25, md: 1.5, lg: 1.75 },
                     borderRadius: { xs: 1.5, lg: 2 },
-                    minWidth: { xs: 100, md: 120, lg: 140 },
-                    mr: { xs: 1.5, md: 2 },
+                    minWidth: { xs: 120, md: 150, lg: 170 },
+                    mr: { xs: 1, md: 2 },
                     '&:hover': {
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
                       borderColor: 'white',
@@ -436,13 +446,13 @@ export default function Header({
                   sx={{
                     backgroundColor: '#CE0E2D',
                     color: 'white',
-                    fontSize: { xs: '0.8rem', lg: '0.875rem' },
+                    fontSize: { xs: '0.875rem', lg: '1rem' },
                     fontWeight: 500,
                     textTransform: 'none',
-                    px: { xs: 2, md: 2.5, lg: 3 },
-                    py: { xs: 0.75, md: 1, lg: 1.25 },
+                    px: { xs: 2, md: 3, lg: 4 },
+                    py: { xs: 1.25, md: 1.5, lg: 1.75 },
                     borderRadius: { xs: 1.5, lg: 2 },
-                    minWidth: { xs: 100, md: 120, lg: 140 },
+                    minWidth: { xs: 120, md: 150, lg: 170 },
                     '&:hover': {
                       backgroundColor: '#b00c26',
                     },
@@ -457,7 +467,7 @@ export default function Header({
             <IconButton
               onClick={handleDrawerToggle}
               sx={{ 
-                display: { xs: 'flex', xl: 'none' },
+                display: { xs: 'flex', lg: 'none' },
                 color: 'white',
                 p: 1.5,
               }}
