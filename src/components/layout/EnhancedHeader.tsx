@@ -55,28 +55,28 @@ const navigationItems = [
   { 
     label: 'Art & Collectibles', 
     path: '/categories/art-collectibles', 
-    count: 9,
+    count: 11,
     icon: 'solar:palette-round-bold-duotone',
     description: 'Paintings, sculptures, and rare collectibles'
   },
   { 
     label: 'Electronics', 
     path: '/categories/electronics', 
-    count: 2,
+    count: 4,
     icon: 'solar:smartphone-bold-duotone',
     description: 'Latest gadgets and electronics'
   },
   { 
     label: 'Vehicles', 
     path: '/categories/vehicles', 
-    count: 1,
+    count: 2,
     icon: 'solar:car-bold-duotone',
     description: 'Cars, motorcycles, and boats'
   },
   { 
     label: 'Watches & Jewelry', 
     path: '/categories/watches-jewelry', 
-    count: 2,
+    count: 4,
     icon: 'solar:crown-bold-duotone',
     description: 'Luxury timepieces and fine jewelry'
   },

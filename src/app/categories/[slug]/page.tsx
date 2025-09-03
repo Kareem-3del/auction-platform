@@ -132,8 +132,6 @@ export default function CategoryPage() {
       }
 
       // Handle the nested data structure from API
-      console.log('Category API Response:', categoryData);
-      
       let categoryInfo;
       if (categoryData.data) {
         if (Array.isArray(categoryData.data)) {
