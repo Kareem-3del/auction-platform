@@ -35,18 +35,16 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const navigationItems = [
-  { label: 'Motors', path: '/categories/cars', count: 889 },
-  { label: 'Prestigious Numbers', path: '/categories/plates', count: 430 },
-  { label: 'Properties', path: '/categories/properties', count: 42 },
-  { label: 'Jewelry', path: '/categories/jewelry', count: 156 },
-  { label: 'Collectibles', path: '/categories/collectibles', count: 85 },
+  { label: 'Art & Collectibles', path: '/categories/art-collectibles', count: 9 },
+  { label: 'Electronics', path: '/categories/electronics', count: 2 },
+  { label: 'Vehicles', path: '/categories/vehicles', count: 1 },
+  { label: 'Watches & Jewelry', path: '/categories/watches-jewelry', count: 2 },
 ];
 
 const utilityLinks = [
-  { label: 'Auction Calendar', path: '/products' },
-  { label: 'About', path: '/about' },
+  { label: 'About EA', path: '/about' },
+  { label: 'Contact', path: '/contact' },
   { label: 'Help', path: '/help' },
-  { label: 'Contact Us', path: '/contact' },
 ];
 
 interface HeaderProps {
@@ -218,11 +216,8 @@ export default function Header({
           <Box sx={{ 
             display: { xs: 'none', lg: 'flex' },
             flex: 1,
-            gap: 1,
+            gap: 0.5,
             alignItems: 'center',
-            justifyContent: 'center',
-            maxWidth: '600px',
-            mx: 'auto',
           }}>
             {navigationItems.map((item) => (
               <Button
@@ -232,43 +227,40 @@ export default function Header({
                 sx={{
                   color: 'white',
                   fontWeight: 500,
-                  fontSize: { lg: '0.8rem', xl: '0.85rem' },
+                  fontSize: { lg: '0.75rem', xl: '0.8rem' },
                   textTransform: 'none',
-                  px: { lg: 1.5, xl: 2 },
-                  py: 2.5,
+                  px: { lg: 1, xl: 1.5 },
+                  py: 3,
                   minWidth: 'auto',
                   borderRadius: 2,
                   display: 'flex',
                   gap: 1,
                   whiteSpace: 'nowrap',
-                  flexDirection: 'column',
+                  flexDirection: 'row',
                   alignItems: 'center',
-                  height: 'fit-content',
                   '&:hover': {
                     backgroundColor: 'rgba(107, 107, 107, 0.4)',
                   },
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography component="span" sx={{ fontWeight: 'inherit', fontSize: 'inherit' }}>
-                    {item.label}
-                  </Typography>
-                  <Typography 
-                    component="span" 
-                    sx={{ 
-                      fontWeight: 'inherit',
-                      opacity: 0.7,
-                      fontSize: '0.75rem',
-                    }}
-                  >
-                    ({item.count})
-                  </Typography>
-                </Box>
+                <Typography component="span" sx={{ fontWeight: 'inherit' }}>
+                  {item.label}
+                </Typography>
+                <Typography 
+                  component="span" 
+                  sx={{ 
+                    fontWeight: 'inherit',
+                    opacity: 0.8,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  ({item.count})
+                </Typography>
                 <KeyboardArrowDownIcon 
                   sx={{ 
-                    fontSize: 12,
-                    opacity: 0.6,
-                    mt: -0.5,
+                    fontSize: 14,
+                    opacity: 0.7,
+                    ml: 0.5,
                   }}
                 />
               </Button>
