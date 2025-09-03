@@ -51,6 +51,7 @@ const searchParamsSchema = z.object({
   featured: z.string().transform(val => val === 'true').optional(),
   auctionOnly: z.string().transform(val => val === 'true' ? true : val === 'false' ? false : undefined).optional(),
   auctionStatus: z.string().optional(), // Comma-separated auction statuses
+  includeEnded: z.string().transform(val => val === 'true').optional(), // Include ended auctions in results
   sortBy: z.enum(['relevance', 'newest', 'oldest', 'price_low', 'price_high', 'priceAsc', 'priceDesc', 'titleAsc', 'titleDesc', 'ending_soon']).default('newest'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
   status: z.enum(['PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'ALL']).default('APPROVED'),
@@ -80,6 +81,7 @@ export async function GET(request: NextRequest) {
       featured, 
       auctionOnly, 
       auctionStatus,
+      includeEnded,
       sortBy, 
       sortOrder,
       status 
@@ -91,11 +93,17 @@ export async function GET(request: NextRequest) {
     if (status !== 'ALL') {
       whereClause.status = status;
       
-      // For public display (APPROVED), exclude sold items and ended auctions
-      if (status === 'APPROVED') {
+      // For public display (APPROVED), exclude sold items and ended auctions unless explicitly requested
+      if (status === 'APPROVED' && !includeEnded) {
         whereClause.NOT = [
           { status: 'SOLD' },
           { auctionStatus: 'ENDED' },
+          { auctionStatus: 'CANCELLED' }
+        ];
+      } else if (status === 'APPROVED' && includeEnded) {
+        // Only exclude sold and cancelled items, but keep ended auctions
+        whereClause.NOT = [
+          { status: 'SOLD' },
           { auctionStatus: 'CANCELLED' }
         ];
       }
@@ -372,6 +380,7 @@ export async function GET(request: NextRequest) {
         featured,
         auctionOnly,
         auctionStatus,
+        includeEnded,
         sortBy,
         sortOrder,
         status,

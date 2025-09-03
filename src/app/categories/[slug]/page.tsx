@@ -172,6 +172,7 @@ export default function CategoryPage() {
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
         sortBy,
+        includeEnded: 'true', // Include ended auctions in category browsing
       });
 
       if (searchQuery.trim()) {
@@ -211,7 +212,7 @@ export default function CategoryPage() {
       const response = await fetch(`${endpoint}?${itemsParams.toString()}`);
       const data = await response.json();
 
-      if (data.success && data.data && data.data.products) {
+      if (data.success && data.data && data.data.products && Array.isArray(data.data.products)) {
         const mappedItems = data.data.products.map((item: any) => {
           // Determine if this is an auction or regular product
           const isAuction = item.auctionStatus && ['SCHEDULED', 'LIVE', 'ENDED'].includes(item.auctionStatus);
@@ -242,6 +243,14 @@ export default function CategoryPage() {
         }));
       } else {
         // No products found or API error
+        console.log('No products found or API error:', {
+          success: data.success,
+          hasData: !!data.data,
+          hasProducts: !!(data.data && data.data.products),
+          isArray: !!(data.data && data.data.products && Array.isArray(data.data.products)),
+          productsLength: data.data && data.data.products ? data.data.products.length : 0
+        });
+        
         setItems([]);
         setPagination(prev => ({
           ...prev,
