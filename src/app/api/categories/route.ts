@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
     const parentId = searchParams.get('parentId');
     const flat = searchParams.get('flat') === 'true';
     const featuredOnly = searchParams.get('featured') === 'true';
+    const slug = searchParams.get('slug');
 
     const whereClause: any = {};
     
@@ -47,7 +48,9 @@ export async function GET(request: NextRequest) {
       whereClause.isFeatured = true;
     }
 
-    if (parentId) {
+    if (slug) {
+      whereClause.slug = slug;
+    } else if (parentId) {
       whereClause.parentId = parentId;
     } else if (!flat) {
       whereClause.parentId = null; // Only root categories

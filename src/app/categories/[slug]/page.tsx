@@ -132,8 +132,19 @@ export default function CategoryPage() {
       }
 
       // Handle the nested data structure from API
-      const categories = Array.isArray(categoryData.data.data) ? categoryData.data.data : categoryData.data;
-      const categoryInfo = categories.find((cat: Category) => cat.slug === slug);
+      console.log('Category API Response:', categoryData);
+      
+      let categoryInfo;
+      if (categoryData.data) {
+        if (Array.isArray(categoryData.data)) {
+          categoryInfo = categoryData.data.find((cat: Category) => cat.slug === slug);
+        } else if (categoryData.data.data && Array.isArray(categoryData.data.data)) {
+          categoryInfo = categoryData.data.data.find((cat: Category) => cat.slug === slug);
+        } else {
+          categoryInfo = categoryData.data;
+        }
+      }
+      
       if (!categoryInfo) {
         setError('Category not found');
         return;
@@ -146,7 +157,14 @@ export default function CategoryPage() {
       const subcategoriesData = await subcategoriesResponse.json();
       
       if (subcategoriesData.success) {
-        const subcats = Array.isArray(subcategoriesData.data.data) ? subcategoriesData.data.data : subcategoriesData.data;
+        let subcats = [];
+        if (subcategoriesData.data) {
+          if (Array.isArray(subcategoriesData.data)) {
+            subcats = subcategoriesData.data;
+          } else if (subcategoriesData.data.data && Array.isArray(subcategoriesData.data.data)) {
+            subcats = subcategoriesData.data.data;
+          }
+        }
         setSubcategories(subcats);
       }
 
@@ -195,7 +213,7 @@ export default function CategoryPage() {
       const response = await fetch(`${endpoint}?${itemsParams.toString()}`);
       const data = await response.json();
 
-      if (data.success) {
+      if (data.success && data.data && data.data.products) {
         const mappedItems = data.data.products.map((item: any) => {
           // Determine if this is an auction or regular product
           const isAuction = item.auctionStatus && ['SCHEDULED', 'LIVE', 'ENDED'].includes(item.auctionStatus);
@@ -223,6 +241,15 @@ export default function CategoryPage() {
         setPagination(prev => ({
           ...prev,
           ...data.data.pagination,
+        }));
+      } else {
+        // No products found or API error
+        setItems([]);
+        setPagination(prev => ({
+          ...prev,
+          page: 1,
+          totalPages: 1,
+          totalCount: 0,
         }));
       }
 
