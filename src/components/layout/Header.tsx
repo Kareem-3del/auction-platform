@@ -100,7 +100,7 @@ export default function Header({
       sx={{
         background: '#000000',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        minHeight: { xs: 70, md: 80, lg: 120 },
+        minHeight: { xs: 60, md: 70, lg: 100 },
         zIndex: 109,
       }}
     >
@@ -108,7 +108,7 @@ export default function Header({
         {/* Top utility bar - hidden on mobile */}
         <Box sx={{ 
           display: { xs: 'none', lg: 'block' },
-          py: 1.5,
+          py: 1,
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         }}>
           <Box sx={{ 
@@ -190,17 +190,17 @@ export default function Header({
         <Toolbar 
           disableGutters 
           sx={{ 
-            minHeight: { xs: 70, md: 80, lg: 80 },
+            minHeight: { xs: 60, md: 70, lg: 70 },
             px: { xs: 4, lg: 0 },
-            py: { xs: 1.5, lg: 2 },
+            py: { xs: 1, lg: 1.5 },
           }}
         >
           {/* Logo */}
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center',
-            width: { xs: 130, lg: 160 },
-            height: { xs: 45, lg: 60 },
+            width: { xs: 120, lg: 140 },
+            height: { xs: 40, lg: 50 },
             mr: { xs: 3, lg: 6 },
           }}>
             <Logo
@@ -231,8 +231,8 @@ export default function Header({
                   fontWeight: 500,
                   fontSize: { lg: '0.8rem', xl: '0.875rem' },
                   textTransform: 'none',
-                  px: { lg: 2.5, xl: 3 },
-                  py: 2,
+                  px: { lg: 2, xl: 2.5 },
+                  py: 1.5,
                   minWidth: 'auto',
                   borderRadius: 2,
                   display: 'flex',
@@ -416,11 +416,11 @@ export default function Header({
                     fontSize: { xs: '0.8rem', lg: '0.875rem' },
                     fontWeight: 500,
                     textTransform: 'none',
-                    px: { xs: 2, md: 3, lg: 3.5 },
-                    py: { xs: 1, md: 1.25, lg: 1.5 },
+                    px: { xs: 2, md: 2.5, lg: 3 },
+                    py: { xs: 0.75, md: 1, lg: 1.25 },
                     borderRadius: { xs: 1.5, lg: 2 },
-                    minWidth: { xs: 120, md: 150, lg: 170 },
-                    mr: { xs: 1, md: 2 },
+                    minWidth: { xs: 100, md: 120, lg: 140 },
+                    mr: { xs: 1.5, md: 2 },
                     '&:hover': {
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
                       borderColor: 'white',
@@ -439,10 +439,10 @@ export default function Header({
                     fontSize: { xs: '0.8rem', lg: '0.875rem' },
                     fontWeight: 500,
                     textTransform: 'none',
-                    px: { xs: 2, md: 3, lg: 3.5 },
-                    py: { xs: 1, md: 1.25, lg: 1.5 },
+                    px: { xs: 2, md: 2.5, lg: 3 },
+                    py: { xs: 0.75, md: 1, lg: 1.25 },
                     borderRadius: { xs: 1.5, lg: 2 },
-                    minWidth: { xs: 120, md: 150, lg: 170 },
+                    minWidth: { xs: 100, md: 120, lg: 140 },
                     '&:hover': {
                       backgroundColor: '#b00c26',
                     },
