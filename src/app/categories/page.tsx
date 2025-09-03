@@ -189,14 +189,14 @@ export default function CategoriesPage() {
               color="text.secondary"
               sx={{ mb: 3, lineHeight: 1.5 }}
             >
-              {category.description || `Explore amazing items in ${category.name.toLowerCase()}`}
+              {category.description || `Discover exciting auctions in ${category.name.toLowerCase()}`}
             </Typography>
 
             {/* Stats */}
             <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
               <Chip
                 icon={<TrendingIcon sx={{ fontSize: '14px !important' }} />}
-                label={`${category.productCount} Items`}
+                label={`${category.productCount} Auctions`}
                 size="small"
                 variant="outlined"
                 sx={{ fontSize: '0.75rem' }}
@@ -281,7 +281,7 @@ export default function CategoriesPage() {
             Browse Categories
           </Typography>
           <Typography variant="h6" color="text.secondary" paragraph>
-            Discover amazing auction items across all categories
+            Discover exciting auctions across all categories
           </Typography>
         </Box>
 
@@ -294,7 +294,7 @@ export default function CategoriesPage() {
                   {categories.reduce((sum, cat) => sum + cat.productCount, 0).toLocaleString()}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Total Items
+                  Total Auctions
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={4}>

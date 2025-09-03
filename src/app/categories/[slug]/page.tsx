@@ -198,57 +198,64 @@ export default function CategoryPage() {
       
       // Add auction filter based on tab selection
       switch (tabValue) {
-        case 0: // All items
-          // Don't add any filter - get all products
+        case 0: // All auctions
+          // Don't add any filter - get all auctions
           break;
-        case 1: // Auctions only
-          itemsParams.append('auctionOnly', 'true');
+        case 1: // Live auctions only
+          itemsParams.append('auctionStatus', 'SCHEDULED,LIVE');
           break;
-        case 2: // Products only
-          itemsParams.append('auctionOnly', 'false');
+        case 2: // Ended auctions only
+          itemsParams.append('auctionStatus', 'ENDED');
           break;
       }
 
       const response = await fetch(`${endpoint}?${itemsParams.toString()}`);
       const data = await response.json();
 
-      if (data.success && data.data && data.data.products && Array.isArray(data.data.products)) {
-        const mappedItems = data.data.products.map((item: any) => {
-          // Determine if this is an auction or regular product
-          const isAuction = item.auctionStatus && ['SCHEDULED', 'LIVE', 'ENDED'].includes(item.auctionStatus);
+      if (data.success && data.data && Array.isArray(data.data)) {
+        const mappedItems = data.data.map((item: any) => {
+          // Treat all items as auctions - unify the terminology
+          const hasActiveAuction = item.auctionStatus && ['SCHEDULED', 'LIVE'].includes(item.auctionStatus);
+          const hasEndedAuction = item.auctionStatus === 'ENDED';
           
           return {
-            type: isAuction ? 'auction' : 'product' as const,
+            type: 'auction' as const, // Always treat as auction
             id: item.id,
             title: item.title,
             description: item.description,
             images: item.images,
-            price: isAuction ? (item.currentBid || item.startingBid || item.estimatedValueMin) : item.estimatedValueMin,
+            price: item.currentBid || item.startingBid || item.estimatedValueMin,
             location: item.location,
             createdAt: item.createdAt,
             agent: item.agent,
             condition: item.condition,
             category: item.category,
-            // Auction-specific fields
-            status: item.auctionStatus,
+            // Auction fields - always present
+            status: item.auctionStatus || 'SCHEDULED',
             endTime: item.endTime,
             bidCount: item.bidCount || 0,
+            // Additional auction info
+            estimatedValueMin: item.estimatedValueMin,
+            estimatedValueMax: item.estimatedValueMax,
+            startingBid: item.startingBid,
+            currentBid: item.currentBid,
+            isActive: hasActiveAuction,
+            hasEnded: hasEndedAuction,
           };
         });
 
         setItems(mappedItems);
         setPagination(prev => ({
           ...prev,
-          ...data.data.pagination,
+          ...data.meta?.pagination,
         }));
       } else {
-        // No products found or API error
-        console.log('No products found or API error:', {
+        // No auctions found or API error
+        console.log('No auctions found or API error:', {
           success: data.success,
           hasData: !!data.data,
-          hasProducts: !!(data.data && data.data.products),
-          isArray: !!(data.data && data.data.products && Array.isArray(data.data.products)),
-          productsLength: data.data && data.data.products ? data.data.products.length : 0
+          isArray: !!(data.data && Array.isArray(data.data)),
+          dataLength: data.data && Array.isArray(data.data) ? data.data.length : 0
         });
         
         setItems([]);
@@ -290,7 +297,7 @@ export default function CategoryPage() {
 
   const renderItem = (item: CategoryItem) => {
     const mainImage = item.images?.[0] || '/images/placeholder-product.jpg';
-    const isAuction = item.type === 'auction';
+    const isAuction = true; // All items are treated as auctions now
 
     return (
       <Grid item xs={12} sm={6} md={4} lg={3} key={`${item.type}-${item.id}`}>
@@ -311,7 +318,7 @@ export default function CategoryPage() {
               borderColor: isAuction ? 'error.main' : 'primary.main',
             },
           }}
-          onClick={() => router.push(`/${isAuction ? 'auctions' : 'products'}/${item.id}`)}
+          onClick={() => router.push(`/auctions/${item.id}`)}
         >
           <Box position="relative">
             <CardMedia
@@ -337,35 +344,22 @@ export default function CategoryPage() {
               }}
             >
               <Chip
-                label={isAuction ? '🔨 Live Auction' : '💎 Premium Item'}
+                label={item.status === 'LIVE' ? '🔨 Live Auction' : item.status === 'ENDED' ? '📋 Auction Ended' : '🔨 Upcoming Auction'}
                 size="small"
                 sx={{
-                  bgcolor: isAuction ? 'error.main' : 'primary.main',
+                  bgcolor: item.status === 'LIVE' ? 'error.main' : 
+                          item.status === 'ENDED' ? 'grey.600' : 
+                          'warning.main',
                   color: 'white',
                   fontWeight: 600,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                 }}
               />
 
-              {isAuction && item.status && (
-                <Chip
-                  label={item.status === 'LIVE' ? '🔴 LIVE' : item.status.replace('_', ' ')}
-                  size="small"
-                  sx={{
-                    bgcolor: item.status === 'LIVE' ? '#ff1744' : 
-                            item.status === 'SCHEDULED' ? '#ff9800' : 
-                            '#4caf50',
-                    color: 'white',
-                    fontWeight: 600,
-                    animation: item.status === 'LIVE' ? 'pulse 2s ease-in-out infinite alternate' : 'none',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                  }}
-                />
-              )}
             </Box>
 
-            {/* Condition Badge for Products */}
-            {!isAuction && item.condition && (
+            {/* Condition Badge for all auctions */}
+            {item.condition && (
               <Chip 
                 label={item.condition.replace('_', ' ')} 
                 size="small"
@@ -423,19 +417,19 @@ export default function CategoryPage() {
                 color="text.secondary" 
                 sx={{ fontSize: '0.75rem', mb: 0.5 }}
               >
-                {isAuction ? 'Current Bid' : 'Starting From'}
+                {item.status === 'ENDED' ? 'Final Price' : item.bidCount > 0 ? 'Current Bid' : 'Starting Bid'}
               </Typography>
               <Typography 
                 variant="h5" 
                 sx={{
                   fontWeight: 700,
-                  color: isAuction ? 'error.main' : 'primary.main',
+                  color: 'error.main',
                   fontSize: '1.25rem'
                 }}
               >
                 {formatCurrency(item.price)}
               </Typography>
-              {isAuction && item.bidCount > 0 && (
+              {item.bidCount > 0 && (
                 <Typography variant="caption" color="text.secondary">
                   {item.bidCount} bid{item.bidCount !== 1 ? 's' : ''}
                 </Typography>
@@ -443,7 +437,7 @@ export default function CategoryPage() {
             </Box>
 
             {/* Auction Timer */}
-            {isAuction && item.endTime && (
+            {item.endTime && (
               <Box 
                 sx={{ 
                   mb: 2,
@@ -664,9 +658,9 @@ export default function CategoryPage() {
             onChange={handleTabChange}
             sx={{ borderBottom: 1, borderColor: 'divider' }}
           >
-            <Tab label={`All Items (${pagination.totalCount})`} />
-            <Tab label="Auctions Only" />
-            <Tab label="Products Only" />
+            <Tab label={`All Auctions (${pagination.totalCount})`} />
+            <Tab label="Live Auctions" />
+            <Tab label="Ended Auctions" />
           </Tabs>
         </Paper>
 
@@ -695,10 +689,10 @@ export default function CategoryPage() {
             <Paper sx={{ p: 6, textAlign: 'center' }}>
               <CategoryIcon sx={{ fontSize: 64, color: 'grey.400', mb: 2 }} />
               <Typography variant="h5" gutterBottom>
-                No Items Found
+                No Auctions Found
               </Typography>
               <Typography color="text.secondary" paragraph>
-                No items match your current filters in this category.
+                No auctions match your current filters in this category.
               </Typography>
               <Button variant="outlined" onClick={resetFilters}>
                 Clear Filters

@@ -87,7 +87,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const navigationItems = [
-  { label: 'Products', path: '/products', icon: ProductIcon, public: true },
   { label: 'Auctions', path: '/products', icon: AuctionIcon, public: true },
   { label: 'Categories', path: '/categories', icon: CategoryIcon, public: true },
 ];
@@ -101,8 +100,7 @@ const userMenuItems = [
 ];
 
 const agentMenuItems = [
-  { label: 'Add Product', path: '/products/create', icon: AddIcon },
-  { label: 'My Products', path: '/agent/products', icon: ProductIcon },
+  { label: 'Create Auction', path: '/products/create', icon: AddIcon },
   { label: 'My Auctions', path: '/agent/products', icon: AuctionIcon },
 ];
 
