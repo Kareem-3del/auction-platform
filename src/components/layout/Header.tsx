@@ -96,77 +96,134 @@ export default function Header({
       position="sticky" 
       elevation={0}
       sx={{
-        background: '#000000',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        minHeight: { xs: 80, md: 100, lg: 160 },
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        minHeight: { xs: 70, md: 80 },
         zIndex: 109,
       }}
     >
-      <Container maxWidth={false} sx={{ px: { xs: 0, lg: 6, xl: 8 } }}>
-        {/* Top utility bar - hidden on mobile */}
-        <Box sx={{ 
-          display: { xs: 'none', lg: 'block' },
-          py: 2,
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        }}>
+      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 4 } }}>
+        <Toolbar 
+          disableGutters 
+          sx={{ 
+            minHeight: { xs: 70, md: 80 },
+            gap: { xs: 2, md: 4 },
+          }}
+        >
+          {/* Logo */}
           <Box sx={{ 
-            display: 'flex',
-            justifyContent: 'space-between',
+            display: 'flex', 
             alignItems: 'center',
-          }}>
-            {/* Contact Info */}
-            <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.75rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.5,
-                }}
-              >
-                <PhoneIcon sx={{ fontSize: 14 }} />
-                +961 1 234 567
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.75rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.5,
-                }}
-              >
-                <EmailIcon sx={{ fontSize: 14 }} />
-                info@lebanonauction.com
-              </Typography>
-            </Box>
+            cursor: 'pointer',
+          }}
+          onClick={() => navigateTo('/')}
+          >
+            <Logo
+              sx={{ 
+                width: { xs: 120, md: 140 },
+                height: { xs: 35, md: 40 },
+              }}
+              isSingle={false}
+            />
+          </Box>
 
-            {/* Utility Links */}
+          {/* Navigation - Desktop */}
+          <Box sx={{ 
+            display: { xs: 'none', lg: 'flex' },
+            flex: 1,
+            justifyContent: 'center',
+            gap: 1,
+          }}>
+            {navigationItems.map((item) => (
+              <Button
+                key={item.path}
+                onClick={() => navigateTo(item.path)}
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  textTransform: 'none',
+                  px: 2,
+                  py: 1.5,
+                  borderRadius: 2,
+                  minWidth: 'auto',
+                  position: 'relative',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: 'rgba(206, 14, 45, 0.1)',
+                    color: '#CE0E2D',
+                    transform: 'translateY(-1px)',
+                  },
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: 0,
+                    left: '50%',
+                    width: 0,
+                    height: '2px',
+                    backgroundColor: '#CE0E2D',
+                    transition: 'all 0.3s ease',
+                    transform: 'translateX(-50%)',
+                  },
+                  '&:hover::after': {
+                    width: '80%',
+                  },
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography component="span" sx={{ fontSize: 'inherit' }}>
+                    {item.label}
+                  </Typography>
+                  <Typography 
+                    component="span" 
+                    sx={{ 
+                      fontSize: '0.75rem',
+                      opacity: 0.7,
+                      backgroundColor: 'rgba(206, 14, 45, 0.2)',
+                      px: 0.5,
+                      py: 0.25,
+                      borderRadius: 1,
+                      minWidth: '18px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {item.count}
+                  </Typography>
+                </Box>
+              </Button>
+            ))}
+          </Box>
+
+          {/* Right Actions */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: { xs: 1, md: 2 },
+          }}>
+            {/* Utility Links - Desktop */}
             <Box sx={{ 
-              display: 'flex',
+              display: { xs: 'none', xl: 'flex' },
               alignItems: 'center',
               gap: 1,
+              mr: 2,
             }}>
               {utilityLinks.map((link) => (
                 <Button
                   key={link.path}
-                  color="inherit"
                   onClick={() => navigateTo(link.path)}
                   sx={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '0.75rem',
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.8rem',
                     fontWeight: 400,
                     textTransform: 'none',
                     px: 1.5,
                     py: 0.5,
                     minWidth: 'auto',
+                    borderRadius: 1,
                     '&:hover': {
                       color: 'white',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      borderRadius: 1,
+                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
                     },
                   }}
                 >
@@ -181,136 +238,48 @@ export default function Header({
                 ]}
               />
             </Box>
-          </Box>
-        </Box>
 
-        {/* Main header content */}
-        <Toolbar 
-          disableGutters 
-          sx={{ 
-            minHeight: { xs: 80, md: 100, lg: 100 },
-            px: { xs: 4, lg: 0 },
-            py: { xs: 2, lg: 3 },
-          }}
-        >
-          {/* Logo */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            width: { xs: 140, lg: 180 },
-            height: { xs: 50, lg: 70 },
-            mr: { xs: 3, lg: 6 },
-          }}>
-            <Logo
-              sx={{ 
-                width: '100%',
-                height: '100%',
-                cursor: 'pointer',
-              }}
-              onClick={() => navigateTo('/')}
-              isSingle={false}
-            />
-          </Box>
-
-          {/* Navigation Items - Desktop */}
-          <Box sx={{ 
-            display: { xs: 'none', lg: 'flex' },
-            flex: 1,
-            gap: 0.5,
-            alignItems: 'center',
-          }}>
-            {navigationItems.map((item) => (
-              <Button
-                key={item.path}
-                color="inherit"
-                onClick={() => navigateTo(item.path)}
-                sx={{
-                  color: 'white',
-                  fontWeight: 500,
-                  fontSize: { lg: '0.75rem', xl: '0.8rem' },
-                  textTransform: 'none',
-                  px: { lg: 1, xl: 1.5 },
-                  py: 3,
-                  minWidth: 'auto',
-                  borderRadius: 2,
-                  display: 'flex',
-                  gap: 1,
-                  whiteSpace: 'nowrap',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  '&:hover': {
-                    backgroundColor: 'rgba(107, 107, 107, 0.4)',
-                  },
-                }}
-              >
-                <Typography component="span" sx={{ fontWeight: 'inherit' }}>
-                  {item.label}
-                </Typography>
-                <Typography 
-                  component="span" 
-                  sx={{ 
-                    fontWeight: 'inherit',
-                    opacity: 0.8,
-                    fontSize: '0.7rem',
-                  }}
-                >
-                  ({item.count})
-                </Typography>
-                <KeyboardArrowDownIcon 
-                  sx={{ 
-                    fontSize: 14,
-                    opacity: 0.7,
-                    ml: 0.5,
-                  }}
-                />
-              </Button>
-            ))}
-          </Box>
-
-          {/* Right side actions */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            gap: { xs: 2, md: 3 },
-            ml: 'auto',
-          }}>
-            {/* Search Icon */}
+            {/* Search */}
             <IconButton 
               onClick={() => setSearchDialogOpen(true)}
               sx={{ 
-                color: 'white',
-                p: 1.5,
+                color: 'rgba(255, 255, 255, 0.8)',
+                p: 1,
+                borderRadius: 2,
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: 'white',
                 },
               }}
             >
-              <SearchIcon sx={{ fontSize: 24 }} />
+              <SearchIcon sx={{ fontSize: 20 }} />
             </IconButton>
 
-            {/* Auth Buttons */}
+            {/* Auth Section */}
             {loading ? (
-              // Show loading placeholder to prevent layout shift
-              <Box sx={{ width: { xs: 80, md: 220 }, height: 40 }} />
+              <Box sx={{ width: 200, height: 40 }} />
             ) : user ? (
-              <>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <NotificationCenter />
                 
-                {/* User Profile Menu */}
                 <IconButton
                   onClick={handleMenuOpen}
                   sx={{
                     p: 0.5,
-                    ml: 1,
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
                   }}
                 >
                   <Avatar
                     src={user?.photoURL}
                     alt={user?.displayName || user?.firstName || 'User'}
                     sx={{
-                      width: 36,
-                      height: 36,
+                      width: 32,
+                      height: 32,
                       bgcolor: '#CE0E2D',
+                      fontSize: '0.875rem',
                     }}
                   >
                     {(user?.displayName || user?.firstName || user?.email)?.charAt(0).toUpperCase()}
@@ -324,27 +293,26 @@ export default function Header({
                   onClick={handleMenuClose}
                   sx={{
                     '& .MuiPaper-root': {
-                      backgroundColor: '#0F1419',
+                      backgroundColor: '#1a1a1a',
                       color: 'white',
-                      minWidth: 200,
+                      minWidth: 220,
                       mt: 1,
-                      borderRadius: 2,
+                      borderRadius: 3,
                       border: '1px solid rgba(255, 255, 255, 0.1)',
+                      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
                     },
                   }}
                   transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                   anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
-                  {/* User Info */}
-                  <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                  <Box sx={{ px: 3, py: 2, borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
                     <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 600 }}>
                       {user?.displayName || `${user?.firstName} ${user?.lastName}` || 'User'}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       {user?.email}
                     </Typography>
-                    {/* Account Balance */}
-                    <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(206, 14, 45, 0.1)', borderRadius: 1 }}>
+                    <Box sx={{ mt: 1.5, p: 1.5, bgcolor: 'rgba(206, 14, 45, 0.1)', borderRadius: 2 }}>
                       <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.6)', display: 'block' }}>
                         Balance
                       </Typography>
@@ -354,7 +322,6 @@ export default function Header({
                     </Box>
                   </Box>
 
-                  {/* Account Management */}
                   <MenuItem onClick={() => handleMenuItemClick('/profile')}>
                     <ListItemIcon>
                       <Iconify icon="solar:user-bold-duotone" sx={{ color: 'rgba(255, 255, 255, 0.8)' }} />
@@ -383,7 +350,6 @@ export default function Header({
                     <Typography sx={{ color: '#22C55E' }}>Charge Account</Typography>
                   </MenuItem>
 
-                  {/* Dashboard for Agent/Admin */}
                   {(user?.userType === 'AGENT' || user?.userType === 'ADMIN' || user?.userType === 'SUPER_ADMIN') && (
                     <>
                       <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 1 }} />
@@ -405,77 +371,75 @@ export default function Header({
                     <Typography sx={{ color: '#CE0E2D' }}>Sign Out</Typography>
                   </MenuItem>
                 </Menu>
-              </>
+              </Box>
             ) : (
-              <>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Button
-                  variant="outlined"
+                  variant="text"
                   onClick={() => navigateTo('/auth/register')}
                   sx={{
-                    display: { xs: 'none', md: 'flex' },
-                    color: 'white',
-                    borderColor: 'white',
-                    fontSize: { xs: '0.875rem', lg: '1rem' },
+                    display: { xs: 'none', sm: 'flex' },
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '0.875rem',
                     fontWeight: 500,
                     textTransform: 'none',
-                    px: { xs: 2, md: 3, lg: 4 },
-                    py: { xs: 1.25, md: 1.5, lg: 1.75 },
-                    borderRadius: { xs: 1.5, lg: 2 },
-                    minWidth: { xs: 120, md: 150, lg: 170 },
-                    mr: { xs: 1, md: 2 },
+                    px: 2,
+                    py: 1,
+                    borderRadius: 2,
+                    minWidth: 'auto',
                     '&:hover': {
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      borderColor: 'white',
+                      color: 'white',
                     },
                   }}
                 >
-                  Create Account
+                  Sign Up
                 </Button>
                 
                 <Button
                   variant="contained"
                   onClick={() => navigateTo('/auth/login')}
                   sx={{
-                    backgroundColor: '#CE0E2D',
+                    background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
                     color: 'white',
-                    fontSize: { xs: '0.875rem', lg: '1rem' },
-                    fontWeight: 500,
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
                     textTransform: 'none',
-                    px: { xs: 2, md: 3, lg: 4 },
-                    py: { xs: 1.25, md: 1.5, lg: 1.75 },
-                    borderRadius: { xs: 1.5, lg: 2 },
-                    minWidth: { xs: 120, md: 150, lg: 170 },
+                    px: { xs: 2.5, sm: 3 },
+                    py: 1,
+                    borderRadius: 2,
+                    minWidth: 'auto',
+                    boxShadow: '0 4px 12px rgba(206, 14, 45, 0.3)',
                     '&:hover': {
-                      backgroundColor: '#b00c26',
+                      background: 'linear-gradient(135deg, #b00c26, #e63939)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 6px 20px rgba(206, 14, 45, 0.4)',
                     },
                   }}
                 >
                   Login
                 </Button>
-              </>
+              </Box>
             )}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu */}
             <IconButton
               onClick={handleDrawerToggle}
               sx={{ 
                 display: { xs: 'flex', lg: 'none' },
-                color: 'white',
-                p: 1.5,
+                color: 'rgba(255, 255, 255, 0.8)',
+                p: 1,
+                borderRadius: 2,
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                },
               }}
             >
-              <MenuIcon sx={{ fontSize: 24 }} />
+              <MenuIcon sx={{ fontSize: 22 }} />
             </IconButton>
           </Box>
         </Toolbar>
-
-        {/* Bottom separator line */}
-        <Box sx={{
-          width: '100%',
-          height: '0.5px',
-          backgroundColor: 'rgba(255, 255, 255, 0.3)',
-          display: { xs: 'none', lg: 'block' },
-        }} />
       </Container>
 
       {/* Search Dialog */}
