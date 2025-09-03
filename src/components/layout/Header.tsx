@@ -1,2 +1,2 @@
-// Re-export the enhanced header component
-export { default } from './EnhancedHeader';
+// Export the modern header component
+export { default } from './ModernHeader';
