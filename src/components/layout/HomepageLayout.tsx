@@ -395,13 +395,20 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                   fontSize: '13px',
                   fontWeight: 500,
                   transition: 'all 0.3s ease',
+                  minWidth: '120px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  whiteSpace: 'nowrap',
+                  textAlign: 'center',
                   '&:hover': {
                     borderColor: '#CE0E2D',
                     color: '#CE0E2D',
                   },
                 }}
               >
-                {t('auth.createAccount')}
+                Create Account
               </Box>
               <Box
                 onClick={() => router.push('/auth/login')}
@@ -415,12 +422,19 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                   fontSize: '13px',
                   fontWeight: 500,
                   transition: 'all 0.3s ease',
+                  minWidth: '120px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  whiteSpace: 'nowrap',
+                  textAlign: 'center',
                   '&:hover': {
                     bgcolor: '#B00C24',
                   },
                 }}
               >
-                {t('auth.login')}
+                Login
               </Box>
             </Box>
           )}
