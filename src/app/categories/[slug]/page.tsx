@@ -318,7 +318,7 @@ export default function CategoryPage() {
               borderColor: isAuction ? 'error.main' : 'primary.main',
             },
           }}
-          onClick={() => router.push(`/auctions/${item.id}`)}
+          onClick={() => router.push(`/products/${item.id}`)}
         >
           <Box position="relative">
             <CardMedia
