@@ -271,7 +271,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
   const renderUserSection = () => {
     if (!isAuthenticated) {
       return (
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <Button
             variant="outlined"
             onClick={() => handleNavigation('/auth/login')}
@@ -279,10 +279,18 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
             sx={{
               color: 'white',
               borderColor: 'rgba(255, 255, 255, 0.5)',
-              minWidth: 120,
-              height: 40,
+              minWidth: '120px !important',
+              width: '120px !important',
+              height: '40px !important',
               textTransform: 'none',
               fontWeight: 500,
+              fontSize: '0.875rem',
+              whiteSpace: 'nowrap',
+              padding: '8px 16px',
+              lineHeight: 1.2,
+              '& .MuiButton-startIcon': {
+                marginRight: '6px',
+              },
               '&:hover': {
                 borderColor: 'white',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -298,11 +306,19 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
             sx={{
               backgroundColor: 'white',
               color: theme.palette.primary.main,
-              minWidth: 120,
-              height: 40,
+              minWidth: '120px !important',
+              width: '120px !important',
+              height: '40px !important',
               textTransform: 'none',
               fontWeight: 500,
+              fontSize: '0.875rem',
               whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              padding: '8px 16px',
+              lineHeight: 1.2,
+              '& .MuiButton-startIcon': {
+                marginRight: '6px',
+              },
               '&:hover': {
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 transform: 'translateY(-1px)',
@@ -500,9 +516,16 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
               sx={{
                 color: 'white',
                 borderColor: 'rgba(255, 255, 255, 0.5)',
-                height: 44,
+                height: '44px !important',
                 textTransform: 'none',
                 fontWeight: 500,
+                fontSize: '0.875rem',
+                whiteSpace: 'nowrap',
+                padding: '10px 16px',
+                lineHeight: 1.2,
+                '& .MuiButton-startIcon': {
+                  marginRight: '8px',
+                },
               }}
             >
               Login
@@ -515,10 +538,17 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
               sx={{
                 backgroundColor: 'white',
                 color: theme.palette.primary.main,
-                height: 44,
+                height: '44px !important',
                 textTransform: 'none',
                 fontWeight: 500,
+                fontSize: '0.875rem',
                 whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                padding: '10px 16px',
+                lineHeight: 1.2,
+                '& .MuiButton-startIcon': {
+                  marginRight: '8px',
+                },
               }}
             >
               Create Account
