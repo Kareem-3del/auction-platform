@@ -279,6 +279,10 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
             sx={{
               color: 'white',
               borderColor: 'rgba(255, 255, 255, 0.5)',
+              minWidth: 120,
+              height: 40,
+              textTransform: 'none',
+              fontWeight: 500,
               '&:hover': {
                 borderColor: 'white',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -294,13 +298,18 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
             sx={{
               backgroundColor: 'white',
               color: theme.palette.primary.main,
+              minWidth: 120,
+              height: 40,
+              textTransform: 'none',
+              fontWeight: 500,
+              whiteSpace: 'nowrap',
               '&:hover': {
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 transform: 'translateY(-1px)',
               },
             }}
           >
-            Register
+            Create Account
           </Button>
         </Box>
       );
@@ -491,6 +500,9 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
               sx={{
                 color: 'white',
                 borderColor: 'rgba(255, 255, 255, 0.5)',
+                height: 44,
+                textTransform: 'none',
+                fontWeight: 500,
               }}
             >
               Login
@@ -503,9 +515,13 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
               sx={{
                 backgroundColor: 'white',
                 color: theme.palette.primary.main,
+                height: 44,
+                textTransform: 'none',
+                fontWeight: 500,
+                whiteSpace: 'nowrap',
               }}
             >
-              Register
+              Create Account
             </Button>
           </Box>
         )}
