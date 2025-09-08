@@ -52,8 +52,10 @@ import {
 } from '@mui/icons-material';
 
 import { useAuth } from 'src/hooks/useAuth';
+import { useLocale } from 'src/hooks/useLocale';
 import { Logo } from 'src/components/logo';
 import { formatCurrency } from 'src/lib/utils';
+import LanguageSwitcher from '../language-switcher/LanguageSwitcher';
 
 // Styled components for modern design
 const StyledAppBar = styled(AppBar)(({ theme, scrolled }: { theme: any; scrolled: boolean }) => ({
@@ -171,21 +173,21 @@ const ModernDrawer = styled(Drawer)(({ theme }) => ({
 }));
 
 const navigation = [
-  { name: 'Auctions', href: '/products', icon: AuctionIcon },
-  { name: 'Categories', href: '/categories', icon: CategoryIcon },
+  { name: 'navigation.auctions', href: '/products', icon: AuctionIcon },
+  { name: 'navigation.categories', href: '/categories', icon: CategoryIcon },
 ];
 
 const userMenuItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: DashboardIcon },
-  { name: 'Profile', href: '/profile', icon: PersonIcon },
-  { name: 'Wallet', href: '/wallet', icon: WalletIcon },
-  { name: 'Watchlist', href: '/watchlist', icon: FavoriteIcon },
-  { name: 'Settings', href: '/settings', icon: SettingsIcon },
+  { name: 'navigation.dashboard', href: '/dashboard', icon: DashboardIcon },
+  { name: 'profile.profile', href: '/profile', icon: PersonIcon },
+  { name: 'wallet.balance', href: '/wallet', icon: WalletIcon },
+  { name: 'dashboard.watchlist', href: '/watchlist', icon: FavoriteIcon },
+  { name: 'navigation.settings', href: '/settings', icon: SettingsIcon },
 ];
 
 const agentMenuItems = [
-  { name: 'Create Auction', href: '/products/create', icon: AddIcon },
-  { name: 'My Auctions', href: '/agent/products', icon: AuctionIcon },
+  { name: 'navigation.createAuction', href: '/products/create', icon: AddIcon },
+  { name: 'navigation.bids', href: '/agent/products', icon: AuctionIcon },
 ];
 
 interface ModernHeaderProps {
@@ -199,6 +201,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const { user, isAuthenticated, logout } = useAuth();
+  const { t, isRTL } = useLocale();
   
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
@@ -262,7 +265,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
           onClick={() => handleNavigation(item.href)}
           startIcon={<item.icon sx={{ fontSize: '1.1rem' }} />}
         >
-          {item.name}
+          {t(item.name)}
         </NavButton>
       ))}
     </Box>
@@ -297,7 +300,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
               },
             }}
           >
-            Login
+            {t('auth.login')}
           </Button>
           <Button
             variant="contained"
@@ -325,7 +328,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
               },
             }}
           >
-            Create Account
+            {t('auth.createAccount')}
           </Button>
         </Box>
       );
@@ -432,7 +435,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
               <ListItemIcon>
                 <item.icon fontSize="small" />
               </ListItemIcon>
-              {item.name}
+              {t(item.name)}
             </MenuItem>
           ))}
 
@@ -445,7 +448,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                   <ListItemIcon>
                     <item.icon fontSize="small" />
                   </ListItemIcon>
-                  {item.name}
+                  {t(item.name)}
                 </MenuItem>
               ))}
             </>
@@ -456,7 +459,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
             <ListItemIcon>
               <LogoutIcon fontSize="small" color="error" />
             </ListItemIcon>
-            Logout
+            {t('auth.logout')}
           </MenuItem>
         </Menu>
       </Box>
@@ -528,7 +531,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                 },
               }}
             >
-              Login
+              {t('auth.login')}
             </Button>
             <Button
               fullWidth
@@ -551,10 +554,18 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                 },
               }}
             >
-              Create Account
+              {t('auth.createAccount')}
             </Button>
           </Box>
         )}
+
+        {/* Language Switcher */}
+        <Box sx={{ mb: 2, px: 2 }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)', mb: 1, display: 'block' }}>
+            {t('common.language')}
+          </Typography>
+          <LanguageSwitcher />
+        </Box>
 
         <List>
           {/* Main Navigation */}
@@ -574,7 +585,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                 <ListItemIcon sx={{ color: 'white' }}>
                   <item.icon />
                 </ListItemIcon>
-                <ListItemText primary={item.name} />
+                <ListItemText primary={t(item.name)} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -592,7 +603,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                     <ListItemIcon sx={{ color: 'white' }}>
                       <item.icon />
                     </ListItemIcon>
-                    <ListItemText primary={item.name} />
+                    <ListItemText primary={t(item.name)} />
                   </ListItemButton>
                 </ListItem>
               ))}
@@ -610,7 +621,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                         <ListItemIcon sx={{ color: 'white' }}>
                           <item.icon />
                         </ListItemIcon>
-                        <ListItemText primary={item.name} />
+                        <ListItemText primary={t(item.name)} />
                       </ListItemButton>
                     </ListItem>
                   ))}
@@ -623,7 +634,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                   <ListItemIcon sx={{ color: '#ffcdd2' }}>
                     <LogoutIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Logout" />
+                  <ListItemText primary={t('auth.logout')} />
                 </ListItemButton>
               </ListItem>
             </>
@@ -656,7 +667,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
           <Container maxWidth={maxWidth}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
               <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-                🔥 <strong>Live Auction:</strong> Rare vintage watch collection ending in 2 hours!
+                🔥 <strong>{t('auction.liveBiddingActive')}:</strong> {isRTL ? 'ساعات نادرة من مجموعة فينتج تنتهي خلال ساعتين!' : 'Rare vintage watch collection ending in 2 hours!'}
               </Typography>
               <Button
                 size="small"
@@ -666,12 +677,13 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                   fontSize: '0.75rem',
                   py: 0.25,
                   px: 1,
-                  ml: 1,
+                  ml: isRTL ? 0 : 1,
+                  mr: isRTL ? 1 : 0,
                 }}
                 variant="outlined"
                 onClick={() => router.push('/categories/watches-jewelry')}
               >
-                View Auction
+                {t('common.view')} {t('navigation.auctions')}
               </Button>
               <IconButton
                 size="small"
@@ -739,7 +751,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                 </Box>
                 <form onSubmit={handleSearch}>
                   <SearchInput
-                    placeholder="Search auctions..."
+                    placeholder={t('forms.placeholders.searchProducts')}
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
                     onFocus={() => setSearchFocused(true)}
@@ -819,7 +831,8 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
             </Box>
 
             {/* Desktop User Section */}
-            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2 }}>
+              <LanguageSwitcher />
               {renderUserSection()}
             </Box>
 

@@ -152,6 +152,9 @@ export function LocaleProvider({ children, initialLocale }: LocaleProviderProps)
       
       document.documentElement.style.fontFamily = fontFamily;
       document.body.style.fontFamily = fontFamily;
+      
+      // Force re-render of CSS by toggling a class
+      document.body.classList.toggle('rtl-switch', isRTL);
     }
   }, [locale, isRTL]);
 

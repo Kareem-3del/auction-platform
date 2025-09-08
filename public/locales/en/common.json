@@ -141,6 +141,7 @@
     "login": "Login",
     "logout": "Logout",
     "register": "Register",
+    "createAccount": "Create Account",
     "forgotPassword": "Forgot Password",
     "resetPassword": "Reset Password",
     "changePassword": "Change Password",

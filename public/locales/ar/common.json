@@ -119,6 +119,7 @@
     "login": "تسجيل الدخول",
     "logout": "تسجيل الخروج",
     "register": "التسجيل",
+    "createAccount": "إنشاء حساب",
     "forgotPassword": "نسيت كلمة المرور",
     "resetPassword": "إعادة تعيين كلمة المرور",
     "changePassword": "تغيير كلمة المرور",
