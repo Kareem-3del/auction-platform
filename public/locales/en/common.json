@@ -47,6 +47,8 @@
     "allAuctions": "All Auctions",
     "createAuction": "Create Auction",
     "bids": "My Bids",
+    "about": "About Us",
+    "home": "Home",
     "transactions": "Transactions",
     "users": "Users",
     "allUsers": "All Users",
@@ -412,6 +414,83 @@
     "comingSoon": "This feature is coming soon",
     "underMaintenance": "This feature is under maintenance",
     "unexpectedError": "An unexpected error occurred"
+  },
+  "about": {
+    "hero": {
+      "title": {
+        "line1": "Lebanon's Premier",
+        "line2": "Luxury Auction",
+        "line3": "Platform"
+      },
+      "subtitle": "Lebanon's premier luxury auction platform connecting collectors with authentic treasures since 2020",
+      "exploreButton": "Explore Auctions",
+      "joinButton": "Join Community",
+      "trustedBy": "Trusted by 25,000+ Users",
+      "globalReach": "From Beirut to the world, connecting luxury enthusiasts with extraordinary items"
+    },
+    "stats": {
+      "title": "Our Impact in Numbers",
+      "users": {
+        "label": "Registered Users",
+        "description": "Active bidders from Lebanon and MENA region"
+      },
+      "auctions": {
+        "label": "Successful Auctions",
+        "description": "Luxury items sold with verified authenticity"
+      },
+      "volume": {
+        "label": "Total Transaction Volume",
+        "description": "In luxury cars, jewelry, and collectibles"
+      },
+      "satisfaction": {
+        "label": "Customer Satisfaction",
+        "description": "Based on post-auction surveys"
+      }
+    },
+    "mission": {
+      "title": "Our Mission",
+      "subtitle": "To democratize access to unique items and collectibles through transparent, secure, and exciting auction experiences.",
+      "description": "Founded in 2020, Lebanon Auction has grown from a small startup to a leading auction platform trusted by thousands of users worldwide. We believe that everyone deserves access to fair, transparent, and exciting auction experiences, whether you're a seasoned collector or just starting your journey.",
+      "imageAlt": "Mission Vision"
+    },
+    "features": {
+      "title": "Why Choose Lebanon Auction?",
+      "subtitle": "We've built our platform with the features that matter most to auction enthusiasts.",
+      "liveAuctions": {
+        "title": "Live Luxury Auctions",
+        "description": "Experience real-time bidding on premium cars, prestigious license plates, fine jewelry, and exclusive collectibles from Lebanon and the Middle East."
+      },
+      "authentication": {
+        "title": "Expert Authentication",
+        "description": "Every item undergoes rigorous authentication by certified experts. All luxury goods come with certificates of authenticity and provenance."
+      },
+      "payment": {
+        "title": "Modern Payment Methods",
+        "description": "Accept Binance Pay, Whish Money, traditional bank transfers, and all major credit cards with instant processing and secure transactions."
+      },
+      "privacy": {
+        "title": "Anonymous Bidding",
+        "description": "Bid confidentially with our anonymous display system. Your identity remains private while maintaining full security and trust."
+      },
+      "support": {
+        "title": "Lebanese Expert Support",
+        "description": "Our local Lebanese team provides 24/7 support in Arabic and English, understanding regional preferences and market dynamics."
+      },
+      "intelligence": {
+        "title": "Market Intelligence",
+        "description": "Access comprehensive market data, price trends, and investment insights for luxury items in the Lebanese and regional markets."
+      }
+    },
+    "team": {
+      "title": "Meet Our Team",
+      "subtitle": "The passionate individuals behind Lebanon Auction's success."
+    },
+    "cta": {
+      "title": "Ready to Start Bidding?",
+      "subtitle": "Join thousands of users who trust Lebanon Auction for their auction needs. Create your account today and start exploring amazing items.",
+      "getStarted": "Get Started",
+      "learnMore": "Learn More"
+    }
   },
   "homepage": {
     "hero": {

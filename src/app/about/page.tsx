@@ -35,50 +35,50 @@ import HomepageLayout from 'src/components/layout/HomepageLayout';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'src/hooks/useLocale';
 
-const features = [
+const getFeatures = (t: any) => [
   {
     icon: AuctionIcon,
-    title: 'Live Luxury Auctions',
-    description: 'Experience real-time bidding on premium cars, prestigious license plates, fine jewelry, and exclusive collectibles from Lebanon and the Middle East.',
+    title: t('about.features.liveAuctions.title'),
+    description: t('about.features.liveAuctions.description'),
     color: '#CE0E2D',
   },
   {
     icon: VerifiedIcon,
-    title: 'Expert Authentication',
-    description: 'Every item undergoes rigorous authentication by certified experts. All luxury goods come with certificates of authenticity and provenance.',
+    title: t('about.features.authentication.title'),
+    description: t('about.features.authentication.description'),
     color: '#22C55E',
   },
   {
     icon: PaymentIcon,
-    title: 'Modern Payment Methods',
-    description: 'Accept Binance Pay, Whish Money, traditional bank transfers, and all major credit cards with instant processing and secure transactions.',
+    title: t('about.features.payment.title'),
+    description: t('about.features.payment.description'),
     color: '#1976D2',
   },
   {
     icon: ShieldIcon,
-    title: 'Anonymous Bidding',
-    description: 'Bid confidentially with our anonymous display system. Your identity remains private while maintaining full security and trust.',
+    title: t('about.features.privacy.title'),
+    description: t('about.features.privacy.description'),
     color: '#9C27B0',
   },
   {
     icon: SupportIcon,
-    title: 'Lebanese Expert Support',
-    description: 'Our local Lebanese team provides 24/7 support in Arabic and English, understanding regional preferences and market dynamics.',
+    title: t('about.features.support.title'),
+    description: t('about.features.support.description'),
     color: '#FF9800',
   },
   {
     icon: TrendingUpIcon,
-    title: 'Market Intelligence',
-    description: 'Access comprehensive market data, price trends, and investment insights for luxury items in the Lebanese and regional markets.',
+    title: t('about.features.intelligence.title'),
+    description: t('about.features.intelligence.description'),
     color: '#00BCD4',
   },
 ];
 
-const stats = [
-  { value: '25K+', label: 'Registered Users', description: 'Active bidders from Lebanon and MENA region' },
-  { value: '5,000+', label: 'Successful Auctions', description: 'Luxury items sold with verified authenticity' },
-  { value: '$12M+', label: 'Total Transaction Volume', description: 'In luxury cars, jewelry, and collectibles' },
-  { value: '99.8%', label: 'Customer Satisfaction', description: 'Based on post-auction surveys' },
+const getStats = (t: any) => [
+  { value: '25K+', label: t('about.stats.users.label'), description: t('about.stats.users.description') },
+  { value: '5,000+', label: t('about.stats.auctions.label'), description: t('about.stats.auctions.description') },
+  { value: '$12M+', label: t('about.stats.volume.label'), description: t('about.stats.volume.description') },
+  { value: '99.8%', label: t('about.stats.satisfaction.label'), description: t('about.stats.satisfaction.description') },
 ];
 
 const milestones = [
@@ -142,6 +142,9 @@ export default function AboutPage() {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useLocale();
+  
+  const features = getFeatures(t);
+  const stats = getStats(t);
 
   return (
     <HomepageLayout>
@@ -185,9 +188,9 @@ export default function AboutPage() {
                 }}
               >
                 <HomeIcon sx={{ mr: 0.5, fontSize: 16 }} />
-                Home
+                {t('navigation.home')}
               </Link>
-              <Typography sx={{ color: 'white', fontWeight: 500 }}>About Us</Typography>
+              <Typography sx={{ color: 'white', fontWeight: 500 }}>{t('navigation.about')}</Typography>
             </Breadcrumbs>
 
             <Grid container spacing={6} alignItems="center">
@@ -203,10 +206,10 @@ export default function AboutPage() {
                     lineHeight: 1.1,
                   }}
                 >
-                  Lebanon's Premier <br />
+                  {t('about.hero.title.line1')} <br />
                   <Box component="span" sx={{ fontStyle: 'italic', opacity: 0.9 }}>
-                    Luxury Auction
-                  </Box> Platform
+                    {t('about.hero.title.line2')}
+                  </Box> {t('about.hero.title.line3')}
                 </Typography>
                 <Typography
                   variant="h5"
@@ -217,7 +220,7 @@ export default function AboutPage() {
                     fontSize: { xs: '1.3rem', md: '1.6rem' },
                   }}
                 >
-                  {t('about.subtitle', "Lebanon's premier luxury auction platform connecting collectors with authentic treasures since 2020")}
+                  {t('about.hero.subtitle')}
                 </Typography>
                 
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
@@ -242,7 +245,7 @@ export default function AboutPage() {
                       transition: 'all 0.3s ease-in-out',
                     }}
                   >
-                    Explore Auctions
+{t('about.hero.exploreButton')}
                   </Button>
                   <Button
                     variant="outlined"
@@ -266,7 +269,7 @@ export default function AboutPage() {
                       transition: 'all 0.3s ease-in-out',
                     }}
                   >
-                    Join Community
+{t('about.hero.joinButton')}
                   </Button>
                 </Stack>
               </Grid>
@@ -294,7 +297,7 @@ export default function AboutPage() {
                         textAlign: 'center',
                       }}
                     >
-                      Trusted by 25,000+ Users
+{t('about.hero.trustedBy')}
                     </Typography>
                     <Typography
                       variant="body1"
@@ -304,7 +307,7 @@ export default function AboutPage() {
                         maxWidth: 300,
                       }}
                     >
-                      From Beirut to the world, connecting luxury enthusiasts with extraordinary items
+{t('about.hero.globalReach')}
                     </Typography>
                   </Stack>
                 </Box>
@@ -322,7 +325,7 @@ export default function AboutPage() {
           gutterBottom
           sx={{ fontWeight: 700, mb: 8, color: 'text.primary' }}
         >
-          Our Impact in Numbers
+{t('about.stats.title')}
         </Typography>
         
         <Grid container spacing={4}>
@@ -385,22 +388,17 @@ export default function AboutPage() {
                 gutterBottom
                 sx={{ fontWeight: 700, color: 'text.primary' }}
               >
-                Our Mission
+{t('about.mission.title')}
               </Typography>
               <Typography
                 variant="h6"
                 color="text.secondary"
                 sx={{ mb: 3, lineHeight: 1.6 }}
               >
-                To democratize access to unique items and collectibles through 
-                transparent, secure, and exciting auction experiences.
+{t('about.mission.subtitle')}
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                Founded in 2020, Sassy has grown from a small startup to a leading 
-                auction platform trusted by thousands of users worldwide. We believe 
-                that everyone deserves access to fair, transparent, and exciting 
-                auction experiences, whether you&apos;re a seasoned collector or just 
-                starting your journey.
+{t('about.mission.description')}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -422,7 +420,7 @@ export default function AboutPage() {
                     fontWeight: 800,
                   }}
                 >
-                  Mission Image
+{t('about.mission.imageAlt')}
                 </Typography>
               </Box>
             </Grid>
@@ -438,10 +436,10 @@ export default function AboutPage() {
             gutterBottom
             sx={{ fontWeight: 700, color: 'text.primary' }}
           >
-            Why Choose Sassy?
+{t('about.features.title')}
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-            We&apos;ve built our platform with the features that matter most to auction enthusiasts.
+{t('about.features.subtitle')}
           </Typography>
         </Box>
         
@@ -503,10 +501,10 @@ export default function AboutPage() {
               gutterBottom
               sx={{ fontWeight: 700, color: 'text.primary' }}
             >
-              Meet Our Team
+{t('about.team.title')}
             </Typography>
             <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-              The passionate individuals behind Sassy&apos;s success.
+{t('about.team.subtitle')}
             </Typography>
           </Box>
           
@@ -581,7 +579,7 @@ export default function AboutPage() {
                 mb: 2,
               }}
             >
-              Ready to Start Bidding?
+{t('about.cta.title')}
             </Typography>
             <Typography
               variant="h6"
@@ -591,8 +589,7 @@ export default function AboutPage() {
                 lineHeight: 1.5,
               }}
             >
-              Join thousands of users who trust Sassy for their auction needs.
-              Create your account today and start exploring amazing items.
+{t('about.cta.subtitle')}
             </Typography>
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
@@ -617,7 +614,7 @@ export default function AboutPage() {
                   transition: 'all 0.3s ease-in-out',
                 }}
               >
-                Get Started
+{t('about.cta.getStarted')}
               </Button>
               <Button
                 variant="outlined"
@@ -638,7 +635,7 @@ export default function AboutPage() {
                   transition: 'all 0.3s ease-in-out',
                 }}
               >
-                Learn More
+{t('about.cta.learnMore')}
               </Button>
             </Stack>
           </Box>
