@@ -9,6 +9,7 @@ import { Search as SearchIcon } from '@mui/icons-material';
 import { Box, Card, Chip, Typography, IconButton, CardContent } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
+import { useLocale } from 'src/hooks/useLocale';
 
 // ----------------------------------------------------------------------
 
@@ -190,6 +191,7 @@ export const ProductAuctionCard: FC<ProductAuctionCardProps> = ({
   bidsCount,
   onClick,
 }) => {
+  const { t } = useLocale();
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -221,13 +223,13 @@ export const ProductAuctionCard: FC<ProductAuctionCardProps> = ({
   const getAuctionChipProps = () => {
     switch (auctionType) {
       case 'sealed':
-        return { label: 'Sealed Bid Auction', icon: <Iconify icon="mdi:gavel" /> };
+        return { label: t('auction.types.sealed'), icon: <Iconify icon="mdi:gavel" /> };
       case 'live':
-        return { label: 'Live Auction', icon: <Iconify icon="mdi:broadcast" /> };
+        return { label: t('auction.types.live'), icon: <Iconify icon="mdi:broadcast" /> };
       case 'buy-now':
-        return { label: 'Buy Now', icon: <Iconify icon="mdi:lightning-bolt" /> };
+        return { label: t('auction.types.buyNow'), icon: <Iconify icon="mdi:lightning-bolt" /> };
       default:
-        return { label: 'Auction', icon: <Iconify icon="mdi:gavel" /> };
+        return { label: t('auction.auction'), icon: <Iconify icon="mdi:gavel" /> };
     }
   };
 
@@ -255,22 +257,22 @@ export const ProductAuctionCard: FC<ProductAuctionCardProps> = ({
         <CountdownContainer>
           <CountdownItem>
             <CountdownNumber>{timeLeft.days.toString().padStart(2, '0')}</CountdownNumber>
-            <CountdownLabel>Days</CountdownLabel>
+            <CountdownLabel>{t('common.time.days')}</CountdownLabel>
           </CountdownItem>
           <Box sx={{ color: 'text.disabled', fontSize: '1.5rem', fontWeight: 300 }}>:</Box>
           <CountdownItem>
             <CountdownNumber>{timeLeft.hours.toString().padStart(2, '0')}</CountdownNumber>
-            <CountdownLabel>Hours</CountdownLabel>
+            <CountdownLabel>{t('common.time.hours')}</CountdownLabel>
           </CountdownItem>
           <Box sx={{ color: 'text.disabled', fontSize: '1.5rem', fontWeight: 300 }}>:</Box>
           <CountdownItem>
             <CountdownNumber>{timeLeft.minutes.toString().padStart(2, '0')}</CountdownNumber>
-            <CountdownLabel>Minutes</CountdownLabel>
+            <CountdownLabel>{t('common.time.minutes')}</CountdownLabel>
           </CountdownItem>
           <Box sx={{ color: 'text.disabled', fontSize: '1.5rem', fontWeight: 300 }}>:</Box>
           <CountdownItem>
             <CountdownNumber>{timeLeft.seconds.toString().padStart(2, '0')}</CountdownNumber>
-            <CountdownLabel>Seconds</CountdownLabel>
+            <CountdownLabel>{t('common.time.seconds')}</CountdownLabel>
           </CountdownItem>
         </CountdownContainer>
       )}

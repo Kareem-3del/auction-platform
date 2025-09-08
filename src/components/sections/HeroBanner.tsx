@@ -189,8 +189,8 @@ export function HeroBanner() {
             {[
               { label: t('homepage.categories.motors'), icon: 'mdi:car', path: '/categories/cars' },
               { label: t('homepage.categories.properties'), icon: 'mdi:home-city', path: '/categories/properties' },
-              { label: 'Jewelry', icon: 'mdi:diamond-stone', path: '/categories/jewelry' },
-              { label: 'Plates', icon: 'mdi:card-text', path: '/categories/plates' },
+              { label: t('homepage.categories.jewelry'), icon: 'mdi:diamond-stone', path: '/categories/jewelry' },
+              { label: t('homepage.categories.plates'), icon: 'mdi:card-text', path: '/categories/plates' },
             ].map((category) => (
               <Button
                 key={category.label}

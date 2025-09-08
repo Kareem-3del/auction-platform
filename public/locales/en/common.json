@@ -93,7 +93,13 @@
     "actions": "Actions",
     "date": "Date",
     "dateAdded": "Date Added",
-    "time": "Time",
+    "time": {
+      "time": "Time",
+      "days": "Days",
+      "hours": "Hours", 
+      "minutes": "Minutes",
+      "seconds": "Seconds"
+    },
     "amount": "Amount",
     "balance": "Balance",
     "price": "Price",
@@ -204,8 +210,15 @@
     "beginsOn": "Auction begins on",
     "endedOn": "Ended on",
     "auctionLive": "Live Auction",
+    "liveBiddingActive": "Live Auction",
     "auctionScheduled": "Scheduled Auction",
     "auctionCancelled": "Cancelled Auction",
+    "auction": "Auction",
+    "types": {
+      "sealed": "Sealed Bid Auction",
+      "live": "Live Auction",
+      "buyNow": "Buy Now"
+    },
     "bidHistory": "Bid History",
     "bidCount": "Total Bids",
     "watchers": "Watchers",
@@ -407,6 +420,12 @@
       "searchPlaceholder": "Search luxury cars, properties, jewelry, collectibles...",
       "auctionHouse": "Auction House",
       "description": "Discover exceptional items from cars and real estate to jewelry and collectibles. Join Lebanon's most trusted auction platform since 2020."
+    },
+    "categories": {
+      "motors": "Motors",
+      "properties": "Properties", 
+      "jewelry": "Jewelry",
+      "plates": "Plates"
     },
     "whyChoose": {
       "title": "Why Choose LebAuction?",

@@ -408,7 +408,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                   },
                 }}
               >
-                Create Account
+{t('auth.createAccount')}
               </Box>
               <Box
                 onClick={() => router.push('/auth/login')}
@@ -434,7 +434,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
                   },
                 }}
               >
-                Login
+{t('auth.login')}
               </Box>
             </Box>
           )}
