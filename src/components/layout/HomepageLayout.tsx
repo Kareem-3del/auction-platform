@@ -49,7 +49,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
   const router = useRouter();
   const theme = useTheme();
   const { user, logout, loading } = useAuth();
-  const { t } = useLocale();
+  const { t, isRTL } = useLocale();
   const { notifications, unreadCount } = useNotificationContext();
   const [categories, setCategories] = useState<Category[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -153,7 +153,8 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
           gap: 1,
           flex: 1,
           justifyContent: 'center',
-          ml: 4,
+          ml: isRTL ? 0 : 4,
+          mr: isRTL ? 4 : 0,
         }}>
           {categories.map((category) => (
             <Box
@@ -176,7 +177,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
               }}
             >
               {category.name} ({category.productCount})
-              <Box sx={{ fontSize: '10px', ml: 0.5 }}>▼</Box>
+              <Box sx={{ fontSize: '10px', ml: isRTL ? 0 : 0.5, mr: isRTL ? 0.5 : 0 }}>▼</Box>
             </Box>
           ))}
         </Box>

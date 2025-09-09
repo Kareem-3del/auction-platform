@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'src/hooks/useLocale';
 import {
   Box,
   Button,
@@ -51,6 +52,7 @@ export function ModernHeroSection() {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { t } = useLocale();
   const [activeItem, setActiveItem] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [heroProducts, setHeroProducts] = useState<HeroProduct[]>([]);
@@ -235,7 +237,7 @@ export function ModernHeroSection() {
                   fontSize: '0.9rem',
                 }}
               >
-                Live Auctions • {totalParticipants > 0 ? `${totalParticipants}+` : '0'} Active Bidders
+                {t('homepage.hero.liveAuctions', { count: totalParticipants > 0 ? totalParticipants : 0 })}
               </Typography>
             </Box>
 
@@ -252,7 +254,7 @@ export function ModernHeroSection() {
                 backgroundClip: 'text',
               }}
             >
-              Discover Extraordinary{' '}
+              {t('homepage.hero.discoverExtraordinary')}{' '}
               <Box
                 component="span"
                 sx={{
@@ -268,7 +270,7 @@ export function ModernHeroSection() {
                   backgroundSize: '200% 200%',
                 }}
               >
-                Auctions
+                {t('homepage.hero.auctions')}
               </Box>
             </Typography>
 
@@ -282,7 +284,7 @@ export function ModernHeroSection() {
                 maxWidth: '500px',
               }}
             >
-              Join the world's most prestigious auction house. Bid on rare collectibles, luxury items, and priceless artifacts from verified sellers worldwide.
+              {t('homepage.hero.joinWorldMost')}
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 6 }}>
@@ -307,7 +309,7 @@ export function ModernHeroSection() {
                   },
                 }}
               >
-                Start Bidding Now
+                {t('homepage.hero.startBiddingNow')}
               </Button>
 
               <Button
@@ -333,16 +335,16 @@ export function ModernHeroSection() {
                   },
                 }}
               >
-                Learn More
+                {t('homepage.hero.learnMore')}
               </Button>
             </Box>
 
             {/* Stats */}
             <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               {[
-                { icon: TrendingIcon, value: '50K+', label: 'Active Users' },
-                { icon: ScheduleIcon, value: '1M+', label: 'Items Sold' },
-                { icon: OfferIcon, value: '$2.5B+', label: 'Total Volume' },
+                { icon: TrendingIcon, value: '50K+', label: t('homepage.hero.activeUsers') },
+                { icon: ScheduleIcon, value: '1M+', label: t('homepage.hero.itemsSold') },
+                { icon: OfferIcon, value: '$2.5B+', label: t('homepage.hero.totalVolume') },
               ].map((stat, index) => (
                 <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Box
@@ -462,7 +464,7 @@ export function ModernHeroSection() {
                         bgcolor: 'white',
                       }}
                     />
-                    LIVE
+                    {t('homepage.hero.live')}
                   </Box>
 
                   {/* Time Left */}
@@ -544,7 +546,7 @@ export function ModernHeroSection() {
                         variant="body2"
                         sx={{ color: 'rgba(255, 255, 255, 0.7)', mb: 0.5 }}
                       >
-                        Current Bid
+                        {t('homepage.hero.currentBid')}
                       </Typography>
                       <Typography
                         variant="h5"
@@ -563,7 +565,7 @@ export function ModernHeroSection() {
                         variant="body2"
                         sx={{ color: 'rgba(255, 255, 255, 0.7)', mb: 0.5 }}
                       >
-                        Participants
+                        {t('homepage.hero.participants')}
                       </Typography>
                       <Typography
                         variant="h6"
@@ -633,7 +635,7 @@ export function ModernHeroSection() {
         }}
       >
         <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.8rem' }}>
-          Scroll to explore
+          {t('homepage.hero.scrollToExplore')}
         </Typography>
         <Box
           sx={{

@@ -667,7 +667,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
           <Container maxWidth={maxWidth}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
               <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-                🔥 <strong>{t('auction.liveBiddingActive')}:</strong> {isRTL ? 'ساعات نادرة من مجموعة فينتج تنتهي خلال ساعتين!' : 'Rare vintage watch collection ending in 2 hours!'}
+                🔥 <strong>{t('auction.liveBiddingActive')}:</strong> {t('announcements.liveWatchCollection')}
               </Typography>
               <Button
                 size="small"

@@ -8,6 +8,8 @@ import {
   Typography,
 } from '@mui/material';
 
+import { useLocale } from 'src/hooks/useLocale';
+
 import { ErrorBoundary } from 'src/components/ErrorBoundary';
 import { ModernHeroSection } from 'src/components/sections/ModernHeroSection';
 import { ModernPremiumAuctions } from 'src/components/sections/ModernPremiumAuctions';
@@ -18,6 +20,7 @@ import HomepageLayout from 'src/components/layout/HomepageLayout';
 export default function NewHomePageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLocale();
   
   // Check for error messages in URL params
   const error = searchParams.get('error');
@@ -109,7 +112,7 @@ export default function NewHomePageClient() {
                     backgroundClip: 'text',
                   }}
                 >
-                  Ready to Start Your Collection?
+                  {t('homepage.cta.readyToStart')}
                 </Typography>
                 
                 <Typography
@@ -123,7 +126,7 @@ export default function NewHomePageClient() {
                     lineHeight: 1.6,
                   }}
                 >
-                  Join thousands of collectors worldwide and discover extraordinary items from verified sellers.
+                  {t('homepage.cta.joinThousands')}
                 </Typography>
 
                 <Box sx={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -176,7 +179,7 @@ export default function NewHomePageClient() {
                         }}
                       />
                     </Box>
-                    Start Collecting Today
+                    {t('homepage.cta.startCollectingToday')}
                   </Box>
 
                   <Box
@@ -203,7 +206,7 @@ export default function NewHomePageClient() {
                       },
                     }}
                   >
-                    Explore Auctions
+                    {t('homepage.cta.exploreAuctions')}
                   </Box>
                 </Box>
 
@@ -219,10 +222,10 @@ export default function NewHomePageClient() {
                   }}
                 >
                   {[
-                    { value: '150K+', label: 'Active Collectors' },
-                    { value: '2.1M+', label: 'Items Sold' },
-                    { value: '$3.2B+', label: 'Total Volume' },
-                    { value: '99.8%', label: 'Satisfaction Rate' },
+                    { value: '150K+', label: t('homepage.cta.activeCollectors') },
+                    { value: '2.1M+', label: t('homepage.cta.itemsSoldStats') },
+                    { value: '$3.2B+', label: t('homepage.cta.totalVolumeStats') },
+                    { value: '99.8%', label: t('homepage.cta.satisfactionRate') },
                   ].map((stat, index) => (
                     <Box key={index} sx={{ textAlign: 'center' }}>
                       <Typography

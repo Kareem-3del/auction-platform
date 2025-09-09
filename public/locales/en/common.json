@@ -498,7 +498,20 @@
       "subtitle": "Join thousands of collectors and discover unique items from verified sellers across the region",
       "searchPlaceholder": "Search luxury cars, properties, jewelry, collectibles...",
       "auctionHouse": "Auction House",
-      "description": "Discover exceptional items from cars and real estate to jewelry and collectibles. Join Lebanon's most trusted auction platform since 2020."
+      "description": "Discover exceptional items from cars and real estate to jewelry and collectibles. Join Lebanon's most trusted auction platform since 2020.",
+      "liveAuctions": "Live Auctions • {count}+ Active Bidders",
+      "discoverExtraordinary": "Discover Extraordinary",
+      "auctions": "Auctions",
+      "joinWorldMost": "Join the world's most prestigious auction house. Bid on rare collectibles, luxury items, and priceless artifacts from verified sellers worldwide.",
+      "startBiddingNow": "Start Bidding Now",
+      "learnMore": "Learn More",
+      "activeUsers": "Active Users",
+      "itemsSold": "Items Sold",
+      "totalVolume": "Total Volume", 
+      "scrollToExplore": "Scroll to explore",
+      "currentBid": "Current Bid",
+      "participants": "Participants",
+      "live": "LIVE"
     },
     "categories": {
       "motors": "Motors",
@@ -546,6 +559,41 @@
       "title": "Start Your Collection Journey",
       "description": "Discover rare finds, exclusive items, and exceptional deals in Lebanon's most trusted auction house"
     },
+    "cta": {
+      "readyToStart": "Ready to Start Your Collection?",
+      "joinThousands": "Join thousands of collectors worldwide and discover extraordinary items from verified sellers.",
+      "startCollectingToday": "Start Collecting Today",
+      "exploreAuctions": "Explore Auctions", 
+      "activeCollectors": "Active Collectors",
+      "itemsSoldStats": "Items Sold",
+      "totalVolumeStats": "Total Volume",
+      "satisfactionRate": "Satisfaction Rate"
+    },
+    "trust": {
+      "trustedByCollectors": "Trusted by Collectors Worldwide",
+      "whatOurCollectors": "What Our Collectors Say",
+      "indicators": {
+        "bankLevelSecurity": "Bank-Level Security",
+        "sslEncryption": "SSL encryption & fraud protection",
+        "secureTransactionsStat": "Secure transactions",
+        "expertAuthentication": "Expert Authentication",
+        "certifiedSpecialists": "Certified specialists verify every item",
+        "authenticatedItemsStat": "Authenticated items",
+        "globalCommunityStat": "Global Community",
+        "trustedWorldwide": "Trusted by collectors worldwide",
+        "activeMembers": "Active members",
+        "whiteGloveService": "White Glove Service",
+        "insuredShipping": "Insured worldwide shipping",
+        "countriesServed": "Countries served",
+        "financialProtectionStat": "Financial Protection",
+        "escrowProtection": "Escrow & payment protection",
+        "protectedVolume": "Protected volume",
+        "support247Stat": "24/7 Support",
+        "expertAssistance": "Expert assistance anytime",
+        "responseTime": "Response time"
+      },
+      "joinThousands": "Join thousands of satisfied collectors who trust us with their most valuable acquisitions"
+    },
     "trustBadges": {
       "licensedSecure": "Licensed & Secure",
       "governmentRegulated": "Government Regulated",
@@ -579,8 +627,21 @@
       "prestigiousNumbers": "Prestigious Numbers",
       "properties": "Properties",
       "surplus": "Surplus",
-      "forRent": "For Rent"
+      "forRent": "For Rent",
+      "artCollectibles": "Art & Collectibles",
+      "electronics": "Electronics", 
+      "vehicles": "Vehicles",
+      "watchesJewelry": "Watches & Jewelry",
+      "descriptions": {
+        "artCollectibles": "Paintings, sculptures, and rare collectibles",
+        "electronics": "Latest gadgets and electronics",
+        "vehicles": "Cars, motorcycles, and boats",
+        "watchesJewelry": "Luxury timepieces and fine jewelry"
+      }
     }
+  },
+  "announcements": {
+    "liveWatchCollection": "Rare vintage watch collection ending in 2 hours!"
   },
   "footer": {
     "company": {

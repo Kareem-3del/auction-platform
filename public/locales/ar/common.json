@@ -1054,5 +1054,94 @@
     "helpCenterDesc": "زُر مركز المساعدة للحصول على إجابات فورية للأسئلة الشائعة.",
     "commonQuestions": "الأسئلة الشائعة",
     "commonQuestionsDesc": "تبحث عن إجابات سريعة؟ تحقق من هذه المواضيع الشائعة."
+  },
+  "homepage": {
+    "hero": {
+      "liveAuctions": "مزادات مباشرة • {count}+ مزايد نشط",
+      "discoverExtraordinary": "اكتشف المزادات الاستثنائية", 
+      "auctions": "المزادات",
+      "joinWorldMost": "انضم إلى دار المزادات الأكثر شهرة في العالم. زايد على مقتنيات نادرة وقطع فاخرة وآثار لا تقدر بثمن من بائعين معتمدين حول العالم.",
+      "startBiddingNow": "ابدأ المزايدة الآن",
+      "learnMore": "تعرف على المزيد",
+      "activeUsers": "مستخدم نشط",
+      "itemsSold": "قطعة مباعة",
+      "totalVolume": "إجمالي الحجم",
+      "scrollToExplore": "مرر لأسفل للاستكشاف",
+      "currentBid": "المزايدة الحالية",
+      "participants": "المشاركون",
+      "live": "مباشر"
+    },
+    "sections": {
+      "endingSoon": "تنتهي قريباً",
+      "trendingAuctions": "مزادات رائجة", 
+      "featuredCollection": "مجموعة مميزة",
+      "latestAdditions": "آخر الإضافات",
+      "comingSoon": "قريباً",
+      "premiumCategories": "فئات مميزة"
+    },
+    "cta": {
+      "readyToStart": "مستعد لبدء مجموعتك؟",
+      "joinThousands": "انضم إلى آلاف الجامعين حول العالم واكتشف قطعاً استثنائية من بائعين معتمدين.",
+      "startCollectingToday": "ابدأ الجمع اليوم",
+      "exploreAuctions": "استكشف المزادات",
+      "activeCollectors": "جامع نشط",
+      "itemsSoldStats": "قطعة مباعة", 
+      "totalVolumeStats": "إجمالي الحجم",
+      "satisfactionRate": "معدل الرضا"
+    },
+    "trust": {
+      "trustedPlatform": "منصة موثوقة",
+      "secureTransactions": "معاملات آمنة",
+      "authenticatedItems": "قطع موثقة",
+      "globalCommunity": "مجتمع عالمي",
+      "financialProtection": "حماية مالية",
+      "support247": "دعم 24/7",
+      "trustedByCollectors": "موثوق من الجامعين في جميع أنحاء العالم",
+      "whatOurCollectors": "ما يقوله جامعونا",
+      "indicators": {
+        "bankLevelSecurity": "أمان بمستوى المصارف",
+        "sslEncryption": "تشفير SSL وحماية من الاحتيال",
+        "secureTransactionsStat": "معاملات آمنة",
+        "expertAuthentication": "تصديق خبراء",
+        "certifiedSpecialists": "متخصصون معتمدون يتحققون من كل قطعة",
+        "authenticatedItemsStat": "قطع موثقة",
+        "globalCommunityStat": "مجتمع عالمي",
+        "trustedWorldwide": "موثوق من جامعين حول العالم",
+        "activeMembers": "أعضاء نشطين",
+        "whiteGloveService": "خدمة راقية",
+        "insuredShipping": "شحن مؤمن عالمياً",
+        "countriesServed": "دولة مخدومة",
+        "financialProtectionStat": "حماية مالية",
+        "escrowProtection": "ضمان وحماية دفع",
+        "protectedVolume": "حجم محمي",
+        "support247Stat": "دعم 24/7",
+        "expertAssistance": "مساعدة خبراء في أي وقت",
+        "responseTime": "وقت الاستجابة"
+      },
+      "joinThousands": "انضم إلى آلاف الجامعين الراضين الذين يثقون بنا مع أثمن مقتنياتهم"
+    }
+  },
+  "categories": {
+    "motors": "السيارات",
+    "properties": "العقارات", 
+    "jewelry": "المجوهرات",
+    "plates": "اللوحات",
+    "artCollectibles": "الفنون والمقتنيات",
+    "watches": "الساعات",
+    "luxuryCars": "السيارات الفاخرة",
+    "fineArt": "الفنون الجميلة",
+    "fineJewelry": "المجوهرات الفاخرة",
+    "electronics": "الإلكترونيات",
+    "vehicles": "المركبات",
+    "watchesJewelry": "الساعات والمجوهرات",
+    "descriptions": {
+      "artCollectibles": "لوحات ومنحوتات ومقتنيات نادرة",
+      "electronics": "أحدث الأجهزة والإلكترونيات",
+      "vehicles": "سيارات ودراجات نارية وقوارب", 
+      "watchesJewelry": "ساعات فاخرة ومجوهرات راقية"
+    }
+  },
+  "announcements": {
+    "liveWatchCollection": "ساعات نادرة من مجموعة فينتج تنتهي خلال ساعتين!"
   }
 }

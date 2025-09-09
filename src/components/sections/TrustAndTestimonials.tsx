@@ -28,6 +28,8 @@ import {
   Support as SupportIcon,
 } from '@mui/icons-material';
 
+import { useLocale } from 'src/hooks/useLocale';
+
 const TESTIMONIALS = [
   {
     id: 1,
@@ -75,56 +77,59 @@ const TESTIMONIALS = [
   },
 ];
 
-const TRUST_INDICATORS = [
+const getTrustIndicators = (t: any) => [
   {
     icon: SecurityIcon,
-    title: 'Bank-Level Security',
-    description: 'SSL encryption & fraud protection',
+    title: t('homepage.trust.indicators.bankLevelSecurity'),
+    description: t('homepage.trust.indicators.sslEncryption'),
     value: '99.9%',
-    label: 'Secure transactions',
+    label: t('homepage.trust.indicators.secureTransactionsStat'),
   },
   {
     icon: VerifiedIcon,
-    title: 'Expert Authentication',
-    description: 'Certified specialists verify every item',
+    title: t('homepage.trust.indicators.expertAuthentication'),
+    description: t('homepage.trust.indicators.certifiedSpecialists'),
     value: '100%',
-    label: 'Authenticated items',
+    label: t('homepage.trust.indicators.authenticatedItemsStat'),
   },
   {
     icon: PeopleIcon,
-    title: 'Global Community',
-    description: 'Trusted by collectors worldwide',
+    title: t('homepage.trust.indicators.globalCommunityStat'),
+    description: t('homepage.trust.indicators.trustedWorldwide'),
     value: '150K+',
-    label: 'Active members',
+    label: t('homepage.trust.indicators.activeMembers'),
   },
   {
     icon: ShippingIcon,
-    title: 'White Glove Service',
-    description: 'Insured worldwide shipping',
+    title: t('homepage.trust.indicators.whiteGloveService'),
+    description: t('homepage.trust.indicators.insuredShipping'),
     value: '200+',
-    label: 'Countries served',
+    label: t('homepage.trust.indicators.countriesServed'),
   },
   {
     icon: BankIcon,
-    title: 'Financial Protection',
-    description: 'Escrow & payment protection',
+    title: t('homepage.trust.indicators.financialProtectionStat'),
+    description: t('homepage.trust.indicators.escrowProtection'),
     value: '$2.5B+',
-    label: 'Protected volume',
+    label: t('homepage.trust.indicators.protectedVolume'),
   },
   {
     icon: SupportIcon,
-    title: '24/7 Support',
-    description: 'Expert assistance anytime',
+    title: t('homepage.trust.indicators.support247Stat'),
+    description: t('homepage.trust.indicators.expertAssistance'),
     value: '< 2min',
-    label: 'Response time',
+    label: t('homepage.trust.indicators.responseTime'),
   },
 ];
 
 export function TrustAndTestimonials() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { t } = useLocale();
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
+  
+  const TRUST_INDICATORS = getTrustIndicators(t);
 
   useEffect(() => {
     if (!autoPlay) return;
@@ -167,7 +172,7 @@ export function TrustAndTestimonials() {
                 lineHeight: 1.2,
               }}
             >
-              Trusted by Collectors Worldwide
+              {t('homepage.trust.trustedByCollectors')}
             </Typography>
             <Typography
               variant="h6"
@@ -179,7 +184,7 @@ export function TrustAndTestimonials() {
                 lineHeight: 1.6,
               }}
             >
-              Join thousands of satisfied collectors who trust us with their most valuable acquisitions
+              {t('homepage.trust.joinThousands')}
             </Typography>
           </Box>
 

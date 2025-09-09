@@ -31,6 +31,7 @@ import useScrollTrigger from '@mui/material/useScrollTrigger';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { useAuth } from 'src/hooks/useAuth';
+import { useLocale } from 'src/hooks/useLocale';
 
 import { LanguagePopover } from 'src/layouts/components/language-popover';
 import NotificationCenter from 'src/components/notifications/NotificationCenter';
@@ -51,41 +52,42 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
-const navigationItems = [
+// Navigation items will be generated using translation keys
+const getNavigationItems = (t: any) => [
   { 
-    label: 'Art & Collectibles', 
+    label: t('homepage.categories.artCollectibles'), 
     path: '/categories/art-collectibles', 
     count: 11,
     icon: 'solar:palette-round-bold-duotone',
-    description: 'Paintings, sculptures, and rare collectibles'
+    description: t('homepage.categories.descriptions.artCollectibles')
   },
   { 
-    label: 'Electronics', 
+    label: t('homepage.categories.electronics'), 
     path: '/categories/electronics', 
     count: 4,
     icon: 'solar:smartphone-bold-duotone',
-    description: 'Latest gadgets and electronics'
+    description: t('homepage.categories.descriptions.electronics')
   },
   { 
-    label: 'Vehicles', 
+    label: t('homepage.categories.vehicles'), 
     path: '/categories/vehicles', 
     count: 2,
     icon: 'solar:car-bold-duotone',
-    description: 'Cars, motorcycles, and boats'
+    description: t('homepage.categories.descriptions.vehicles')
   },
   { 
-    label: 'Watches & Jewelry', 
+    label: t('homepage.categories.watchesJewelry'), 
     path: '/categories/watches-jewelry', 
     count: 4,
     icon: 'solar:crown-bold-duotone',
-    description: 'Luxury timepieces and fine jewelry'
+    description: t('homepage.categories.descriptions.watchesJewelry')
   },
 ];
 
-const utilityLinks = [
-  { label: 'About EA', path: '/about', icon: 'solar:info-circle-bold-duotone' },
-  { label: 'Contact', path: '/contact', icon: 'solar:phone-bold-duotone' },
-  { label: 'Help', path: '/help', icon: 'solar:question-circle-bold-duotone' },
+const getUtilityLinks = (t: any) => [
+  { label: t('navigation.aboutEA'), path: '/about', icon: 'solar:info-circle-bold-duotone' },
+  { label: t('navigation.contactUs'), path: '/contact', icon: 'solar:phone-bold-duotone' },
+  { label: t('navigation.help'), path: '/help', icon: 'solar:question-circle-bold-duotone' },
 ];
 
 const quickActions = [
@@ -128,6 +130,11 @@ export default function EnhancedHeader({
   const router = useRouter();
   const theme = useTheme();
   const { user, logout, loading } = useAuth();
+  const { t } = useLocale();
+
+  // Generate navigation items and utility links with translations
+  const navigationItems = getNavigationItems(t);
+  const utilityLinks = getUtilityLinks(t);
   
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
