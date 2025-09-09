@@ -83,7 +83,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
           <CircularProgress size={40} />
           <Typography variant="body1" sx={{ ml: 2 }}>
-            Loading ending soon auctions...
+            {t('homepage.sections.loadingEndingSoon')}
           </Typography>
         </Box>
       </Container>
@@ -196,7 +196,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
                   },
                 }}
               >
-                {t('homepage.sections.viewAll')} Ending Soon
+                {t('homepage.sections.viewAllEndingSoon')}
               </Button>
             </Box>
           </Box>
@@ -260,7 +260,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
                 },
               }}
             >
-              Explore All Urgent Auctions
+              {t('homepage.sections.exploreAllUrgent')}
             </Button>
           </Box>
         )}

@@ -25,6 +25,7 @@ import {
 import { SimplePremiumCard } from '../product-card/SimplePremiumCard';
 import { productsAPI, isSuccessResponse } from 'src/lib/api-client';
 import type { ProductCard } from 'src/types/common';
+import { useLocale } from 'src/hooks/useLocale';
 
 interface ModernPremiumAuctionsProps {
   limit?: number;
@@ -34,48 +35,50 @@ interface ModernPremiumAuctionsProps {
 
 // No more mock data - everything uses real API calls
 
-const SECTION_CONFIGS = {
+const getSectionConfigs = (t: (key: string) => string) => ({
   ending: {
-    title: 'Ending Soon',
-    subtitle: 'Last chance to bid on these exclusive items',
+    title: t('homepage.sections.endingSoon'),
+    subtitle: t('homepage.sections.lastChanceToBid'),
     icon: TimeIcon,
     color: '#CE0E2D',
     variant: 'ending' as const,
     background: 'linear-gradient(135deg, rgba(206, 14, 45, 0.02) 0%, rgba(255, 68, 68, 0.02) 100%)',
   },
   trending: {
-    title: 'Trending Auctions',
-    subtitle: 'Most popular items with active bidding',
+    title: t('homepage.sections.trendingAuctions'),
+    subtitle: t('homepage.sections.mostPopularItems'),
     icon: TrendingIcon,
     color: '#9C27B0',
     variant: 'trending' as const,
     background: 'linear-gradient(135deg, rgba(156, 39, 176, 0.02) 0%, rgba(186, 104, 200, 0.02) 100%)',
   },
   featured: {
-    title: 'Featured Collection',
-    subtitle: 'Carefully curated premium selections',
+    title: t('homepage.sections.featuredCollection'),
+    subtitle: t('homepage.sections.curatedPremiumSelections'),
     icon: StarIcon,
     color: '#FF9800',
     variant: 'featured' as const,
     background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.02) 0%, rgba(255, 183, 77, 0.02) 100%)',
   },
   recent: {
-    title: 'Latest Additions',
-    subtitle: 'Fresh arrivals from verified sellers',
+    title: t('homepage.sections.recentAdditions'),
+    subtitle: t('homepage.sections.freshArrivals'),
     icon: NewIcon,
     color: '#4CAF50',
     variant: 'recent' as const,
     background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.02) 0%, rgba(129, 199, 132, 0.02) 100%)',
   },
-};
+});
 
 export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPremiumAuctionsProps) {
   const router = useRouter();
+  const { t, isRTL } = useLocale();
   const [activeTab, setActiveTab] = useState(0);
   const [products, setProducts] = useState<{ [key: string]: ProductCard[] }>({});
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
   const [error, setError] = useState<{ [key: string]: string | null }>({});
 
+  const SECTION_CONFIGS = getSectionConfigs(t);
   const sections = Object.keys(SECTION_CONFIGS);
   const currentSection = sections[activeTab];
   const config = SECTION_CONFIGS[currentSection as keyof typeof SECTION_CONFIGS];
@@ -322,7 +325,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
                           },
                         }}
                       >
-                        View All {sectionConfig.title}
+                        {t(`homepage.sections.viewAll${sectionKey.charAt(0).toUpperCase() + sectionKey.slice(1)}` as any)}
                       </Button>
                     </Box>
                   </>
@@ -350,9 +353,10 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
               mb: 4,
               lineHeight: 1.3,
               letterSpacing: '-0.025em',
+              textAlign: isRTL ? 'right' : 'left',
             }}
           >
-            Premium Collections
+            {t('homepage.sections.premiumCollections')}
           </Typography>
 
           <Tabs
@@ -473,14 +477,14 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
                       },
                     }}
                   >
-                    View All {config.title}
+                    {t(`homepage.sections.viewAll${currentSection.charAt(0).toUpperCase() + currentSection.slice(1)}` as any)}
                   </Button>
                 </Box>
               </>
             ) : (
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <Typography variant="h6" color="text.secondary">
-                  No {config.title.toLowerCase()} available at the moment
+                  {t('homepage.sections.noItemsAvailable', { section: config.title })}
                 </Typography>
               </Box>
             )}
