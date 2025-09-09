@@ -16,11 +16,13 @@ import {
   Diamond as JewelryIcon,
 } from '@mui/icons-material';
 
-const CATEGORIES = [
+import { useLocale } from 'src/hooks/useLocale';
+
+const getCategories = (t: any) => [
   {
     id: 'luxury-cars',
-    name: 'Luxury Cars',
-    description: 'Classic & Modern Supercars',
+    name: t('categories.luxuryCars'),
+    description: t('categories.descriptions.luxuryCars'),
     icon: CarIcon,
     itemCount: '2.1K+',
     averagePrice: '$450K',
@@ -28,8 +30,8 @@ const CATEGORIES = [
   },
   {
     id: 'luxury-watches',
-    name: 'Luxury Watches', 
-    description: 'Swiss & Premium Timepieces',
+    name: t('categories.luxuryWatches'), 
+    description: t('categories.descriptions.luxuryWatches'),
     icon: WatchIcon,
     itemCount: '5.8K+',
     averagePrice: '$85K',
@@ -37,8 +39,8 @@ const CATEGORIES = [
   },
   {
     id: 'fine-art',
-    name: 'Fine Art',
-    description: 'Paintings & Sculptures',
+    name: t('categories.fineArt'),
+    description: t('categories.descriptions.fineArt'),
     icon: ArtIcon,
     itemCount: '3.2K+',
     averagePrice: '$125K',
@@ -46,8 +48,8 @@ const CATEGORIES = [
   },
   {
     id: 'jewelry',
-    name: 'Fine Jewelry',
-    description: 'Diamonds & Precious Stones',
+    name: t('categories.fineJewelry'),
+    description: t('categories.descriptions.fineJewelry'),
     icon: JewelryIcon,
     itemCount: '4.5K+',
     averagePrice: '$65K',
@@ -57,6 +59,8 @@ const CATEGORIES = [
 
 export function SimpleCategoryShowcase() {
   const router = useRouter();
+  const { t, isRTL } = useLocale();
+  const CATEGORIES = getCategories(t);
 
   const handleCategoryClick = (categoryId: string) => {
     router.push(`/categories/${categoryId}`);
@@ -65,7 +69,7 @@ export function SimpleCategoryShowcase() {
   return (
     <Box sx={{ py: { xs: 8, md: 12 }, bgcolor: '#FAFAFA' }}>
       <Container maxWidth="xl">
-        <Box sx={{ textAlign: 'center', mb: { xs: 6, md: 8 } }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 6, md: 8 }, direction: isRTL ? 'rtl' : 'ltr' }}>
           <Typography
             variant="h2"
             sx={{
@@ -79,7 +83,7 @@ export function SimpleCategoryShowcase() {
               lineHeight: 1.2,
             }}
           >
-            Explore Premium Categories
+            {t('homepage.sections.explorePremiumCategories')}
           </Typography>
           <Typography
             variant="h5"
@@ -92,7 +96,7 @@ export function SimpleCategoryShowcase() {
               fontWeight: 400,
             }}
           >
-            Discover extraordinary items across our curated collection of luxury categories
+            {t('homepage.sections.discoverExtraordinaryItems')}
           </Typography>
         </Box>
 
@@ -148,12 +152,17 @@ export function SimpleCategoryShowcase() {
                   {category.description}
                 </Typography>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  direction: isRTL ? 'rtl' : 'ltr',
+                }}>
                   <Typography
                     variant="body2"
                     sx={{ color: 'text.secondary', fontSize: '0.9rem' }}
                   >
-                    {category.itemCount} items
+                    {category.itemCount} {t('homepage.sections.items')}
                   </Typography>
                   <Typography
                     variant="body1"

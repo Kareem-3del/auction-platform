@@ -632,12 +632,34 @@
       "electronics": "Electronics", 
       "vehicles": "Vehicles",
       "watchesJewelry": "Watches & Jewelry",
+      "luxuryCars": "Luxury Cars",
+      "luxuryWatches": "Luxury Watches",
+      "fineArt": "Fine Art",
+      "fineJewelry": "Fine Jewelry",
       "descriptions": {
         "artCollectibles": "Paintings, sculptures, and rare collectibles",
         "electronics": "Latest gadgets and electronics",
         "vehicles": "Cars, motorcycles, and boats",
-        "watchesJewelry": "Luxury timepieces and fine jewelry"
+        "watchesJewelry": "Luxury timepieces and fine jewelry",
+        "luxuryCars": "Classic & Modern Supercars",
+        "luxuryWatches": "Swiss & Premium Timepieces",
+        "fineArt": "Paintings & Sculptures",
+        "fineJewelry": "Diamonds & Precious Stones"
       }
+    },
+    "sections": {
+      "endingSoon": "Ending Soon",
+      "endingSoonSubtitle": "Don't miss these final opportunities",
+      "trendingAuctions": "Trending Auctions",
+      "mostPopular": "Most popular this week",
+      "featuredCollection": "Featured Collection",
+      "editorsChoice": "Editor's pick of exceptional pieces",
+      "trending": "Trending",
+      "explorePremiumCategories": "Explore Premium Categories",
+      "discoverExtraordinaryItems": "Discover extraordinary items across our curated collection of luxury categories",
+      "viewAll": "View All",
+      "retry": "Retry",
+      "items": "items"
     }
   },
   "announcements": {

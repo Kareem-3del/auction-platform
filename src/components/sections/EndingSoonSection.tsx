@@ -22,6 +22,7 @@ import {
 } from '@mui/material';
 
 import { UnifiedAuctionCard } from 'src/components/product-card/unified-auction-card';
+import { useLocale } from 'src/hooks/useLocale';
 
 // Use Product type from API types
 
@@ -37,6 +38,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
   containerMaxWidth = '1536px',
 }) => {
   const router = useRouter();
+  const { t, isRTL } = useLocale();
   const [products, setProducts] = useState<ProductCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,7 +102,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
               size="small" 
               onClick={() => window.location.reload()}
             >
-              Retry
+              {t('homepage.sections.retry')}
             </Button>
           }
         >
@@ -140,6 +142,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
               flexWrap: 'wrap',
               gap: 3,
               mb: 2,
+              direction: isRTL ? 'rtl' : 'ltr',
             }}>
               <Box>
                 <Typography
@@ -154,7 +157,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
                     letterSpacing: '-0.025em',
                   }}
                 >
-                  Ending Soon
+                  {t('homepage.sections.endingSoon')}
                 </Typography>
                 <Typography
                   variant="body1"
@@ -165,13 +168,14 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
                     opacity: 0.8,
                   }}
                 >
-                  Don&apos;t miss these final opportunities
+                  {t('homepage.sections.endingSoonSubtitle')}
                 </Typography>
               </Box>
               
               <Button
                 variant="outlined"
-                endIcon={<ArrowIcon />}
+                endIcon={isRTL ? undefined : <ArrowIcon />}
+                startIcon={isRTL ? <ArrowIcon sx={{ transform: 'rotate(180deg)' }} /> : undefined}
                 onClick={handleViewAll}
                 sx={{
                   borderColor: '#CE0E2D',
@@ -192,7 +196,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
                   },
                 }}
               >
-                View All Ending Soon
+                {t('homepage.sections.viewAll')} Ending Soon
               </Button>
             </Box>
           </Box>

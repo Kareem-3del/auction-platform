@@ -1073,11 +1073,20 @@
     },
     "sections": {
       "endingSoon": "تنتهي قريباً",
+      "endingSoonSubtitle": "لا تفوت هذه الفرص الأخيرة",
       "trendingAuctions": "مزادات رائجة", 
+      "mostPopular": "الأكثر شعبية في هذا الأسبوع",
       "featuredCollection": "مجموعة مميزة",
+      "editorsChoice": "اختيار المحررين من القطع الاستثنائية",
+      "trending": "رائجة",
       "latestAdditions": "آخر الإضافات",
       "comingSoon": "قريباً",
-      "premiumCategories": "فئات مميزة"
+      "premiumCategories": "فئات مميزة",
+      "explorePremiumCategories": "استكشف الفئات المميزة",
+      "discoverExtraordinaryItems": "اكتشف قطعاً استثنائية عبر مجموعتنا المختارة من فئات الرفاهية",
+      "viewAll": "عرض الكل",
+      "retry": "إعادة المحاولة",
+      "items": "قطعة"
     },
     "cta": {
       "readyToStart": "مستعد لبدء مجموعتك؟",
@@ -1129,6 +1138,7 @@
     "artCollectibles": "الفنون والمقتنيات",
     "watches": "الساعات",
     "luxuryCars": "السيارات الفاخرة",
+    "luxuryWatches": "الساعات الفاخرة",
     "fineArt": "الفنون الجميلة",
     "fineJewelry": "المجوهرات الفاخرة",
     "electronics": "الإلكترونيات",
@@ -1138,7 +1148,11 @@
       "artCollectibles": "لوحات ومنحوتات ومقتنيات نادرة",
       "electronics": "أحدث الأجهزة والإلكترونيات",
       "vehicles": "سيارات ودراجات نارية وقوارب", 
-      "watchesJewelry": "ساعات فاخرة ومجوهرات راقية"
+      "watchesJewelry": "ساعات فاخرة ومجوهرات راقية",
+      "luxuryCars": "سيارات كلاسيكية وحديثة فائقة",
+      "luxuryWatches": "ساعات سويسرية ومميزة",
+      "fineArt": "لوحات ومنحوتات",
+      "fineJewelry": "ألماس وأحجار كريمة"
     }
   },
   "announcements": {
