@@ -1153,6 +1153,18 @@
       "luxuryWatches": "ساعات سويسرية ومميزة",
       "fineArt": "لوحات ومنحوتات",
       "fineJewelry": "ألماس وأحجار كريمة"
+    },
+    "luxuryItemCounts": {
+      "luxuryCars": "2.1 ألف+ قطعة",
+      "luxuryWatches": "5.8 ألف+ قطعة", 
+      "fineArt": "3.2 ألف+ قطعة",
+      "fineJewelry": "4.5 ألف+ قطعة"
+    },
+    "luxuryValues": {
+      "luxuryCars": "450 ألف دولار",
+      "luxuryWatches": "85 ألف دولار",
+      "fineArt": "125 ألف دولار", 
+      "fineJewelry": "65 ألف دولار"
     }
   },
   "announcements": {

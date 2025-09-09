@@ -25,14 +25,16 @@ import {
   ArrowForward as ArrowIcon,
 } from '@mui/icons-material';
 
-const CATEGORIES = [
+import { useLocale } from 'src/hooks/useLocale';
+
+const getCategoriesConfig = (t: any) => [
   {
     id: 'luxury-cars',
-    name: 'Luxury Cars',
-    description: 'Classic & Modern Supercars',
+    nameKey: 'categories.luxuryCars',
+    descriptionKey: 'categories.descriptions.luxuryCars',
     icon: CarIcon,
-    itemCount: '2.1K+',
-    averagePrice: '$450K',
+    itemCountKey: 'categories.luxuryItemCounts.luxuryCars',
+    averagePriceKey: 'categories.luxuryValues.luxuryCars',
     image: '/api/placeholder/400/300',
     gradient: 'linear-gradient(135deg, #FF6B6B 0%, #CE0E2D 100%)',
     color: '#CE0E2D',
@@ -40,11 +42,11 @@ const CATEGORIES = [
   },
   {
     id: 'luxury-watches',
-    name: 'Luxury Watches',
-    description: 'Swiss & Premium Timepieces',
+    nameKey: 'categories.luxuryWatches',
+    descriptionKey: 'categories.descriptions.luxuryWatches',
     icon: WatchIcon,
-    itemCount: '5.8K+',
-    averagePrice: '$85K',
+    itemCountKey: 'categories.luxuryItemCounts.luxuryWatches',
+    averagePriceKey: 'categories.luxuryValues.luxuryWatches',
     image: '/api/placeholder/400/300',
     gradient: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)',
     color: '#44A08D',
@@ -52,11 +54,11 @@ const CATEGORIES = [
   },
   {
     id: 'fine-art',
-    name: 'Fine Art',
-    description: 'Paintings & Sculptures',
+    nameKey: 'categories.fineArt',
+    descriptionKey: 'categories.descriptions.fineArt',
     icon: ArtIcon,
-    itemCount: '3.2K+',
-    averagePrice: '$125K',
+    itemCountKey: 'categories.luxuryItemCounts.fineArt',
+    averagePriceKey: 'categories.luxuryValues.fineArt',
     image: '/api/placeholder/400/300',
     gradient: 'linear-gradient(135deg, #A8EDEA 0%, #6C5CE7 100%)',
     color: '#6C5CE7',
@@ -64,11 +66,11 @@ const CATEGORIES = [
   },
   {
     id: 'jewelry',
-    name: 'Fine Jewelry',
-    description: 'Diamonds & Precious Stones',
+    nameKey: 'categories.fineJewelry',
+    descriptionKey: 'categories.descriptions.fineJewelry',
     icon: JewelryIcon,
-    itemCount: '4.5K+',
-    averagePrice: '$65K',
+    itemCountKey: 'categories.luxuryItemCounts.fineJewelry',
+    averagePriceKey: 'categories.luxuryValues.fineJewelry',
     image: '/api/placeholder/400/300',
     gradient: 'linear-gradient(135deg, #FFD89B 0%, #19547B 100%)',
     color: '#19547B',
@@ -76,11 +78,11 @@ const CATEGORIES = [
   },
   {
     id: 'antiques',
-    name: 'Antiques',
-    description: 'Historical Artifacts',
+    nameKey: 'categories.artCollectibles',
+    descriptionKey: 'categories.descriptions.artCollectibles',
     icon: AntiqueIcon,
-    itemCount: '1.9K+',
-    averagePrice: '$35K',
+    itemCountKey: 'categories.luxuryItemCounts.fineArt',
+    averagePriceKey: 'categories.luxuryValues.fineArt',
     image: '/api/placeholder/400/300',
     gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: '#764ba2',
@@ -88,11 +90,11 @@ const CATEGORIES = [
   },
   {
     id: 'sports',
-    name: 'Sports Memorabilia',
-    description: 'Collectibles & Equipment',
+    nameKey: 'categories.artCollectibles',
+    descriptionKey: 'categories.descriptions.artCollectibles',
     icon: SportsIcon,
-    itemCount: '2.8K+',
-    averagePrice: '$12K',
+    itemCountKey: 'categories.luxuryItemCounts.fineArt',
+    averagePriceKey: 'categories.luxuryValues.fineArt',
     image: '/api/placeholder/400/300',
     gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     color: '#f5576c',
@@ -100,11 +102,11 @@ const CATEGORIES = [
   },
   {
     id: 'books',
-    name: 'Rare Books',
-    description: 'First Editions & Manuscripts',
+    nameKey: 'categories.artCollectibles',
+    descriptionKey: 'categories.descriptions.artCollectibles',
     icon: BooksIcon,
-    itemCount: '1.2K+',
-    averagePrice: '$8K',
+    itemCountKey: 'categories.luxuryItemCounts.fineArt',
+    averagePriceKey: 'categories.luxuryValues.fineArt',
     image: '/api/placeholder/400/300',
     gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
     color: '#00f2fe',
@@ -112,11 +114,11 @@ const CATEGORIES = [
   },
   {
     id: 'vintage',
-    name: 'Vintage Items',
-    description: 'Collectible Vintage Goods',
+    nameKey: 'categories.artCollectibles',
+    descriptionKey: 'categories.descriptions.artCollectibles',
     icon: VintageIcon,
-    itemCount: '3.1K+',
-    averagePrice: '$15K',
+    itemCountKey: 'categories.luxuryItemCounts.fineArt',
+    averagePriceKey: 'categories.luxuryValues.fineArt',
     image: '/api/placeholder/400/300',
     gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
     color: '#fa709a',
@@ -129,19 +131,21 @@ export function ElegantCategoryShowcase() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const { t, isRTL } = useLocale();
 
   const handleCategoryClick = useCallback((categoryId: string) => {
     router.push(`/categories/${categoryId}`);
   }, [router]);
 
-  const featuredCategories = CATEGORIES.filter(cat => cat.featured);
-  const otherCategories = CATEGORIES.filter(cat => !cat.featured);
+  const categories = getCategoriesConfig(t);
+  const featuredCategories = categories.filter(cat => cat.featured);
+  const otherCategories = categories.filter(cat => !cat.featured);
 
   return (
     <Box sx={{ py: { xs: 8, md: 12 }, bgcolor: '#FAFAFA' }}>
       <Container maxWidth="xl">
         {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: { xs: 6, md: 10 } }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 6, md: 10 }, direction: isRTL ? 'rtl' : 'ltr' }}>
           <Typography
             variant="h2"
             sx={{
@@ -155,7 +159,7 @@ export function ElegantCategoryShowcase() {
               lineHeight: 1.2,
             }}
           >
-            Explore Premium Categories
+            {t('homepage.sections.explorePremiumCategories')}
           </Typography>
           <Typography
             variant="h5"
@@ -168,12 +172,12 @@ export function ElegantCategoryShowcase() {
               fontWeight: 400,
             }}
           >
-            Discover extraordinary items across our curated collection of luxury categories
+            {t('homepage.sections.discoverExtraordinaryItems')}
           </Typography>
         </Box>
 
         {/* Featured Categories Grid */}
-        <Box sx={{ mb: { xs: 6, md: 10 } }}>
+        <Box sx={{ mb: { xs: 6, md: 10 }, direction: isRTL ? 'rtl' : 'ltr' }}>
           <Typography
             variant="h4"
             sx={{
@@ -183,7 +187,7 @@ export function ElegantCategoryShowcase() {
               fontSize: { xs: '1.8rem', md: '2.2rem' },
             }}
           >
-            Featured Categories
+            {t('homepage.sections.featuredCategories')}
           </Typography>
           
           <Box
@@ -264,7 +268,7 @@ export function ElegantCategoryShowcase() {
                         lineHeight: 1.2,
                       }}
                     >
-                      {featuredCategories[0]?.name}
+                      {t(featuredCategories[0]?.nameKey)}
                     </Typography>
                     <Typography
                       variant="h6"
@@ -275,7 +279,7 @@ export function ElegantCategoryShowcase() {
                         fontWeight: 400,
                       }}
                     >
-                      {featuredCategories[0]?.description}
+                      {t(featuredCategories[0]?.descriptionKey)}
                     </Typography>
                   </Box>
 
@@ -283,18 +287,18 @@ export function ElegantCategoryShowcase() {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                       <Box>
                         <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5 }}>
-                          Available Items
+                          {t('homepage.sections.items')}
                         </Typography>
                         <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                          {featuredCategories[0]?.itemCount}
+                          {t(featuredCategories[0]?.itemCountKey)}
                         </Typography>
                       </Box>
                       <Box sx={{ textAlign: 'right' }}>
                         <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5 }}>
-                          Avg. Price
+                          {t('common.price')}
                         </Typography>
                         <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                          {featuredCategories[0]?.averagePrice}
+                          {t(featuredCategories[0]?.averagePriceKey)}
                         </Typography>
                       </Box>
                     </Box>
@@ -317,7 +321,7 @@ export function ElegantCategoryShowcase() {
                       }}
                     >
                       <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Explore Collection
+                        {t('homepage.sections.viewAll')}
                       </Typography>
                       <IconButton sx={{ color: 'white' }}>
                         <ArrowIcon />
@@ -381,23 +385,23 @@ export function ElegantCategoryShowcase() {
                         variant="h5"
                         sx={{ fontWeight: 700, mb: 1, lineHeight: 1.3 }}
                       >
-                        {category.name}
+                        {t(category.nameKey)}
                       </Typography>
                       <Typography
                         variant="body2"
                         sx={{ opacity: 0.9, mb: 3 }}
                       >
-                        {category.description}
+                        {t(category.descriptionKey)}
                       </Typography>
                     </Box>
 
                     <Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                         <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                          {category.itemCount} items
+                          {t(category.itemCountKey)}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {category.averagePrice}
+                          {t(category.averagePriceKey)}
                         </Typography>
                       </Box>
                       
@@ -431,7 +435,7 @@ export function ElegantCategoryShowcase() {
         </Box>
 
         {/* Other Categories Grid */}
-        <Box>
+        <Box sx={{ direction: isRTL ? 'rtl' : 'ltr' }}>
           <Typography
             variant="h4"
             sx={{
@@ -441,7 +445,7 @@ export function ElegantCategoryShowcase() {
               fontSize: { xs: '1.8rem', md: '2.2rem' },
             }}
           >
-            More Categories
+            {t('categories.artCollectibles')}
           </Typography>
           
           <Box
@@ -527,13 +531,13 @@ export function ElegantCategoryShowcase() {
                         variant="h6"
                         sx={{ fontWeight: 700, mb: 1, color: '#0F1419' }}
                       >
-                        {category.name}
+                        {t(category.nameKey)}
                       </Typography>
                       <Typography
                         variant="body2"
                         sx={{ color: 'text.secondary', mb: 2 }}
                       >
-                        {category.description}
+                        {t(category.descriptionKey)}
                       </Typography>
                     </Box>
 
@@ -542,7 +546,7 @@ export function ElegantCategoryShowcase() {
                         variant="body2"
                         sx={{ color: 'text.secondary', fontSize: '0.8rem' }}
                       >
-                        {category.itemCount} items
+                        {t(category.itemCountKey)}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -552,7 +556,7 @@ export function ElegantCategoryShowcase() {
                           fontSize: '0.9rem',
                         }}
                       >
-                        {category.averagePrice}
+                        {t(category.averagePriceKey)}
                       </Typography>
                     </Box>
                   </Box>
