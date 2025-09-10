@@ -410,11 +410,11 @@ export const POST = withAuth(async (request) => {
     validateMethod(request, ['POST']);
     validateContentType(request);
 
-    // Check user permissions - agents and buyers can create products
-    if (!['AGENT', 'BUYER'].includes(request.user.userType)) {
+    // Check user permissions - agents, buyers, and admins can create products
+    if (!['AGENT', 'BUYER', 'ADMIN', 'SUPER_ADMIN'].includes(request.user.userType)) {
       return handleAPIError({
         name: 'UnauthorizedError',
-        message: 'Only agents and buyers can create products',
+        message: 'Only authorized users can create products',
       });
     }
 
