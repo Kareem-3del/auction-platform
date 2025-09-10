@@ -38,13 +38,9 @@ export async function POST(request: NextRequest) {
 
     // Create upload directory if it doesn't exist
     const uploadDir = join(process.cwd(), 'public', 'uploads', type || 'general');
-    const nginxUploadDir = join('/var/www/html/uploads', type || 'general');
     
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
-    }
-    if (!existsSync(nginxUploadDir)) {
-      await mkdir(nginxUploadDir, { recursive: true });
     }
 
     // Generate unique filename
@@ -53,19 +49,17 @@ export async function POST(request: NextRequest) {
     const extension = file.name.split('.').pop();
     const filename = `${timestamp}-${randomSuffix}.${extension}`;
     const filepath = join(uploadDir, filename);
-    const nginxFilepath = join(nginxUploadDir, filename);
 
-    // Convert file to buffer and save to both locations
+    // Convert file to buffer and save
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filepath, buffer);
-    await writeFile(nginxFilepath, buffer);
+    await writeFile(filepath, buffer, { mode: 0o644 });
     
-    // Set correct permissions for nginx
+    // Async sync to nginx directory (non-blocking)
     try {
-      await execAsync(`sudo chown www-data:www-data "${nginxFilepath}"`);
-      await execAsync(`sudo chmod 644 "${nginxFilepath}"`);
-    } catch (permError) {
-      console.warn('Failed to set file permissions:', permError);
+      await execAsync('sudo /home/ubuntu/sync-uploads.sh');
+    } catch (syncError) {
+      console.warn('Failed to sync to nginx directory:', syncError);
+      // Continue anyway, the main file is saved
     }
 
     // Return the public URL
