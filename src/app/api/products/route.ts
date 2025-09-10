@@ -29,8 +29,8 @@ const createProductSchema = z.object({
 }).refine(data => data.estimatedValueMax >= data.estimatedValueMin, {
   message: 'Maximum value must be greater than or equal to minimum value',
   path: ['estimatedValueMax'],
-}).refine(data => !data.reservePrice || data.reservePrice <= data.estimatedValueMax, {
-  message: 'Reserve price cannot exceed maximum estimated value',
+}).refine(data => !data.reservePrice || data.reservePrice >= data.estimatedValueMin, {
+  message: 'Reserve price must be at least the minimum estimated value',
   path: ['reservePrice'],
 });
 
