@@ -40,7 +40,7 @@ import {
 import { useAuth } from 'src/hooks/useAuth';
 import { useLocale } from 'src/hooks/useLocale';
 
-import { apiClient } from 'src/lib/axios';
+import { usersAPI, notificationsAPI } from 'src/lib/api-client';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { formatDate, formatCurrency, formatTimeRemaining } from 'src/lib/utils';
 
@@ -108,34 +108,21 @@ export default function DashboardPage() {
 
       try {
         // Load user's auction and bidding statistics with authentication
-        const [statsData, auctionsData] = await Promise.all([
-          apiClient.get('/api/users/stats'),
-          apiClient.get('/api/auctions?status=LIVE&limit=5')
-        ]);
+        const statsData = await usersAPI.getUserStats();
 
         // Load stats if available
         if (statsData.success) {
           userStats = {
-            activeBids: statsData.data.activeBids || 0,
-            auctionsWon: statsData.data.auctionsWon || 0,
-            watchedAuctions: statsData.data.watchedAuctions || 0,
-            totalSpent: statsData.data.totalSpent || 0,
+            activeBids: statsData.data.data?.activeBids || 0,
+            auctionsWon: statsData.data.data?.auctionsWon || 0,
+            watchedAuctions: statsData.data.data?.watchedAuctions || 0,
+            totalSpent: statsData.data.data?.totalSpent || 0,
           };
         }
 
-        // Load upcoming auctions
-        if (auctionsData.success) {
-          upcomingAuctions = (auctionsData.data || []).map((auction: any) => ({
-            id: auction.id,
-            title: auction.title,
-            description: auction.description || '',
-            startTime: auction.startTime,
-            endTime: auction.endTime,
-            currentBid: auction.currentBid,
-            category: auction.product?.category?.name || 'Unknown',
-            imageUrl: auction.product?.images?.[0],
-          }));
-        }
+        // For now, set empty upcoming auctions array
+        // TODO: Implement proper auctions/products API for upcoming auctions
+        upcomingAuctions = [];
       } catch (apiError) {
         console.error('API calls failed:', apiError);
         // Keep default values
@@ -225,7 +212,7 @@ export default function DashboardPage() {
             <CardContent>
               <Box display="flex" alignItems="center" mb={2}>
                 <Avatar 
-                  src={user.isAnonymousDisplay ? user.anonymousDisplayName : undefined}
+                  src={user.avatarUrl || undefined}
                   sx={{ width: 60, height: 60, mr: 2 }}
                 >
                   <PersonIcon />

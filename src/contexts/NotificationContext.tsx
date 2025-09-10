@@ -38,7 +38,11 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
+      const authTokens = localStorage.getItem('auth_tokens');
+      if (!authTokens) return;
+      
+      const tokens = JSON.parse(authTokens);
+      const token = tokens.accessToken;
       if (!token) return;
 
       // Fetch from notifications API
@@ -50,10 +54,8 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       
       if (response.ok) {
         const result = await response.json();
-        if (result.success && Array.isArray(result.data)) {
-          setNotifications(result.data);
-        } else if (result.notifications && Array.isArray(result.notifications)) {
-          setNotifications(result.notifications);
+        if (result.success && result.data?.notifications) {
+          setNotifications(result.data.notifications);
         } else {
           setNotifications([]);
         }
@@ -73,15 +75,20 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     if (!user) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
+      const authTokens = localStorage.getItem('auth_tokens');
+      if (!authTokens) return;
+      
+      const tokens = JSON.parse(authTokens);
+      const token = tokens.accessToken;
       if (!token) return;
 
-      const response = await fetch(`/api/v1/notifications/${id}/read`, {
+      const response = await fetch(`/api/notifications/${id}`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ isRead: true }),
       });
       
       if (response.ok) {
@@ -101,11 +108,15 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     if (!user) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
+      const authTokens = localStorage.getItem('auth_tokens');
+      if (!authTokens) return;
+      
+      const tokens = JSON.parse(authTokens);
+      const token = tokens.accessToken;
       if (!token) return;
 
-      const response = await fetch('/api/v1/notifications/read-all', {
-        method: 'PATCH',
+      const response = await fetch('/api/notifications/mark-all-read', {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -126,10 +137,14 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     if (!user) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
+      const authTokens = localStorage.getItem('auth_tokens');
+      if (!authTokens) return;
+      
+      const tokens = JSON.parse(authTokens);
+      const token = tokens.accessToken;
       if (!token) return;
 
-      const response = await fetch(`/api/v1/notifications/${id}`, {
+      const response = await fetch(`/api/notifications/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -162,8 +177,17 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 
   const connectWebSocket = () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) return;
+      const authTokens = localStorage.getItem('auth_tokens');
+      if (!authTokens) return;
+      
+      const tokens = JSON.parse(authTokens);
+      const token = tokens.accessToken;
+      
+      // Check if token is expired
+      if (!token || tokens.expiresAt <= Date.now()) {
+        console.log('Token expired, cannot connect WebSocket');
+        return;
+      }
 
       const { WS_URL } = getClientEnv();
       const wsUrl = WS_URL || (process.env.NODE_ENV === 'production' 
@@ -216,12 +240,25 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
         console.log('🔌 WebSocket connection closed:', event.code);
         setIsConnected(false);
         
+        // Don't reconnect if token is expired or connection was rejected
+        if (event.code === 1005 || event.code === 1008 || event.code === 1011) {
+          console.log('WebSocket closed due to authentication issue, not reconnecting');
+          return;
+        }
+        
         // Attempt to reconnect after a delay if not intentionally closed
         if (event.code !== 1000 && user) {
           setTimeout(() => {
-            console.log('🔄 Attempting to reconnect WebSocket...');
-            connectWebSocket();
-          }, 3000);
+            // Check if token is still valid before reconnecting
+            const authTokens = localStorage.getItem('auth_tokens');
+            if (authTokens) {
+              const tokens = JSON.parse(authTokens);
+              if (tokens.expiresAt > Date.now()) {
+                console.log('🔄 Attempting to reconnect WebSocket...');
+                connectWebSocket();
+              }
+            }
+          }, 5000); // Increased delay to 5 seconds
         }
       };
 

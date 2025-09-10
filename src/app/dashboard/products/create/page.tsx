@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useLocale } from 'src/hooks/useLocale';
+import { productsAPI, categoriesAPI } from 'src/lib/api-client';
 
 import {
   Save as SaveIcon,
@@ -62,10 +63,9 @@ export default function CreateProductPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories');
-        const result = await response.json();
+        const result = await categoriesAPI.getCategories();
         if (result.success) {
-          setCategories(result.data.map((cat: any) => ({ id: cat.id, name: cat.name })));
+          setCategories(result.data.categories.map((cat: any) => ({ id: cat.id, name: cat.name })));
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -156,15 +156,7 @@ export default function CreateProductPage() {
         authenticity: formData.authenticity || undefined,
       };
 
-      const response = await fetch('/api/products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      });
-
-      const result = await response.json();
+      const result = await productsAPI.createProduct(productData);
 
       if (result.success) {
         setSuccessMessage('Product created successfully! It will be reviewed before going live.');
