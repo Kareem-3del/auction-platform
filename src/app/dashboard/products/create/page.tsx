@@ -63,12 +63,19 @@ export default function CreateProductPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const result = await categoriesAPI.getCategories();
-        if (result.success) {
-          setCategories(result.data.categories.map((cat: any) => ({ id: cat.id, name: cat.name })));
+        // Use direct fetch to bypass potential API client issues
+        const response = await fetch('/api/categories?flat=true');
+        const result = await response.json();
+        
+        if (result.success && Array.isArray(result.data)) {
+          setCategories(result.data.map((cat: any) => ({ id: cat.id, name: cat.name })));
+        } else {
+          console.error('Failed to fetch categories:', result.success ? 'Invalid data format' : result.error?.message);
+          setCategories([]);
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
+        setCategories([]);
       } finally {
         setLoadingCategories(false);
       }
@@ -255,11 +262,17 @@ export default function CreateProductPage() {
                             onChange={(e) => handleInputChange('categoryId', e.target.value)}
                             disabled={loadingCategories}
                           >
-                            {categories.map((category) => (
-                              <MenuItem key={category.id} value={category.id}>
-                                {category.name}
-                              </MenuItem>
-                            ))}
+                            {loadingCategories ? (
+                              <MenuItem disabled>Loading categories...</MenuItem>
+                            ) : categories.length === 0 ? (
+                              <MenuItem disabled>No categories available</MenuItem>
+                            ) : (
+                              categories.map((category) => (
+                                <MenuItem key={category.id} value={category.id}>
+                                  {category.name}
+                                </MenuItem>
+                              ))
+                            )}
                           </Select>
                           {errors.categoryId && (
                             <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
