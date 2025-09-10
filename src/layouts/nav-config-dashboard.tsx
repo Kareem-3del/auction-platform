@@ -62,20 +62,23 @@ export const getNavData = (t: (key: string) => string): NavSectionProps['data'] 
     ],
   },
   /**
-   * Inventory Management
+   * Auction Management
    */
   {
-    subheader: t('dashboard.inventoryManagement'),
+    subheader: t('dashboard.auctionManagement'),
     items: [
       {
-        title: t('navigation.products'),
-        path: paths.dashboard.products.root,
-        icon: ICONS.product,
+        title: t('navigation.auctions'),
+        path: paths.dashboard.auctions.root,
+        icon: ICONS.ecommerce,
         children: [
-          { title: t('navigation.allProducts'), path: paths.dashboard.products.root },
-          { title: t('navigation.addProduct'), path: paths.dashboard.products.create },
+          { title: t('navigation.allAuctions'), path: paths.dashboard.auctions.root },
+          { title: t('navigation.createAuction'), path: paths.dashboard.auctions.create },
         ],
       },
+      { title: t('navigation.bids'), path: paths.dashboard.bids, icon: ICONS.order },
+      { title: 'Wallet & Recharge', path: '/dashboard/wallet', icon: ICONS.banking },
+      { title: t('navigation.transactions'), path: paths.dashboard.transactions, icon: ICONS.banking },
       {
         title: t('navigation.categories'),
         path: paths.dashboard.categories.root,
@@ -103,26 +106,6 @@ export const getNavData = (t: (key: string) => string): NavSectionProps['data'] 
           { title: t('navigation.addTag'), path: paths.dashboard.tags.create },
         ],
       },
-    ],
-  },
-  /**
-   * Auction Management
-   */
-  {
-    subheader: t('dashboard.auctionManagement'),
-    items: [
-      {
-        title: t('navigation.auctions'),
-        path: paths.dashboard.auctions.root,
-        icon: ICONS.ecommerce,
-        children: [
-          { title: t('navigation.allAuctions'), path: paths.dashboard.auctions.root },
-          { title: t('navigation.createAuction'), path: paths.dashboard.auctions.create },
-        ],
-      },
-      { title: t('navigation.bids'), path: paths.dashboard.bids, icon: ICONS.order },
-      { title: 'Wallet & Recharge', path: '/dashboard/wallet', icon: ICONS.banking },
-      { title: t('navigation.transactions'), path: paths.dashboard.transactions, icon: ICONS.banking },
     ],
   },
   /**

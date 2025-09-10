@@ -38,27 +38,32 @@ import {
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-interface Product {
-  id: string;
-  title: string;
-  images?: string[];
-}
-
 interface Auction {
   id: string;
   title: string;
   description: string;
+  images: string[];
   startingBid: number;
   currentBid: number;
   reservePrice?: number;
   bidIncrement: number;
   startTime: string;
   endTime: string;
+  auctionStatus: string;
   status: string;
   bidCount: number;
   viewCount: number;
-  productId: string;
-  product?: Product;
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  agent?: {
+    id: string;
+    displayName: string;
+    businessName: string;
+    logoUrl: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -78,7 +83,7 @@ export default function AuctionsPage() {
     const loadAuctions = async () => {
       try {
         setLoading(true);
-        const data = await apiClient.get('/api/auctions?includeProduct=true');
+        const data = await apiClient.get('/api/products');
 
         if (data.success) {
           setAuctions(data.data || []);
@@ -99,10 +104,9 @@ export default function AuctionsPage() {
   const filteredAuctions = Array.isArray(auctions) ? auctions.filter(auction => {
     const matchesSearch = 
       auction.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      auction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (auction.product?.title || '').toLowerCase().includes(searchQuery.toLowerCase());
+      auction.description.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || auction.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || auction.auctionStatus === statusFilter;
 
     return matchesSearch && matchesStatus;
   }) : [];
@@ -124,7 +128,7 @@ export default function AuctionsPage() {
   const handleDeleteAuction = async (auction: Auction) => {
     if (confirm(`Are you sure you want to delete "${auction.title}"?`)) {
       try {
-        const data = await apiClient.delete(`/api/auctions/${auction.id}`);
+        const data = await apiClient.delete(`/api/products/${auction.id}`);
 
         if (data.success) {
           setAuctions(prev => prev.filter(a => a.id !== auction.id));
@@ -151,11 +155,11 @@ export default function AuctionsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE':
+      case 'LIVE':
         return 'success';
-      case 'PENDING':
+      case 'SCHEDULED':
         return 'warning';
-      case 'COMPLETED':
+      case 'ENDED':
         return 'info';
       case 'CANCELLED':
         return 'error';
@@ -210,7 +214,7 @@ export default function AuctionsPage() {
               Auctions
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Manage product auctions and bidding
+              Manage auctions and bidding
             </Typography>
           </Box>
           <Button
@@ -250,8 +254,8 @@ export default function AuctionsPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Auction</TableCell>
-                  <TableCell>Product</TableCell>
+                  <TableCell>Auction Item</TableCell>
+                  <TableCell>Category</TableCell>
                   <TableCell>Current Bid</TableCell>
                   <TableCell>Time Remaining</TableCell>
                   <TableCell>Bids</TableCell>
@@ -281,12 +285,12 @@ export default function AuctionsPage() {
                     <TableCell>
                       <Stack direction="row" alignItems="center" spacing={2}>
                         <Avatar
-                          src={auction.product?.images?.[0]}
+                          src={auction.images?.[0]}
                           variant="rounded"
                           sx={{ width: 40, height: 40 }}
                         />
                         <Typography variant="body2">
-                          {auction.product?.title || 'Unknown Product'}
+                          {auction.category?.name || 'Uncategorized'}
                         </Typography>
                       </Stack>
                     </TableCell>
@@ -323,9 +327,9 @@ export default function AuctionsPage() {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={auction.status}
+                        label={auction.auctionStatus}
                         size="small"
-                        color={getStatusColor(auction.status) as any}
+                        color={getStatusColor(auction.auctionStatus) as any}
                         variant="filled"
                       />
                     </TableCell>

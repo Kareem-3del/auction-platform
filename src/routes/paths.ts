@@ -36,12 +36,6 @@ export const paths = {
       create: `${ROOTS.DASHBOARD}/tags/create`,
       edit: `${ROOTS.DASHBOARD}/tags/[id]/edit`,
     },
-    products: {
-      root: `${ROOTS.DASHBOARD}/products`,
-      create: `${ROOTS.DASHBOARD}/products/create`,
-      edit: `${ROOTS.DASHBOARD}/products/[id]/edit`,
-      view: `${ROOTS.DASHBOARD}/products/[id]`,
-    },
     brands: {
       root: `${ROOTS.DASHBOARD}/brands`,
       create: `${ROOTS.DASHBOARD}/brands/create`,

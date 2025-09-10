@@ -21,58 +21,88 @@ import {
   InputLabel,
   IconButton,
   FormControl,
-  Autocomplete,
   InputAdornment,
   CircularProgress,
 } from '@mui/material';
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
-
-interface Product {
-  id: string;
-  title: string;
-  description: string;
-  images?: string[];
-}
+import ImageUpload from 'src/components/common/ImageUpload';
 
 export default function CreateAuctionPage() {
   const router = useRouter();
   
-  const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    // Item Details
     title: '',
     description: '',
-    productId: '',
+    categoryId: '',
+    condition: 'NEW' as 'NEW' | 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR',
+    location: '',
+    provenance: '',
+    dimensions: '',
+    weight: '',
+    materials: '',
+    authenticity: '',
+    
+    // Pricing
+    estimatedValueMin: '',
+    estimatedValueMax: '',
     startingBid: '',
     reservePrice: '',
     bidIncrement: '10',
+    buyNowPrice: '',
+    
+    // Auction Settings
+    auctionType: 'LIVE' as 'LIVE' | 'TIMED' | 'SILENT',
     startTime: '',
     endTime: '',
-    status: 'PENDING',
+    timezone: 'UTC',
+    autoExtend: true,
+    extensionTriggerMinutes: '2',
+    extensionDurationMinutes: '5',
+    maxExtensions: '3',
+    
+    // Display Settings
+    showBidderNames: true,
+    showBidCount: true,
+    showWatcherCount: true,
+    
+    // Shipping
+    pickupAvailable: false,
+    pickupAddress: '',
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Array<{id: string, name: string}>>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
+  // Fetch categories on component mount
   useEffect(() => {
-    const loadProducts = async () => {
+    const fetchCategories = async () => {
       try {
-        const data = await apiClient.get('/api/products?status=APPROVED&hasAuction=false');
-
-        if (data.success) {
-          setProducts(data.data || []);
+        const response = await fetch('/api/categories?flat=true');
+        const result = await response.json();
+        
+        if (result.success && Array.isArray(result.data)) {
+          setCategories(result.data.map((cat: any) => ({ id: cat.id, name: cat.name })));
+        } else {
+          console.error('Failed to fetch categories:', result.success ? 'Invalid data format' : result.error?.message);
+          setCategories([]);
         }
       } catch (error) {
-        console.error('Error loading products:', error);
+        console.error('Error fetching categories:', error);
+        setCategories([]);
       } finally {
-        setLoading(false);
+        setLoadingCategories(false);
       }
     };
 
-    loadProducts();
+    fetchCategories();
   }, []);
 
   const handleInputChange = (field: string, value: any) => {
@@ -80,19 +110,6 @@ export default function CreateAuctionPage() {
       ...prev,
       [field]: value,
     }));
-
-    // Auto-generate title from product if product is selected and title is empty
-    if (field === 'productId' && value && !formData.title) {
-      const product = products.find(p => p.id === value);
-      if (product) {
-        setFormData(prev => ({
-          ...prev,
-          [field]: value,
-          title: `Auction for ${product.title}`,
-          description: product.description || '',
-        }));
-      }
-    }
 
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -102,6 +119,7 @@ export default function CreateAuctionPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    // Item Details Validation
     if (!formData.title.trim()) {
       newErrors.title = 'Auction title is required';
     }
@@ -110,22 +128,40 @@ export default function CreateAuctionPage() {
       newErrors.description = 'Description is required';
     }
 
-    if (!formData.productId) {
-      newErrors.productId = 'Product selection is required';
+    if (!formData.categoryId) {
+      newErrors.categoryId = 'Category is required';
+    }
+
+    if (!formData.location.trim()) {
+      newErrors.location = 'Location is required';
+    }
+
+    // Pricing Validation
+    if (!formData.estimatedValueMin || parseFloat(formData.estimatedValueMin) <= 0) {
+      newErrors.estimatedValueMin = 'Minimum estimated value is required';
+    }
+
+    if (!formData.estimatedValueMax || parseFloat(formData.estimatedValueMax) <= 0) {
+      newErrors.estimatedValueMax = 'Maximum estimated value is required';
+    }
+
+    if (parseFloat(formData.estimatedValueMax) < parseFloat(formData.estimatedValueMin)) {
+      newErrors.estimatedValueMax = 'Maximum value must be greater than minimum value';
     }
 
     if (!formData.startingBid || parseFloat(formData.startingBid) <= 0) {
       newErrors.startingBid = 'Valid starting bid is required';
     }
 
-    if (formData.reservePrice && parseFloat(formData.reservePrice) < parseFloat(formData.startingBid || '0')) {
-      newErrors.reservePrice = 'Reserve price must be greater than or equal to starting bid';
+    if (formData.reservePrice && parseFloat(formData.reservePrice) < parseFloat(formData.estimatedValueMin || '0')) {
+      newErrors.reservePrice = 'Reserve price must be at least the minimum estimated value';
     }
 
     if (!formData.bidIncrement || parseFloat(formData.bidIncrement) <= 0) {
       newErrors.bidIncrement = 'Valid bid increment is required';
     }
 
+    // Auction Timing Validation
     if (!formData.startTime) {
       newErrors.startTime = 'Start time is required';
     }
@@ -144,6 +180,11 @@ export default function CreateAuctionPage() {
       newErrors.startTime = 'Start time must be in the future';
     }
 
+    // Images Validation
+    if (images.length === 0) {
+      newErrors.images = 'At least one image is required';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -159,14 +200,51 @@ export default function CreateAuctionPage() {
     setSuccessMessage('');
 
     try {
-      const data = await apiClient.post('/api/auctions', {
-        ...formData,
+      const auctionData = {
+        // Item details
+        title: formData.title,
+        description: formData.description,
+        categoryId: formData.categoryId,
+        condition: formData.condition,
+        location: formData.location,
+        images: images,
+        
+        // Specifications
+        provenance: formData.provenance,
+        dimensions: formData.dimensions,
+        weight: formData.weight,
+        materials: formData.materials,
+        authenticity: formData.authenticity,
+        
+        // Pricing
+        estimatedValueMin: parseFloat(formData.estimatedValueMin),
+        estimatedValueMax: parseFloat(formData.estimatedValueMax),
         startingBid: parseFloat(formData.startingBid),
         reservePrice: formData.reservePrice ? parseFloat(formData.reservePrice) : null,
         bidIncrement: parseFloat(formData.bidIncrement),
+        buyNowPrice: formData.buyNowPrice ? parseFloat(formData.buyNowPrice) : null,
+        
+        // Auction settings
+        auctionType: formData.auctionType,
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
-      });
+        timezone: formData.timezone,
+        autoExtend: formData.autoExtend,
+        extensionTriggerMinutes: parseInt(formData.extensionTriggerMinutes),
+        extensionDurationMinutes: parseInt(formData.extensionDurationMinutes),
+        maxExtensions: parseInt(formData.maxExtensions),
+        
+        // Display settings
+        showBidderNames: formData.showBidderNames,
+        showBidCount: formData.showBidCount,
+        showWatcherCount: formData.showWatcherCount,
+        
+        // Shipping
+        pickupAvailable: formData.pickupAvailable,
+        pickupAddress: formData.pickupAddress || null,
+      };
+
+      const data = await apiClient.post('/api/products', auctionData);
 
       if (data.success) {
         setSuccessMessage('Auction created successfully!');
@@ -203,7 +281,7 @@ export default function CreateAuctionPage() {
     }
   }, [formData.startTime, formData.endTime]);
 
-  if (loading) {
+  if (loadingCategories) {
     return (
       <DashboardContent>
         <Box sx={{ py: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
@@ -212,8 +290,6 @@ export default function CreateAuctionPage() {
       </DashboardContent>
     );
   }
-
-  const selectedProduct = products.find(p => p.id === formData.productId);
 
   return (
     <DashboardContent>
@@ -228,7 +304,7 @@ export default function CreateAuctionPage() {
               Create Auction
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Create a new auction for your product
+              Create a new auction item with all details and settings
             </Typography>
           </Box>
         </Stack>
@@ -247,39 +323,17 @@ export default function CreateAuctionPage() {
           </Alert>
         )}
 
-        {products.length === 0 && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            No approved products available for auction. Please ensure you have approved products without existing auctions.
-          </Alert>
-        )}
-
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             {/* Left Column */}
             <Grid item xs={12} md={8}>
               <Stack spacing={3}>
-                {/* Basic Information */}
+                {/* Item Details */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Basic Information
+                    Item Details
                   </Typography>
                   <Stack spacing={3}>
-                    <Autocomplete
-                      options={products}
-                      getOptionLabel={(option) => option.title}
-                      value={selectedProduct || null}
-                      onChange={(_, newValue) => handleInputChange('productId', newValue?.id || '')}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Product"
-                          error={!!errors.productId}
-                          helperText={errors.productId || 'Select the product to auction'}
-                          required
-                        />
-                      )}
-                    />
-
                     <TextField
                       fullWidth
                       label="Auction Title"
@@ -302,26 +356,160 @@ export default function CreateAuctionPage() {
                       required
                     />
 
-                    <FormControl fullWidth error={!!errors.status}>
-                      <InputLabel>Status</InputLabel>
-                      <Select
-                        value={formData.status}
-                        label="Status"
-                        onChange={(e) => handleInputChange('status', e.target.value)}
-                      >
-                        <MenuItem value="PENDING">Pending</MenuItem>
-                        <MenuItem value="ACTIVE">Active</MenuItem>
-                      </Select>
-                    </FormControl>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth error={!!errors.categoryId}>
+                          <InputLabel>Category *</InputLabel>
+                          <Select
+                            value={formData.categoryId}
+                            label="Category *"
+                            onChange={(e) => handleInputChange('categoryId', e.target.value)}
+                          >
+                            {categories.map((category) => (
+                              <MenuItem key={category.id} value={category.id}>
+                                {category.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                          {errors.categoryId && (
+                            <Typography variant="caption" color="error">
+                              {errors.categoryId}
+                            </Typography>
+                          )}
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
+                          <InputLabel>Condition</InputLabel>
+                          <Select
+                            value={formData.condition}
+                            label="Condition"
+                            onChange={(e) => handleInputChange('condition', e.target.value)}
+                          >
+                            <MenuItem value="NEW">New</MenuItem>
+                            <MenuItem value="EXCELLENT">Excellent</MenuItem>
+                            <MenuItem value="GOOD">Good</MenuItem>
+                            <MenuItem value="FAIR">Fair</MenuItem>
+                            <MenuItem value="POOR">Poor</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+
+                    <TextField
+                      fullWidth
+                      label="Location"
+                      value={formData.location}
+                      onChange={(e) => handleInputChange('location', e.target.value)}
+                      error={!!errors.location}
+                      helperText={errors.location}
+                      required
+                    />
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Provenance"
+                          value={formData.provenance}
+                          onChange={(e) => handleInputChange('provenance', e.target.value)}
+                          helperText="Item's origin or history"
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Dimensions"
+                          value={formData.dimensions}
+                          onChange={(e) => handleInputChange('dimensions', e.target.value)}
+                          helperText="Size measurements"
+                        />
+                      </Grid>
+                    </Grid>
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Weight"
+                          value={formData.weight}
+                          onChange={(e) => handleInputChange('weight', e.target.value)}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Materials"
+                          value={formData.materials}
+                          onChange={(e) => handleInputChange('materials', e.target.value)}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Authenticity"
+                          value={formData.authenticity}
+                          onChange={(e) => handleInputChange('authenticity', e.target.value)}
+                        />
+                      </Grid>
+                    </Grid>
                   </Stack>
                 </Card>
 
-                {/* Bidding Settings */}
+                {/* Images */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Bidding Settings
+                    Images
+                  </Typography>
+                  <ImageUpload
+                    images={images}
+                    onChange={setImages}
+                    error={errors.images}
+                    maxImages={10}
+                  />
+                  {errors.images && (
+                    <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                      {errors.images}
+                    </Typography>
+                  )}
+                </Card>
+
+                {/* Pricing */}
+                <Card sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Pricing & Bidding
                   </Typography>
                   <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Estimated Value (Min)"
+                        type="number"
+                        value={formData.estimatedValueMin}
+                        onChange={(e) => handleInputChange('estimatedValueMin', e.target.value)}
+                        error={!!errors.estimatedValueMin}
+                        helperText={errors.estimatedValueMin}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        }}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Estimated Value (Max)"
+                        type="number"
+                        value={formData.estimatedValueMax}
+                        onChange={(e) => handleInputChange('estimatedValueMax', e.target.value)}
+                        error={!!errors.estimatedValueMax}
+                        helperText={errors.estimatedValueMax}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        }}
+                        required
+                      />
+                    </Grid>
                     <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
@@ -351,7 +539,7 @@ export default function CreateAuctionPage() {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
                         label="Bid Increment"
@@ -366,46 +554,107 @@ export default function CreateAuctionPage() {
                         required
                       />
                     </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Buy Now Price (Optional)"
+                        type="number"
+                        value={formData.buyNowPrice}
+                        onChange={(e) => handleInputChange('buyNowPrice', e.target.value)}
+                        helperText="Price to buy item immediately"
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        }}
+                      />
+                    </Grid>
                   </Grid>
                 </Card>
 
-                {/* Timing */}
+                {/* Auction Settings */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Auction Timing
+                    Auction Settings
                   </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Start Time"
-                        type="datetime-local"
-                        value={formData.startTime}
-                        onChange={(e) => handleInputChange('startTime', e.target.value)}
-                        error={!!errors.startTime}
-                        helperText={errors.startTime}
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        required
-                      />
+                  <Stack spacing={3}>
+                    <FormControl fullWidth>
+                      <InputLabel>Auction Type</InputLabel>
+                      <Select
+                        value={formData.auctionType}
+                        label="Auction Type"
+                        onChange={(e) => handleInputChange('auctionType', e.target.value)}
+                      >
+                        <MenuItem value="LIVE">Live Auction</MenuItem>
+                        <MenuItem value="TIMED">Timed Auction</MenuItem>
+                        <MenuItem value="SILENT">Silent Auction</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Start Time"
+                          type="datetime-local"
+                          value={formData.startTime}
+                          onChange={(e) => handleInputChange('startTime', e.target.value)}
+                          error={!!errors.startTime}
+                          helperText={errors.startTime}
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="End Time"
+                          type="datetime-local"
+                          value={formData.endTime}
+                          onChange={(e) => handleInputChange('endTime', e.target.value)}
+                          error={!!errors.endTime}
+                          helperText={errors.endTime}
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                          required
+                        />
+                      </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="End Time"
-                        type="datetime-local"
-                        value={formData.endTime}
-                        onChange={(e) => handleInputChange('endTime', e.target.value)}
-                        error={!!errors.endTime}
-                        helperText={errors.endTime}
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        required
-                      />
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Extension Trigger (Minutes)"
+                          type="number"
+                          value={formData.extensionTriggerMinutes}
+                          onChange={(e) => handleInputChange('extensionTriggerMinutes', e.target.value)}
+                          helperText="Extend if bid within this time"
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Extension Duration (Minutes)"
+                          type="number"
+                          value={formData.extensionDurationMinutes}
+                          onChange={(e) => handleInputChange('extensionDurationMinutes', e.target.value)}
+                          helperText="How long to extend"
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Max Extensions"
+                          type="number"
+                          value={formData.maxExtensions}
+                          onChange={(e) => handleInputChange('maxExtensions', e.target.value)}
+                          helperText="Maximum number of extensions"
+                        />
+                      </Grid>
                     </Grid>
-                  </Grid>
+                  </Stack>
                 </Card>
               </Stack>
             </Grid>
@@ -413,38 +662,6 @@ export default function CreateAuctionPage() {
             {/* Right Column */}
             <Grid item xs={12} md={4}>
               <Stack spacing={3}>
-                {/* Product Preview */}
-                {selectedProduct && (
-                  <Card sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>
-                      Selected Product
-                    </Typography>
-                    <Stack spacing={2}>
-                      {selectedProduct.images?.[0] && (
-                        <Box
-                          component="img"
-                          src={selectedProduct.images[0]}
-                          alt={selectedProduct.title}
-                          sx={{
-                            width: '100%',
-                            height: 200,
-                            objectFit: 'cover',
-                            borderRadius: 1,
-                          }}
-                        />
-                      )}
-                      <Box>
-                        <Typography variant="subtitle1" fontWeight="medium">
-                          {selectedProduct.title}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {selectedProduct.description}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </Card>
-                )}
-
                 {/* Auction Preview */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
@@ -473,6 +690,19 @@ export default function CreateAuctionPage() {
 
                     <Box>
                       <Typography variant="subtitle2" color="text.secondary">
+                        Estimated Value
+                      </Typography>
+                      <Typography variant="body2">
+                        {formData.estimatedValueMin && formData.estimatedValueMax ? (
+                          `$${parseFloat(formData.estimatedValueMin).toFixed(2)} - $${parseFloat(formData.estimatedValueMax).toFixed(2)}`
+                        ) : (
+                          'Not set'
+                        )}
+                      </Typography>
+                    </Box>
+
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">
                         Duration
                       </Typography>
                       <Typography variant="body2">
@@ -493,7 +723,7 @@ export default function CreateAuctionPage() {
                     variant="contained"
                     size="large"
                     startIcon={<SaveIcon />}
-                    disabled={isSubmitting || products.length === 0}
+                    disabled={isSubmitting}
                     fullWidth
                   >
                     {isSubmitting ? 'Creating...' : 'Create Auction'}

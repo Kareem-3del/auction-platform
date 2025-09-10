@@ -21,7 +21,6 @@ import { RouterLink } from 'src/routes/components';
 
 import { useAuth } from 'src/hooks/useAuth';
 
-import { _mock } from 'src/_mock';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -184,41 +183,6 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
             </Typography>
           </Box>
 
-          <Box
-            sx={{
-              p: 3,
-              gap: 1,
-              flexWrap: 'wrap',
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-          >
-            {Array.from({ length: 3 }, (_, index) => (
-              <Tooltip
-                key={_mock.fullName(index + 1)}
-                title={`Switch to: ${_mock.fullName(index + 1)}`}
-              >
-                <Avatar
-                  alt={_mock.fullName(index + 1)}
-                  src={_mock.image.avatar(index + 1)}
-                  onClick={() => {}}
-                />
-              </Tooltip>
-            ))}
-
-            <Tooltip title="Add account">
-              <IconButton
-                sx={[
-                  (theme) => ({
-                    bgcolor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
-                    border: `dashed 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.32)}`,
-                  }),
-                ]}
-              >
-                <Iconify icon="mingcute:add-line" />
-              </IconButton>
-            </Tooltip>
-          </Box>
 
           {renderList()}
 
