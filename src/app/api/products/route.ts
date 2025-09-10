@@ -410,25 +410,30 @@ export const POST = withAuth(async (request) => {
     validateMethod(request, ['POST']);
     validateContentType(request);
 
-    // Check user permissions - only agents can create products
-    if (request.user.userType !== 'AGENT') {
+    // Check user permissions - agents and buyers can create products
+    if (!['AGENT', 'BUYER'].includes(request.user.userType)) {
       return handleAPIError({
         name: 'UnauthorizedError',
-        message: 'Only agents can create products',
+        message: 'Only agents and buyers can create products',
       });
     }
 
-    // Get agent information
-    const agent = await prisma.agent.findUnique({
-      where: { userId: request.user.id },
-      select: { id: true, status: true },
-    });
-
-    if (!agent || agent.status !== 'APPROVED') {
-      return handleAPIError({
-        name: 'AgentNotActiveError',
-        message: 'Agent account is not active',
+    // Get agent information if user is an agent
+    let agentId = null;
+    if (request.user.userType === 'AGENT') {
+      const agent = await prisma.agent.findUnique({
+        where: { userId: request.user.id },
+        select: { id: true, status: true },
       });
+
+      if (!agent || agent.status !== 'APPROVED') {
+        return handleAPIError({
+          name: 'AgentNotActiveError',
+          message: 'Agent account is not active',
+        });
+      }
+      
+      agentId = agent.id;
     }
 
     const body = await request.json();
@@ -451,7 +456,7 @@ export const POST = withAuth(async (request) => {
     const product = await prisma.product.create({
       data: {
         ...validatedData,
-        agentId: agent.id,
+        agentId: agentId, // Will be null for buyer users
         images: JSON.stringify(validatedData.images),
         status: 'PENDING_APPROVAL', // All new products start as pending approval
       },
