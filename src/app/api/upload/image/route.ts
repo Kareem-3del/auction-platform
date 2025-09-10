@@ -4,11 +4,15 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { NextResponse } from 'next/server';
 import { mkdir, writeFile } from 'fs/promises';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { 
   errorResponse, 
   successResponse, 
   ErrorCodes 
 } from 'src/lib/api-response';
+
+const execAsync = promisify(exec);
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,8 +38,13 @@ export async function POST(request: NextRequest) {
 
     // Create upload directory if it doesn't exist
     const uploadDir = join(process.cwd(), 'public', 'uploads', type || 'general');
+    const nginxUploadDir = join('/var/www/html/uploads', type || 'general');
+    
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
+    }
+    if (!existsSync(nginxUploadDir)) {
+      await mkdir(nginxUploadDir, { recursive: true });
     }
 
     // Generate unique filename
@@ -44,10 +53,20 @@ export async function POST(request: NextRequest) {
     const extension = file.name.split('.').pop();
     const filename = `${timestamp}-${randomSuffix}.${extension}`;
     const filepath = join(uploadDir, filename);
+    const nginxFilepath = join(nginxUploadDir, filename);
 
-    // Convert file to buffer and save
+    // Convert file to buffer and save to both locations
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(filepath, buffer);
+    await writeFile(nginxFilepath, buffer);
+    
+    // Set correct permissions for nginx
+    try {
+      await execAsync(`sudo chown www-data:www-data "${nginxFilepath}"`);
+      await execAsync(`sudo chmod 644 "${nginxFilepath}"`);
+    } catch (permError) {
+      console.warn('Failed to set file permissions:', permError);
+    }
 
     // Return the public URL
     const publicUrl = `/uploads/${type || 'general'}/${filename}`;
