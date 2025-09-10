@@ -27,7 +27,7 @@ import {
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
-import ImageUpload from 'src/components/common/ImageUpload';
+import MultiImageUpload from 'src/components/common/MultiImageUpload';
 
 export default function CreateAuctionPage() {
   const router = useRouter();
@@ -461,7 +461,7 @@ export default function CreateAuctionPage() {
                   <Typography variant="h6" gutterBottom>
                     Images
                   </Typography>
-                  <ImageUpload
+                  <MultiImageUpload
                     images={images}
                     onChange={setImages}
                     error={errors.images}
