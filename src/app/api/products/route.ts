@@ -537,6 +537,13 @@ export const POST = withAuth(async (request) => {
       });
     }
 
+    console.error('Detailed product creation error:', {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack,
+      cause: error?.cause,
+      toString: error?.toString()
+    });
     return handleAPIError(error);
   }
 }, { required: true });

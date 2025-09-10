@@ -273,17 +273,14 @@ export const categoriesAPI = {
     limit?: number;
     search?: string;
     parentId?: string;
-  }): Promise<APIResponse<{ 
-    categories: Array<{
-      id: string;
-      name: string;
-      slug: string;
-      description?: string;
-      parentId?: string;
-      isActive: boolean;
-    }>; 
-    meta: { pagination: PaginationMeta } 
-  }>> => 
+  }): Promise<APIResponse<Array<{
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    parentId?: string;
+    isActive: boolean;
+  }>>> => 
     apiClient.get('/api/categories', params),
 
   getCategory: (id: string): Promise<APIResponse<{
