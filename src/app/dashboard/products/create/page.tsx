@@ -1,15 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useLocale } from 'src/hooks/useLocale';
 
 import {
-  Add as AddIcon,
   Save as SaveIcon,
-  Upload as UploadIcon,
-  Delete as DeleteIcon,
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import {
@@ -28,36 +25,11 @@ import {
   InputLabel,
   IconButton,
   FormControl,
-  Autocomplete,
   InputAdornment,
-  FormControlLabel,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-
-// Mock data
-const mockCategories = [
-  'Electronics > Smartphones',
-  'Electronics > Laptops', 
-  'Electronics > Tablets',
-  'Fashion > Clothing',
-  'Fashion > Shoes',
-  'Fashion > Watches',
-  'Home & Garden > Furniture',
-  'Home & Garden > Decor',
-  'Collectibles > Art',
-  'Collectibles > Coins',
-];
-
-const mockBrands = [
-  'Apple', 'Samsung', 'Microsoft', 'Google', 'Sony',
-  'Nike', 'Adidas', 'Rolex', 'Omega', 'Louis Vuitton'
-];
-
-const mockTags = [
-  'Premium', 'Sale', 'New Arrival', 'Limited Edition',
-  'Vintage', 'Luxury', 'Professional', 'Gaming'
-];
+import ImageUpload from 'src/components/common/ImageUpload';
 
 export default function CreateProductPage() {
   const router = useRouter();
@@ -66,26 +38,44 @@ export default function CreateProductPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    brand: '',
-    category: '',
-    price: '',
+    categoryId: '',
+    condition: 'NEW' as 'NEW' | 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR',
+    location: '',
+    estimatedValueMin: '',
+    estimatedValueMax: '',
     reservePrice: '',
-    condition: 'NEW',
-    dimensions: {
-      length: '',
-      width: '',
-      height: '',
-      weight: '',
-    },
-    tags: [] as string[],
-    specifications: [{ key: '', value: '' }],
-    isActive: true,
+    provenance: '',
+    dimensions: '',
+    weight: '',
+    materials: '',
+    authenticity: '',
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Array<{id: string, name: string}>>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const result = await response.json();
+        if (result.success) {
+          setCategories(result.data.map((cat: any) => ({ id: cat.id, name: cat.name })));
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
@@ -99,68 +89,39 @@ export default function CreateProductPage() {
     }
   };
 
-  const handleDimensionChange = (dimension: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      dimensions: {
-        ...prev.dimensions,
-        [dimension]: value,
-      }
-    }));
-  };
-
-  const handleSpecificationChange = (index: number, field: 'key' | 'value', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      specifications: prev.specifications.map((spec, i) => 
-        i === index ? { ...spec, [field]: value } : spec
-      ),
-    }));
-  };
-
-  const addSpecification = () => {
-    setFormData(prev => ({
-      ...prev,
-      specifications: [...prev.specifications, { key: '', value: '' }],
-    }));
-  };
-
-  const removeSpecification = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      specifications: prev.specifications.filter((_, i) => i !== index),
-    }));
-  };
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = t('products.productTitleRequired');
+      newErrors.title = 'Product title is required';
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = t('products.descriptionRequired');
+      newErrors.description = 'Description is required';
     }
 
-    if (!formData.brand.trim()) {
-      newErrors.brand = t('products.brandRequired');
+    if (!formData.categoryId) {
+      newErrors.categoryId = 'Category is required';
     }
 
-    if (!formData.category.trim()) {
-      newErrors.category = t('products.categoryRequired');
+    if (!formData.location.trim()) {
+      newErrors.location = 'Location is required';
     }
 
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      newErrors.price = t('products.startingPriceRequired');
+    if (!formData.estimatedValueMin || parseFloat(formData.estimatedValueMin) <= 0) {
+      newErrors.estimatedValueMin = 'Minimum estimated value is required';
     }
 
-    if (!formData.reservePrice || parseFloat(formData.reservePrice) <= 0) {
-      newErrors.reservePrice = t('products.reservePriceRequired');
+    if (!formData.estimatedValueMax || parseFloat(formData.estimatedValueMax) <= 0) {
+      newErrors.estimatedValueMax = 'Maximum estimated value is required';
     }
 
-    if (parseFloat(formData.reservePrice) >= parseFloat(formData.price)) {
-      newErrors.reservePrice = t('products.reservePriceMustBeLess');
+    if (parseFloat(formData.estimatedValueMax) < parseFloat(formData.estimatedValueMin)) {
+      newErrors.estimatedValueMax = 'Maximum value must be greater than minimum value';
+    }
+
+    if (images.length === 0) {
+      newErrors.images = 'At least one image is required';
     }
 
     setErrors(newErrors);
@@ -178,19 +139,46 @@ export default function CreateProductPage() {
     setSuccessMessage('');
 
     try {
-      // TODO: Replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      console.log('Creating product:', formData);
-      
-      setSuccessMessage(t('products.createSuccess'));
-      
-      // Redirect after success
-      setTimeout(() => {
-        router.push('/dashboard/products');
-      }, 1500);
+      const productData = {
+        title: formData.title,
+        description: formData.description,
+        categoryId: formData.categoryId,
+        condition: formData.condition,
+        location: formData.location,
+        images: images,
+        estimatedValueMin: parseFloat(formData.estimatedValueMin),
+        estimatedValueMax: parseFloat(formData.estimatedValueMax),
+        reservePrice: formData.reservePrice ? parseFloat(formData.reservePrice) : undefined,
+        provenance: formData.provenance || undefined,
+        dimensions: formData.dimensions || undefined,
+        weight: formData.weight || undefined,
+        materials: formData.materials || undefined,
+        authenticity: formData.authenticity || undefined,
+      };
+
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSuccessMessage('Product created successfully! It will be reviewed before going live.');
+        
+        // Redirect after success
+        setTimeout(() => {
+          router.push('/dashboard/products');
+        }, 2000);
+      } else {
+        setErrors({ submit: result.error?.message || 'Failed to create product' });
+      }
     } catch (error) {
       console.error('Error creating product:', error);
+      setErrors({ submit: 'Network error. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -210,10 +198,10 @@ export default function CreateProductPage() {
           </IconButton>
           <Box>
             <Typography variant="h4" gutterBottom>
-              {t('products.createTitle')}
+              Create New Product
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {t('products.createDescription')}
+              Add a new product to your auction inventory
             </Typography>
           </Box>
         </Stack>
@@ -225,6 +213,13 @@ export default function CreateProductPage() {
           </Alert>
         )}
 
+        {/* Error Message */}
+        {errors.submit && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {errors.submit}
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             {/* Left Column */}
@@ -233,12 +228,12 @@ export default function CreateProductPage() {
                 {/* Basic Information */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    {t('products.basicInfo')}
+                    Basic Information
                   </Typography>
                   <Stack spacing={3}>
                     <TextField
                       fullWidth
-                      label={t('products.productTitle')}
+                      label="Product Title"
                       value={formData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
                       error={!!errors.title}
@@ -248,7 +243,7 @@ export default function CreateProductPage() {
 
                     <TextField
                       fullWidth
-                      label={t('products.description')}
+                      label="Description"
                       multiline
                       rows={4}
                       value={formData.description}
@@ -260,89 +255,106 @@ export default function CreateProductPage() {
 
                     <Grid container spacing={2}>
                       <Grid item xs={12} md={6}>
-                        <Autocomplete
-                          freeSolo
-                          options={mockBrands}
-                          value={formData.brand}
-                          onChange={(_, value) => handleInputChange('brand', value || '')}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label={t('products.brand')}
-                              error={!!errors.brand}
-                              helperText={errors.brand}
-                              required
-                            />
+                        <FormControl fullWidth required error={!!errors.categoryId}>
+                          <InputLabel>Category</InputLabel>
+                          <Select
+                            value={formData.categoryId}
+                            label="Category"
+                            onChange={(e) => handleInputChange('categoryId', e.target.value)}
+                            disabled={loadingCategories}
+                          >
+                            {categories.map((category) => (
+                              <MenuItem key={category.id} value={category.id}>
+                                {category.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                          {errors.categoryId && (
+                            <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                              {errors.categoryId}
+                            </Typography>
                           )}
-                        />
+                        </FormControl>
                       </Grid>
                       <Grid item xs={12} md={6}>
-                        <Autocomplete
-                          freeSolo
-                          options={mockCategories}
-                          value={formData.category}
-                          onChange={(_, value) => handleInputChange('category', value || '')}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label={t('products.category')}
-                              error={!!errors.category}
-                              helperText={errors.category}
-                              required
-                            />
-                          )}
+                        <TextField
+                          fullWidth
+                          label="Location"
+                          value={formData.location}
+                          onChange={(e) => handleInputChange('location', e.target.value)}
+                          error={!!errors.location}
+                          helperText={errors.location}
+                          required
+                          placeholder="City, Country"
                         />
                       </Grid>
                     </Grid>
 
                     <FormControl fullWidth>
-                      <InputLabel>{t('products.condition')}</InputLabel>
+                      <InputLabel>Condition</InputLabel>
                       <Select
                         value={formData.condition}
-                        label={t('products.condition')}
+                        label="Condition"
                         onChange={(e) => handleInputChange('condition', e.target.value)}
                       >
-                        <MenuItem value="NEW">{t('products.conditionNew')}</MenuItem>
-                        <MenuItem value="EXCELLENT">{t('products.conditionExcellent')}</MenuItem>
-                        <MenuItem value="GOOD">{t('products.conditionGood')}</MenuItem>
-                        <MenuItem value="FAIR">{t('products.conditionFair')}</MenuItem>
+                        <MenuItem value="NEW">New</MenuItem>
+                        <MenuItem value="EXCELLENT">Excellent</MenuItem>
+                        <MenuItem value="GOOD">Good</MenuItem>
+                        <MenuItem value="FAIR">Fair</MenuItem>
                         <MenuItem value="POOR">Poor</MenuItem>
                       </Select>
                     </FormControl>
                   </Stack>
                 </Card>
 
-                {/* Pricing */}
+                {/* Estimated Value */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    {t('products.pricing')}
+                    Estimated Value
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Provide the estimated market value range for this item
                   </Typography>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={4}>
                       <TextField
                         fullWidth
-                        label={t('products.startingPrice')}
+                        label="Minimum Value"
                         type="number"
-                        value={formData.price}
-                        onChange={(e) => handleInputChange('price', e.target.value)}
-                        error={!!errors.price}
-                        helperText={errors.price}
+                        value={formData.estimatedValueMin}
+                        onChange={(e) => handleInputChange('estimatedValueMin', e.target.value)}
+                        error={!!errors.estimatedValueMin}
+                        helperText={errors.estimatedValueMin}
                         required
                         InputProps={{
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={4}>
                       <TextField
                         fullWidth
-                        label={t('products.reservePrice')}
+                        label="Maximum Value"
+                        type="number"
+                        value={formData.estimatedValueMax}
+                        onChange={(e) => handleInputChange('estimatedValueMax', e.target.value)}
+                        error={!!errors.estimatedValueMax}
+                        helperText={errors.estimatedValueMax}
+                        required
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        fullWidth
+                        label="Reserve Price (Optional)"
                         type="number"
                         value={formData.reservePrice}
                         onChange={(e) => handleInputChange('reservePrice', e.target.value)}
                         error={!!errors.reservePrice}
-                        helperText={errors.reservePrice || t('products.reservePriceHelp')}
-                        required
+                        helperText={errors.reservePrice || 'Minimum price to accept'}
                         InputProps={{
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
                         }}
@@ -351,109 +363,60 @@ export default function CreateProductPage() {
                   </Grid>
                 </Card>
 
-                {/* Dimensions */}
+                {/* Additional Details */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    {t('products.dimensionsWeight')}
+                    Additional Details
                   </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6} md={3}>
-                      <TextField
-                        fullWidth
-                        label={t('products.length')}
-                        type="number"
-                        value={formData.dimensions.length}
-                        onChange={(e) => handleDimensionChange('length', e.target.value)}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">in</InputAdornment>,
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField
-                        fullWidth
-                        label={t('products.width')}
-                        type="number"
-                        value={formData.dimensions.width}
-                        onChange={(e) => handleDimensionChange('width', e.target.value)}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">in</InputAdornment>,
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField
-                        fullWidth
-                        label={t('products.height')}
-                        type="number"
-                        value={formData.dimensions.height}
-                        onChange={(e) => handleDimensionChange('height', e.target.value)}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">in</InputAdornment>,
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField
-                        fullWidth
-                        label={t('products.weight')}
-                        type="number"
-                        value={formData.dimensions.weight}
-                        onChange={(e) => handleDimensionChange('weight', e.target.value)}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">lbs</InputAdornment>,
-                        }}
-                      />
-                    </Grid>
-                  </Grid>
-                </Card>
-
-                {/* Specifications */}
-                <Card sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    {t('products.specifications')}
-                  </Typography>
-                  <Stack spacing={2}>
-                    {formData.specifications.map((spec, index) => (
-                      <Grid container spacing={2} key={index}>
-                        <Grid item xs={5}>
-                          <TextField
-                            fullWidth
-                            label={t('products.specification')}
-                            value={spec.key}
-                            onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
-                            placeholder={t('products.specificationPlaceholder')}
-                          />
-                        </Grid>
-                        <Grid item xs={5}>
-                          <TextField
-                            fullWidth
-                            label={t('products.value')}
-                            value={spec.value}
-                            onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
-                            placeholder={t('products.valuePlaceholder')}
-                          />
-                        </Grid>
-                        <Grid item xs={2}>
-                          <IconButton 
-                            onClick={() => removeSpecification(index)}
-                            disabled={formData.specifications.length === 1}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Grid>
+                  <Stack spacing={3}>
+                    <TextField
+                      fullWidth
+                      label="Provenance"
+                      value={formData.provenance}
+                      onChange={(e) => handleInputChange('provenance', e.target.value)}
+                      placeholder="History and origin of the item"
+                      multiline
+                      rows={2}
+                    />
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Dimensions"
+                          value={formData.dimensions}
+                          onChange={(e) => handleInputChange('dimensions', e.target.value)}
+                          placeholder="Length x Width x Height"
+                        />
                       </Grid>
-                    ))}
-                    <Button
-                      startIcon={<AddIcon />}
-                      onClick={addSpecification}
-                      variant="outlined"
-                      size="small"
-                    >
-                      {t('products.addSpecification')}
-                    </Button>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Weight"
+                          value={formData.weight}
+                          onChange={(e) => handleInputChange('weight', e.target.value)}
+                          placeholder="Weight and unit"
+                        />
+                      </Grid>
+                    </Grid>
+                    <TextField
+                      fullWidth
+                      label="Materials"
+                      value={formData.materials}
+                      onChange={(e) => handleInputChange('materials', e.target.value)}
+                      placeholder="Materials used in construction"
+                    />
+                    <TextField
+                      fullWidth
+                      label="Authenticity"
+                      value={formData.authenticity}
+                      onChange={(e) => handleInputChange('authenticity', e.target.value)}
+                      placeholder="Certificates, signatures, authentication details"
+                      multiline
+                      rows={2}
+                    />
                   </Stack>
                 </Card>
+
               </Stack>
             </Grid>
 
@@ -463,78 +426,76 @@ export default function CreateProductPage() {
                 {/* Images */}
                 <Card sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    {t('products.productImages')}
+                    Product Images
                   </Typography>
-                  <Box
-                    sx={{
-                      border: '2px dashed',
-                      borderColor: 'divider',
-                      borderRadius: 1,
-                      p: 3,
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        borderColor: 'primary.main',
-                        backgroundColor: 'action.hover',
-                      },
-                    }}
-                  >
-                    <UploadIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {t('products.uploadHelp')}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {t('products.uploadFormats')}
-                    </Typography>
-                  </Box>
-                </Card>
-
-                {/* Tags */}
-                <Card sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    {t('products.tags')}
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Upload up to 10 images for your product. The first image will be the main image.
                   </Typography>
-                  <Autocomplete
-                    multiple
-                    freeSolo
-                    options={mockTags}
-                    value={formData.tags}
-                    onChange={(_, value) => handleInputChange('tags', value)}
-                    renderTags={(value, getTagProps) =>
-                      value.map((option, index) => (
-                        <Chip
-                          variant="outlined"
-                          label={option}
-                          {...getTagProps({ index })}
-                          key={index}
+                  
+                  {/* Image Upload Grid */}
+                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 2 }}>
+                    {/* Existing Images */}
+                    {images.map((imageUrl, index) => (
+                      <Box key={index} sx={{ position: 'relative' }}>
+                        <ImageUpload
+                          currentImageUrl={imageUrl}
+                          onImageChange={(url) => {
+                            if (url) {
+                              setImages(prev => prev.map((img, i) => i === index ? url : img));
+                            } else {
+                              setImages(prev => prev.filter((_, i) => i !== index));
+                            }
+                          }}
+                          uploadType="product"
+                          variant="rectangle"
+                          size="medium"
+                          allowRemove={true}
                         />
-                      ))
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder={t('products.tagsPlaceholder')}
-                        helperText={t('products.tagsHelp')}
+                        {index === 0 && (
+                          <Chip
+                            label="Main"
+                            size="small"
+                            color="primary"
+                            sx={{
+                              position: 'absolute',
+                              bottom: -8,
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              fontSize: '0.7rem',
+                            }}
+                          />
+                        )}
+                      </Box>
+                    ))}
+                    
+                    {/* Add New Image Button */}
+                    {images.length < 10 && (
+                      <ImageUpload
+                        onImageChange={(url) => {
+                          if (url) {
+                            setImages(prev => [...prev, url]);
+                          }
+                        }}
+                        uploadType="product"
+                        variant="rectangle"
+                        size="medium"
+                        allowRemove={false}
                       />
                     )}
-                  />
+                  </Box>
+                  
+                  {/* Help Text */}
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+                    Supported formats: JPEG, PNG, WebP (max 5MB per image)
+                  </Typography>
                 </Card>
 
-                {/* Settings */}
-                <Card sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    {t('products.settings')}
-                  </Typography>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={formData.isActive}
-                        onChange={(e) => handleInputChange('isActive', e.target.checked)}
-                      />
-                    }
-                    label={t('products.active')}
-                  />
-                </Card>
+                {/* Images Validation Error */}
+                {errors.images && (
+                  <Alert severity="error" sx={{ mb: 3 }}>
+                    {errors.images}
+                  </Alert>
+                )}
 
                 {/* Actions */}
                 <Stack direction="column" spacing={2}>
@@ -546,7 +507,7 @@ export default function CreateProductPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    {isSubmitting ? t('products.creating') : t('products.createProduct')}
+                    {isSubmitting ? 'Creating Product...' : 'Create Product'}
                   </Button>
                   <Button
                     variant="outlined"
@@ -554,7 +515,7 @@ export default function CreateProductPage() {
                     disabled={isSubmitting}
                     fullWidth
                   >
-                    {t('products.cancel')}
+                    Cancel
                   </Button>
                 </Stack>
               </Stack>
