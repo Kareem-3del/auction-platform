@@ -452,12 +452,29 @@ export const POST = withAuth(async (request) => {
       });
     }
 
+    // Prepare specifications with additional fields
+    const specifications = {
+      provenance: validatedData.provenance,
+      dimensions: validatedData.dimensions,
+      weight: validatedData.weight,
+      materials: validatedData.materials,
+      authenticity: validatedData.authenticity,
+    };
+
     // Create the product
     const product = await prisma.product.create({
       data: {
-        ...validatedData,
-        agentId: agentId, // Will be null for buyer users
+        title: validatedData.title,
+        description: validatedData.description,
+        categoryId: validatedData.categoryId,
+        condition: validatedData.condition,
+        location: validatedData.location,
         images: JSON.stringify(validatedData.images),
+        estimatedValueMin: validatedData.estimatedValueMin,
+        estimatedValueMax: validatedData.estimatedValueMax,
+        reservePrice: validatedData.reservePrice,
+        specifications: specifications,
+        agentId: agentId, // Will be null for buyer users
         status: 'PENDING_APPROVAL', // All new products start as pending approval
       },
       include: {

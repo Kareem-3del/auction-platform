@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const uploadDir = join(process.cwd(), 'public', 'uploads', type || 'general');
     
     if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+      await mkdir(uploadDir, { recursive: true, mode: 0o755 });
     }
 
     // Generate unique filename
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     // Convert file to buffer and save
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filepath, buffer, { mode: 0o644 });
+    await writeFile(filepath, buffer, { mode: 0o755 });
     
     // Async sync to nginx directory (non-blocking)
     try {
