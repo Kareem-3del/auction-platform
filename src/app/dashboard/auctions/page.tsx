@@ -83,12 +83,15 @@ export default function AuctionsPage() {
     const loadAuctions = async () => {
       try {
         setLoading(true);
-        const data = await apiClient.get('/api/auctions');
+        
+        // Make direct fetch call to our Next.js API
+        const response = await fetch('/api/auctions');
+        const data = await response.json();
 
-        if (data.success) {
+        if (response.ok && data.success) {
           setAuctions(data.data || []);
         } else {
-          setError(data.error?.message || 'Failed to load auctions');
+          setError(data.error?.message || data.message || 'Failed to load auctions');
         }
       } catch (error) {
         console.error('Error loading auctions:', error);
@@ -128,12 +131,15 @@ export default function AuctionsPage() {
   const handleDeleteAuction = async (auction: Auction) => {
     if (confirm(`Are you sure you want to delete "${auction.title}"?`)) {
       try {
-        const data = await apiClient.delete(`/api/auctions/${auction.id}`);
+        const response = await fetch(`/api/auctions/${auction.id}`, {
+          method: 'DELETE',
+        });
+        const data = await response.json();
 
-        if (data.success) {
+        if (response.ok && data.success) {
           setAuctions(prev => prev.filter(a => a.id !== auction.id));
         } else {
-          setError(data.error?.message || 'Failed to delete auction');
+          setError(data.error?.message || data.message || 'Failed to delete auction');
         }
       } catch (error) {
         console.error('Error deleting auction:', error);

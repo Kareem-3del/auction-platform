@@ -417,7 +417,7 @@ export default function SearchPage() {
           },
           position: 'relative',
         }}
-        onClick={() => router.push(`/products/${item.id}`)}
+        onClick={() => router.push(`/auctions/${item.id}`)}
       >
         {/* Featured Badge */}
         {item.featured && (
@@ -599,7 +599,7 @@ export default function SearchPage() {
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/products/${item.id}`);
+                router.push(`/auctions/${item.id}`);
               }}
             >
               {item.type === 'auction' ? 'View & Bid' : 'View Details'}

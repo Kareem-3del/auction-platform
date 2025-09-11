@@ -344,7 +344,7 @@ export default function DashboardPage() {
               <Button
                 variant="outlined"
                 startIcon={<AddIcon />}
-                onClick={() => router.push('/products/create')}
+                onClick={() => router.push('/dashboard/auctions/create')}
                 disabled={user.userType !== 'AGENT'}
               >
                 {t('navigation.createAuction')}
@@ -466,7 +466,7 @@ export default function DashboardPage() {
                         <Button
                           size="small"
                           startIcon={<VisibilityIcon />}
-                          onClick={() => router.push(`/products/${auction.id}`)}
+                          onClick={() => router.push(`/auctions/${auction.id}`)}
                         >
                           {t('common.view')}
                         </Button>

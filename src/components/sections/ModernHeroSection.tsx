@@ -410,7 +410,7 @@ export function ModernHeroSection() {
                     boxShadow: '0 25px 60px rgba(0, 0, 0, 0.4)',
                   },
                 }}
-                onClick={() => currentItem && router.push(`/products/${currentItem.id}`)}
+                onClick={() => currentItem && router.push(`/auctions/${currentItem.id}`)}
               >
                 {/* Image */}
                 <Box

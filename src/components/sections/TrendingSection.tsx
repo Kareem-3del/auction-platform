@@ -93,11 +93,11 @@ export const TrendingSection: FC<TrendingSectionProps> = ({
   }, [limit, section]);
 
   const handleProductClick = (productId: string) => {
-    router.push(`/products/${productId}`);
+    router.push(`/auctions/${productId}`);
   };
 
   const handleViewAll = () => {
-    router.push(`/products?filter=${section}`);
+    router.push(`/auctions?filter=${section}`);
   };
 
   const handleFavorite = async (productId: string) => {

@@ -188,7 +188,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
   };
 
   const handleProductClick = (productId: string) => {
-    router.push(`/products/${productId}`);
+    router.push(`/auctions/${productId}`);
   };
 
   const handleViewAll = () => {
@@ -199,7 +199,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
       recent: 'recent',
     };
     
-    router.push(`/products?filter=${filterMap[currentSection as keyof typeof filterMap]}`);
+    router.push(`/auctions?filter=${filterMap[currentSection as keyof typeof filterMap]}`);
   };
 
   const currentProducts = products[currentSection] || [];
@@ -309,7 +309,7 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
                             featured: 'featured',
                             recent: 'recent',
                           };
-                          router.push(`/products?filter=${filterMap[sectionKey as keyof typeof filterMap]}`);
+                          router.push(`/auctions?filter=${filterMap[sectionKey as keyof typeof filterMap]}`);
                         }}
                         sx={{
                           background: `linear-gradient(135deg, ${sectionConfig.color}, ${sectionConfig.color}CC)`,

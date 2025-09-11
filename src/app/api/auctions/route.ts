@@ -259,7 +259,7 @@ export const POST = withAuth(async (request) => {
         reservePrice: validatedData.reservePrice,
         specifications: specifications,
         agentId: agentId, // Will be null for buyer users
-        status: 'PENDING_APPROVAL', // All new auctions start as pending approval
+        status: 'APPROVED', // Auto-approve auctions for immediate visibility
         
         // Auction-specific fields
         startingBid: validatedData.startingBid,

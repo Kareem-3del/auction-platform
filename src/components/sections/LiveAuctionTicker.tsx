@@ -99,7 +99,7 @@ export function LiveAuctionTicker() {
   }, [isPaused]);
 
   const handleAuctionClick = (auctionId: number) => {
-    router.push(`/products/${auctionId}`);
+    router.push(`/auctions/${auctionId}`);
   };
 
   return (

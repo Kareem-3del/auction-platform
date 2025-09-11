@@ -74,7 +74,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
   }, [limit]);
 
   const handleProductClick = (productId: string) => {
-    router.push(`/products/${productId}`);
+    router.push(`/auctions/${productId}`);
   };
 
   const handleViewAll = () => {

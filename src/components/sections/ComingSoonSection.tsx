@@ -84,7 +84,7 @@ export const ComingSoonSection: FC<ComingSoonSectionProps> = ({
   }, [limit]);
 
   const handleProductClick = (productId: string) => {
-    router.push(`/products/${productId}`);
+    router.push(`/auctions/${productId}`);
   };
 
   const handleViewAll = () => {
