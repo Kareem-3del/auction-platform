@@ -291,7 +291,7 @@ export function ModernHeroSection() {
               <Button
                 variant="contained"
                 size="large"
-                onClick={() => router.push('/products')}
+                onClick={() => router.push('/auctions')}
                 sx={{
                   px: { xs: 4, md: 6 },
                   py: { xs: 1.5, md: 2 },

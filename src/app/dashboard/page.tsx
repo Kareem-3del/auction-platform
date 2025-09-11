@@ -337,7 +337,7 @@ export default function DashboardPage() {
               <Button
                 variant="contained"
                 startIcon={<GavelIcon />}
-                onClick={() => router.push('/products')}
+                onClick={() => router.push('/auctions')}
               >
                 {t('dashboard.browseAuctions')}
               </Button>
@@ -481,7 +481,7 @@ export default function DashboardPage() {
               <Button
                 fullWidth
                 variant="text"
-                onClick={() => router.push('/products')}
+                onClick={() => router.push('/auctions')}
                 sx={{ mt: 2 }}
               >
                 {t('dashboard.browseAllAuctions')}

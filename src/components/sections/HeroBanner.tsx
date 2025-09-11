@@ -235,7 +235,7 @@ export function HeroBanner() {
             <Button
               variant="contained"
               size="large"
-              onClick={() => router.push('/products')}
+              onClick={() => router.push('/auctions')}
               startIcon={<Icon icon="mdi:gavel" width={22} />}
               sx={{
                 bgcolor: 'primary.main',

@@ -184,7 +184,7 @@ export default function NewHomePageClient() {
 
                   <Box
                     component="button"
-                    onClick={() => router.push('/products')}
+                    onClick={() => router.push('/auctions')}
                     sx={{
                       px: { xs: 6, md: 10 },
                       py: { xs: 2, md: 3 },

@@ -229,8 +229,8 @@ export default function EnhancedProductPage({ params }: ProductPageProps) {
         <MuiLink href="/" underline="hover" color="inherit">
           Home
         </MuiLink>
-        <MuiLink href="/products" underline="hover" color="inherit">
-          Products
+        <MuiLink href="/auctions" underline="hover" color="inherit">
+          Auctions
         </MuiLink>
         <Typography color="text.primary">{product.title}</Typography>
       </Breadcrumbs>

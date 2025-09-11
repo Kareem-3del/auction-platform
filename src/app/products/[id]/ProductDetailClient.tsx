@@ -284,7 +284,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               🏠 {t('navigation.home')}
             </MuiLink>
             <MuiLink 
-              href="/products" 
+              href="/auctions" 
               underline="none"
               sx={{ 
                 color: '#ffffff',

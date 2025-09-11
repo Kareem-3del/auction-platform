@@ -348,7 +348,7 @@ export function LiveAuctionTicker() {
           <Box sx={{ flexShrink: 0 }}>
             <Typography
               variant="body2"
-              onClick={() => router.push('/products?status=live')}
+              onClick={() => router.push('/auctions?status=live')}
               sx={{
                 color: '#CE0E2D',
                 fontWeight: 600,

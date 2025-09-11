@@ -88,7 +88,7 @@ export const ComingSoonSection: FC<ComingSoonSectionProps> = ({
   };
 
   const handleViewAll = () => {
-    router.push('/products?filter=coming-soon');
+    router.push('/auctions?filter=coming-soon');
   };
 
   const handleNotifyMe = async (productId: string) => {

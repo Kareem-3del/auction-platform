@@ -78,7 +78,7 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
   };
 
   const handleViewAll = () => {
-    router.push('/products?filter=ending-soon');
+    router.push('/auctions?filter=ending-soon');
   };
 
   if (loading) {

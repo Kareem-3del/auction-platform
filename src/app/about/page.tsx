@@ -227,7 +227,7 @@ export default function AboutPage() {
                   <Button
                     variant="contained"
                     size="large"
-                    onClick={() => router.push('/products')}
+                    onClick={() => router.push('/auctions')}
                     sx={{
                       px: 6,
                       py: 2,

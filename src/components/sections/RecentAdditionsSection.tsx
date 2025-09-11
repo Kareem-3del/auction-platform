@@ -86,7 +86,7 @@ export const RecentAdditionsSection: FC<RecentAdditionsSectionProps> = ({
   };
 
   const handleViewAll = () => {
-    router.push('/products?filter=recent');
+    router.push('/auctions?filter=recent');
   };
 
   const isNewProduct = (createdAt: string) => {
