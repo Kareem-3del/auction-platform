@@ -12,21 +12,31 @@ const axiosInstance = axios.create({ baseURL: CONFIG.serverUrl });
 const getAuthToken = () => {
   if (typeof localStorage !== 'undefined') {
     try {
-      // Try the direct accessToken storage first (current system)
-      const accessToken = localStorage.getItem('accessToken');
-      if (accessToken) {
-        return accessToken;
-      }
-      
-      // Fallback to auth_tokens format for compatibility
+      // Primary method: auth_tokens format (used by our auth system)
       const authTokens = localStorage.getItem('auth_tokens');
       if (authTokens) {
         const parsedTokens = JSON.parse(authTokens);
-        // Check if token is still valid
-        if (parsedTokens.accessToken && parsedTokens.expiresAt > Date.now()) {
+        console.log('🔍 AUTH TOKEN DEBUG - Parsed tokens:', {
+          hasAccessToken: !!parsedTokens.accessToken,
+          expiresAt: parsedTokens.expiresAt,
+          currentTime: Date.now(),
+          isExpired: parsedTokens.expiresAt <= Date.now()
+        });
+        
+        // Return token even if close to expiry - let the interceptor handle refresh
+        if (parsedTokens.accessToken) {
           return parsedTokens.accessToken;
         }
       }
+      
+      // Fallback: direct accessToken storage
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        console.log('🔍 AUTH TOKEN DEBUG - Using direct accessToken');
+        return accessToken;
+      }
+      
+      console.log('🔍 AUTH TOKEN DEBUG - No token found in localStorage');
     } catch (error) {
       console.warn('Failed to parse auth tokens from localStorage:', error);
     }
@@ -39,6 +49,17 @@ axiosInstance.interceptors.request.use((config) => {
   const token = getAuthToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log('🔍 AUTH TOKEN DEBUG - Request interceptor added token:', {
+      url: config.url,
+      method: config.method,
+      hasToken: !!token,
+      tokenStart: token.substring(0, 20) + '...'
+    });
+  } else {
+    console.log('🔍 AUTH TOKEN DEBUG - Request interceptor: NO TOKEN AVAILABLE for', {
+      url: config.url,
+      method: config.method
+    });
   }
   return config;
 });

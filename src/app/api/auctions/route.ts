@@ -184,6 +184,13 @@ export async function GET(request: NextRequest) {
 // POST /api/auctions - Create new auction
 export const POST = withAuth(async (request) => {
   try {
+    console.log('🏛️ AUCTION CREATE - Start processing request');
+    console.log('🏛️ AUCTION CREATE - User:', {
+      id: request.user.id,
+      email: request.user.email,
+      userType: request.user.userType
+    });
+    
     validateMethod(request, ['POST']);
     validateContentType(request);
 
