@@ -52,7 +52,7 @@ export function FeaturedCategoryWithProducts({ category }: FeaturedCategoryWithP
         setLoading(true);
         const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
         
-        const response = await fetch(`/api/products?categoryId=${category.id}&limit=4`, {
+        const response = await fetch(`/api/auctions?categoryId=${category.id}&limit=4`, {
           signal: controller.signal,
         });
         
@@ -131,13 +131,18 @@ export function FeaturedCategoryWithProducts({ category }: FeaturedCategoryWithP
 const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
   const primaryImage = Array.isArray(product.images) ? product.images[0] : 
                       typeof product.images === 'string' ? JSON.parse(product.images)[0] : 
-                      '/placeholder-product.jpg';
+                      '/images/products/rolex1.jpg';
 
   const isAuction = product.auctionStatus && ['SCHEDULED', 'LIVE', 'ENDED'].includes(product.auctionStatus);
   const currentPrice = isAuction ? product.currentBid || product.estimatedValueMin : product.estimatedValueMin;
 
+  const handleClick = () => {
+    window.location.href = `/auctions/${product.id}`;
+  };
+
   return (
     <Card
+      onClick={handleClick}
       sx={{
         height: '100%',
         cursor: 'pointer',

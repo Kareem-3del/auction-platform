@@ -194,7 +194,7 @@ export default function CategoryPage() {
       itemsParams.append('minPrice', priceRange[0].toString());
       itemsParams.append('maxPrice', priceRange[1].toString());
 
-      const endpoint = '/api/products';
+      const endpoint = '/api/auctions';
       
       // Add auction filter based on tab selection
       switch (tabValue) {
@@ -296,7 +296,7 @@ export default function CategoryPage() {
   };
 
   const renderItem = (item: CategoryItem) => {
-    const mainImage = item.images?.[0] || '/images/placeholder-product.jpg';
+    const mainImage = item.images?.[0] || '/images/products/rolex1.jpg';
     const isAuction = true; // All items are treated as auctions now
 
     return (
@@ -318,7 +318,7 @@ export default function CategoryPage() {
               borderColor: isAuction ? 'error.main' : 'primary.main',
             },
           }}
-          onClick={() => router.push(`/products/${item.id}`)}
+          onClick={() => router.push(`/auctions/${item.id}`)}
         >
           <Box position="relative">
             <CardMedia

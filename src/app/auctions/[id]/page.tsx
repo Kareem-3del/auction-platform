@@ -89,7 +89,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/products/${productId}`);
+      const response = await fetch(`/api/auctions/${productId}`);
       if (!response.ok) {
         if (response.status === 404) {
           setError('Product not found');
@@ -122,7 +122,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
   const loadWinner = async (productId: string, winnerId: string) => {
     try {
       // Get the highest bid to find winner information
-      const bidsResponse = await fetch(`/api/products/${productId}/bids`);
+      const bidsResponse = await fetch(`/api/auctions/${productId}/bids`);
       if (bidsResponse.ok) {
         const bidsData = await bidsResponse.json();
         if (bidsData.success && bidsData.data.bids.length > 0) {

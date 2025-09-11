@@ -56,7 +56,7 @@ export const RecentAdditionsSection: FC<RecentAdditionsSectionProps> = ({
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/products/showcase?section=recent&limit=${limit}`);
+        const response = await fetch(`/api/auctions?sortBy=newest&limit=${limit}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

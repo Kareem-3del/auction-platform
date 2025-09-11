@@ -58,7 +58,7 @@ export const ComingSoonSection: FC<ComingSoonSectionProps> = ({
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/products/showcase?section=coming-soon&limit=${limit}`);
+        const response = await fetch(`/api/auctions?auctionStatus=SCHEDULED&sortBy=newest&limit=${limit}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

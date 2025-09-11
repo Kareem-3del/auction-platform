@@ -63,7 +63,7 @@ export function ModernHeroSection() {
     const fetchHeroProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/products?limit=3&status=APPROVED&auctionStatus=LIVE&sortBy=relevance');
+        const response = await fetch('/api/auctions?limit=3&auctionStatus=LIVE&sortBy=relevance');
         const data = await response.json();
         
         if (data.success && data.data?.length > 0) {

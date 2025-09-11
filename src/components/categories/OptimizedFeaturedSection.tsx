@@ -52,7 +52,7 @@ export function OptimizedFeaturedSection() {
     try {
       setLoading(true);
       
-      const response = await fetch(`/api/products?categoryId=${STATIC_CATEGORY.id}&limit=4`, {
+      const response = await fetch(`/api/auctions?categoryId=${STATIC_CATEGORY.id}&limit=4`, {
         signal: controller.signal,
       });
       

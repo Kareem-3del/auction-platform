@@ -90,10 +90,9 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
 
       console.log(`Fetching ${section} products...`);
       
-      // Try direct products API with appropriate filters for each section
+      // Try direct auctions API with appropriate filters for each section
       let apiParams: Record<string, any> = {
-        limit: limit,
-        status: 'APPROVED'
+        limit: limit
       };
       
       // Apply section-specific filters
@@ -104,7 +103,6 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
           break;
         case 'trending':
           apiParams.sortBy = 'relevance';
-          apiParams.auctionOnly = 'true';
           break;
         case 'featured':
           // Use activity-based sorting instead of featured field
@@ -119,10 +117,10 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
         .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
         .join('&');
       
-      console.log(`API call: /api/products?${queryString}`);
+      console.log(`API call: /api/auctions?${queryString}`);
       
       console.log(`Attempting to fetch real data for ${section}...`);
-      const response = await fetch(`/api/products?${queryString}`);
+      const response = await fetch(`/api/auctions?${queryString}`);
       let data;
       
       try {

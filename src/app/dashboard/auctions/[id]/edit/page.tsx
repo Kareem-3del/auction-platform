@@ -82,7 +82,7 @@ export default function EditAuctionPage() {
       try {
         const [auctionData, productsData] = await Promise.all([
           apiClient.get(`/api/auctions/${auctionId}?includeProduct=true`),
-          apiClient.get('/api/products?status=APPROVED')
+          apiClient.get('/api/auctions')
         ]);
 
         const a = auctionData.data || auctionData;
