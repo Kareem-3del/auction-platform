@@ -80,8 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authAPI.refreshToken(refreshTokenValue);
 
       if (isSuccessResponse(response)) {
-        // Calculate expiration time (JWT tokens typically expire in 15 minutes)
-        const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+        // Calculate expiration time (JWT tokens typically expire in 30 minutes)
+        const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes from now
         
         const newTokens: AuthTokens = {
           accessToken: response.data.tokens.accessToken,
@@ -114,8 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authAPI.login(loginData);
 
       if (isSuccessResponse(response)) {
-        // Calculate expiration time (JWT tokens typically expire in 15 minutes)
-        const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+        // Calculate expiration time (JWT tokens typically expire in 30 minutes)
+        const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes from now
         
         const newTokens: AuthTokens = {
           accessToken: response.data.tokens.accessToken,
@@ -148,8 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authAPI.register(data);
 
       if (isSuccessResponse(response)) {
-        // Calculate expiration time (JWT tokens typically expire in 15 minutes)
-        const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+        // Calculate expiration time (JWT tokens typically expire in 30 minutes)
+        const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes from now
         
         const newTokens: AuthTokens = {
           accessToken: response.data.tokens.accessToken,

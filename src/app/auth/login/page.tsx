@@ -124,7 +124,7 @@ export default function LoginPage() {
               
               if (data.success) {
                 // Store tokens in the format expected by auth context
-                const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+                const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes from now
                 
                 const authTokens = {
                   accessToken: data.data.tokens.accessToken,

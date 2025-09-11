@@ -85,7 +85,7 @@ axiosInstance.interceptors.response.use(
             
             if (refreshResponse.data.success) {
               const newTokens = refreshResponse.data.data.tokens;
-              const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+              const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes from now
               
               const updatedTokens = {
                 accessToken: newTokens.accessToken,

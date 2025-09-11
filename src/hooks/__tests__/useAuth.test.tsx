@@ -76,7 +76,7 @@ describe('useAuth Hook', () => {
       const mockTokens = {
         accessToken: 'access-token',
         refreshToken: 'refresh-token',
-        expiresAt: Date.now() + 900000, // 15 minutes from now
+        expiresAt: Date.now() + 1800000, // 30 minutes from now
       };
 
       mockLocalStorage.getItem

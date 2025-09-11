@@ -66,7 +66,7 @@ const getRefreshTokenSecret = () => {
   return secret;
 };
 
-const ACCESS_TOKEN_EXPIRES = process.env.JWT_ACCESS_EXPIRES_IN || '15m';
+const ACCESS_TOKEN_EXPIRES = process.env.JWT_ACCESS_EXPIRES_IN || '30m';
 const REFRESH_TOKEN_EXPIRES = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
 // Password utilities
@@ -99,7 +99,7 @@ export function generateAccessToken(user: User): string {
     role: user.userType,
     kycStatus: user.kycStatus,
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (15 * 60), // 15 minutes
+    exp: Math.floor(Date.now() / 1000) + (30 * 60), // 30 minutes
   };
 
   return jwt.sign(payload, getAccessTokenSecret(), {
