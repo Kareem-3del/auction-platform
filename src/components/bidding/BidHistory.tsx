@@ -65,7 +65,7 @@ export default function BidHistory({
   const loadBidHistory = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/products/${auctionId}/bids`);
+      const response = await fetch(`/api/auctions/${auctionId}/bids`);
       const data = await response.json();
       
       if (data.success) {

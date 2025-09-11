@@ -36,14 +36,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const parsedTokens = JSON.parse(storedTokens);
         const parsedUser = JSON.parse(storedUser);
 
-        // Check if token is still valid
-        if (parsedTokens.expiresAt > Date.now()) {
+        // Check if token is still valid (allow some leeway for refresh)
+        if (parsedTokens.expiresAt > Date.now() - 60000) { // Allow 1 minute leeway
           setTokens(parsedTokens);
           setUser(parsedUser);
           // Set token in API client
           apiClient.setAuthToken(parsedTokens.accessToken);
+          console.log('🔐 AUTH - Restored auth state from localStorage:', {
+            userId: parsedUser.id,
+            email: parsedUser.email,
+            tokenExpiry: new Date(parsedTokens.expiresAt).toISOString()
+          });
         } else {
           // Token expired, try to refresh
+          console.log('🔐 AUTH - Token expired, attempting refresh');
           attemptTokenRefresh(parsedTokens.refreshToken);
         }
       } catch (error) {

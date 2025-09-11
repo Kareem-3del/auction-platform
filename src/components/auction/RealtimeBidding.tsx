@@ -121,7 +121,7 @@ export function RealtimeBidding({
     setBidSuccess(null);
 
     try {
-      const response = await fetch(`/api/products/${productId}/bid`, {
+      const response = await fetch(`/api/auctions/${productId}/bids`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

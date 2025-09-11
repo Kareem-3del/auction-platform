@@ -25,7 +25,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import { apiClient } from 'src/lib/axios';
+import { auctionsAPI } from 'src/lib/api-client';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuth } from 'src/hooks/useAuth';
 import MultiImageUpload from 'src/components/common/MultiImageUpload';
@@ -202,15 +202,6 @@ export default function CreateAuctionPage() {
     setSuccessMessage('');
 
     try {
-      // Check token expiration and refresh if needed
-      if (tokens && tokens.expiresAt <= Date.now() + 60000) {
-        console.log('Token expiring soon, refreshing...');
-        const refreshSuccess = await refreshToken();
-        if (!refreshSuccess) {
-          setErrors({ general: 'Session expired. Please log in again.' });
-          return;
-        }
-      }
 
       const auctionData = {
         // Item details
@@ -258,7 +249,7 @@ export default function CreateAuctionPage() {
 
       console.log('Creating auction with data:', { ...auctionData, images: `${images.length} images` });
 
-      const data = await apiClient.post('/api/auctions', auctionData);
+      const data = await auctionsAPI.createAuction(auctionData);
 
       if (data.success) {
         setSuccessMessage('Auction created successfully!');
@@ -271,74 +262,7 @@ export default function CreateAuctionPage() {
       }
     } catch (error) {
       console.error('Error creating auction:', error);
-      
-      // Check if it's an authentication error
-      if (error?.response?.status === 401) {
-        console.log('Authentication error, trying to refresh token...');
-        const refreshSuccess = await refreshToken();
-        if (refreshSuccess) {
-          // Retry the request
-          try {
-            const auctionData = {
-              // Item details
-              title: formData.title,
-              description: formData.description,
-              categoryId: formData.categoryId,
-              condition: formData.condition,
-              location: formData.location,
-              images: images,
-              
-              // Specifications
-              provenance: formData.provenance,
-              dimensions: formData.dimensions,
-              weight: formData.weight,
-              materials: formData.materials,
-              authenticity: formData.authenticity,
-              
-              // Pricing
-              estimatedValueMin: parseFloat(formData.estimatedValueMin),
-              estimatedValueMax: parseFloat(formData.estimatedValueMax),
-              startingBid: parseFloat(formData.startingBid),
-              reservePrice: formData.reservePrice ? parseFloat(formData.reservePrice) : null,
-              bidIncrement: parseFloat(formData.bidIncrement),
-              buyNowPrice: formData.buyNowPrice ? parseFloat(formData.buyNowPrice) : null,
-              
-              // Auction settings
-              auctionType: formData.auctionType,
-              startTime: new Date(formData.startTime).toISOString(),
-              endTime: new Date(formData.endTime).toISOString(),
-              timezone: formData.timezone,
-              autoExtend: formData.autoExtend,
-              extensionTriggerMinutes: parseInt(formData.extensionTriggerMinutes),
-              extensionDurationMinutes: parseInt(formData.extensionDurationMinutes),
-              maxExtensions: parseInt(formData.maxExtensions),
-              
-              // Display settings
-              showBidderNames: formData.showBidderNames,
-              showBidCount: formData.showBidCount,
-              showWatcherCount: formData.showWatcherCount,
-              
-              // Shipping
-              pickupAvailable: formData.pickupAvailable,
-              pickupAddress: formData.pickupAddress || null,
-            };
-            
-            const retryData = await apiClient.post('/api/auctions', auctionData);
-            if (retryData.success) {
-              setSuccessMessage('Auction created successfully!');
-              setTimeout(() => {
-                router.push('/dashboard/auctions');
-              }, 1500);
-              return;
-            }
-          } catch (retryError) {
-            console.error('Retry failed:', retryError);
-          }
-        }
-        setErrors({ general: 'Session expired. Please refresh the page and try again.' });
-      } else {
-        setErrors({ general: 'An unexpected error occurred. Please try again.' });
-      }
+      setErrors({ general: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }

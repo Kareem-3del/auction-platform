@@ -83,7 +83,7 @@ export default function AuctionsPage() {
     const loadAuctions = async () => {
       try {
         setLoading(true);
-        const data = await apiClient.get('/api/products');
+        const data = await apiClient.get('/api/auctions');
 
         if (data.success) {
           setAuctions(data.data || []);
@@ -128,7 +128,7 @@ export default function AuctionsPage() {
   const handleDeleteAuction = async (auction: Auction) => {
     if (confirm(`Are you sure you want to delete "${auction.title}"?`)) {
       try {
-        const data = await apiClient.delete(`/api/products/${auction.id}`);
+        const data = await apiClient.delete(`/api/auctions/${auction.id}`);
 
         if (data.success) {
           setAuctions(prev => prev.filter(a => a.id !== auction.id));

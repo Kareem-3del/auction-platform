@@ -54,7 +54,7 @@ export class APIClient {
     };
   }
 
-  // Generic request method with proper typing
+  // Generic request method with automatic token refresh
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -75,10 +75,61 @@ export class APIClient {
     }
 
     try {
-      const response = await fetch(url, config);
+      let response = await fetch(url, config);
+      
+      // If we get 401 and have a refresh token, try to refresh
+      if (response.status === 401 && typeof localStorage !== 'undefined') {
+        const authTokens = localStorage.getItem('auth_tokens');
+        if (authTokens) {
+          try {
+            const tokens = JSON.parse(authTokens);
+            if (tokens.refreshToken) {
+              console.log('🔄 API CLIENT - Attempting token refresh due to 401');
+              
+              // Try to refresh token
+              const refreshResponse = await fetch('/api/auth/refresh', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ refreshToken: tokens.refreshToken }),
+              });
+              
+              if (refreshResponse.ok) {
+                const refreshData = await refreshResponse.json();
+                if (refreshData.success) {
+                  // Update stored tokens
+                  const newTokens = {
+                    accessToken: refreshData.data.tokens.accessToken,
+                    refreshToken: refreshData.data.tokens.refreshToken,
+                    expiresAt: Date.now() + (15 * 60 * 1000),
+                  };
+                  
+                  localStorage.setItem('auth_tokens', JSON.stringify(newTokens));
+                  localStorage.setItem('auth_user', JSON.stringify(refreshData.data.user));
+                  
+                  // Update authorization header and retry
+                  this.setAuthToken(newTokens.accessToken);
+                  config.headers = {
+                    ...config.headers,
+                    Authorization: `Bearer ${newTokens.accessToken}`,
+                  };
+                  
+                  console.log('🔄 API CLIENT - Token refreshed, retrying request');
+                  response = await fetch(url, config);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('🔄 API CLIENT - Token refresh failed:', error);
+          }
+        }
+      }
+      
       const data: APIResponse<T> = await response.json();
       return data;
     } catch (error) {
+      console.error('🔄 API CLIENT - Request failed:', error);
       // Return standardized error response for network errors
       return {
         success: false,

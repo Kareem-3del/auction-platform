@@ -88,7 +88,7 @@ export default function BiddingInterface({
     if (!user) return;
     
     try {
-      const response = await fetch(`/api/products/${auctionId}/watchlist/check`);
+      const response = await fetch(`/api/auctions/${auctionId}/watchlist/check`);
       const data = await response.json();
       if (data.success) {
         setIsWatching(data.data.isWatching);
@@ -122,7 +122,7 @@ export default function BiddingInterface({
     setSuccess(null);
 
     try {
-      const response = await fetch(`/api/products/${auctionId}/bid`, {
+      const response = await fetch(`/api/auctions/${auctionId}/bids`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ export default function BiddingInterface({
     }
 
     try {
-      const response = await fetch(`/api/products/${auctionId}/auto-bid`, {
+      const response = await fetch(`/api/auctions/${auctionId}/auto-bid`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ export default function BiddingInterface({
     setWatchlistLoading(true);
 
     try {
-      const response = await fetch(`/api/products/${auctionId}/watchlist`, {
+      const response = await fetch(`/api/auctions/${auctionId}/watchlist`, {
         method: isWatching ? 'DELETE' : 'POST',
       });
 

@@ -154,7 +154,7 @@ export default function QuickBidDialog({
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
-      const response = await authenticatedFetch(`/api/products/${productId}/bid`, {
+      const response = await authenticatedFetch(`/api/auctions/${productId}/bids`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: selectedBid }),
