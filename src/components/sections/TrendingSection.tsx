@@ -22,7 +22,7 @@ import {
 
 import { UnifiedAuctionCard } from 'src/components/product-card/unified-auction-card';
 import { useLocale } from 'src/hooks/useLocale';
-import { productsAPI, isSuccessResponse } from 'src/lib/api-client';
+import { auctionsAPI, isSuccessResponse } from 'src/lib/api-client';
 import type { ProductCard } from 'src/types/common';
 
 interface Product {
@@ -68,10 +68,14 @@ export const TrendingSection: FC<TrendingSectionProps> = ({
         setLoading(true);
         setError(null);
 
-        const response = await productsAPI.getShowcaseProducts(section, limit);
+        const response = await auctionsAPI.getAuctions({ 
+          sortBy: 'relevance', 
+          limit,
+          featured: true
+        });
         
         if (isSuccessResponse(response)) {
-          const products = response.data.data || [];
+          const products = response.data || [];
           console.log(`${section} products:`, products, 'isArray:', Array.isArray(products));
           setProducts(Array.isArray(products) ? products : []);
         } else {

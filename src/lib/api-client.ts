@@ -183,42 +183,31 @@ export const authAPI = {
     apiClient.post('/api/auth/verify-email', { token }),
 };
 
-// Products/Auctions APIs
-export const productsAPI = {
-  getProducts: (params?: Partial<SearchFilters>): Promise<APIResponse<SearchResponse<ProductCard>>> => 
-    apiClient.get('/api/products', params),
+// Auctions APIs
+export const auctionsAPI = {
+  getAuctions: (params?: Partial<SearchFilters>): Promise<APIResponse<SearchResponse<ProductCard>>> => 
+    apiClient.get('/api/auctions', params),
 
-  getProduct: (id: string, includeAuction?: boolean): Promise<APIResponse<Product>> => 
-    apiClient.get(`/api/products/${id}`, includeAuction ? { includeAuction: 'true' } : undefined),
+  getAuction: (id: string): Promise<APIResponse<Product>> => 
+    apiClient.get(`/api/auctions/${id}`),
 
-  createProduct: (productData: Record<string, unknown>): Promise<APIResponse<Product>> => 
-    apiClient.post<Product>('/api/products', productData),
+  createAuction: (auctionData: Record<string, unknown>): Promise<APIResponse<Product>> => 
+    apiClient.post<Product>('/api/auctions', auctionData),
 
-  updateProduct: (id: string, productData: Record<string, unknown>): Promise<APIResponse<Product>> => 
-    apiClient.put<Product>(`/api/products/${id}`, productData),
+  updateAuction: (id: string, auctionData: Record<string, unknown>): Promise<APIResponse<Product>> => 
+    apiClient.put<Product>(`/api/auctions/${id}`, auctionData),
 
-  deleteProduct: (id: string): Promise<APIResponse<{ message: string }>> => 
-    apiClient.delete(`/api/products/${id}`),
-
-  getShowcaseProducts: (section: string, limit?: number): Promise<APIResponse<{
-    data: ProductCard[];
-    meta: {
-      section: string;
-      title: string;
-      count: number;
-      hasMore: boolean;
-    };
-  }>> => 
-    apiClient.get('/api/products/showcase', { section, ...(limit && { limit }) }),
+  deleteAuction: (id: string): Promise<APIResponse<{ message: string }>> => 
+    apiClient.delete(`/api/auctions/${id}`),
 };
 
 // Bidding APIs
 export const biddingAPI = {
-  placeBid: (productId: string, bidData: PlaceBidRequest): Promise<APIResponse<PlaceBidResponse>> => 
-    apiClient.post<PlaceBidResponse, PlaceBidRequest>(`/api/products/${productId}/bid`, bidData),
+  placeBid: (auctionId: string, bidData: PlaceBidRequest): Promise<APIResponse<PlaceBidResponse>> => 
+    apiClient.post<PlaceBidResponse, PlaceBidRequest>(`/api/auctions/${auctionId}/bids`, bidData),
 
-  getBidHistory: (productId: string, page?: number, limit?: number): Promise<APIResponse<SearchResponse<BidHistory>>> => 
-    apiClient.get(`/api/products/${productId}/bids`, { ...(page && { page }), ...(limit && { limit }) }),
+  getBidHistory: (auctionId: string, page?: number, limit?: number): Promise<APIResponse<SearchResponse<BidHistory>>> => 
+    apiClient.get(`/api/auctions/${auctionId}/bids`, { ...(page && { page }), ...(limit && { limit }) }),
 
   getUserBids: (page?: number, limit?: number): Promise<APIResponse<SearchResponse<Bid>>> => 
     apiClient.get('/api/bids', { ...(page && { page }), ...(limit && { limit }) }),
@@ -384,7 +373,7 @@ export const notificationsAPI = {
 
 // Search APIs
 export const searchAPI = {
-  searchProducts: (query: string, filters?: Partial<SearchFilters>): Promise<APIResponse<SearchResponse<ProductCard>>> => 
+  searchAuctions: (query: string, filters?: Partial<SearchFilters>): Promise<APIResponse<SearchResponse<ProductCard>>> => 
     apiClient.get('/api/search', { q: query, ...filters }),
 
   getSuggestions: (query: string): Promise<APIResponse<{ suggestions: SearchSuggestion[] }>> => 

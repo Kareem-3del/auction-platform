@@ -45,7 +45,53 @@ axiosInstance.interceptors.request.use((config) => {
 
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong!')
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // If we get a 401 error and haven't already tried to refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Try to refresh the token
+        const authTokens = localStorage.getItem('auth_tokens');
+        if (authTokens) {
+          const parsedTokens = JSON.parse(authTokens);
+          if (parsedTokens.refreshToken) {
+            const refreshResponse = await axios.post('/api/auth/refresh', {
+              refreshToken: parsedTokens.refreshToken
+            });
+            
+            if (refreshResponse.data.success) {
+              const newTokens = refreshResponse.data.data.tokens;
+              const expiresAt = Date.now() + (15 * 60 * 1000); // 15 minutes from now
+              
+              const updatedTokens = {
+                accessToken: newTokens.accessToken,
+                refreshToken: newTokens.refreshToken,
+                expiresAt,
+              };
+              
+              localStorage.setItem('auth_tokens', JSON.stringify(updatedTokens));
+              
+              // Update the authorization header and retry the request
+              originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
+              return axiosInstance(originalRequest);
+            }
+          }
+        }
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+        // Clear invalid tokens
+        localStorage.removeItem('auth_tokens');
+        localStorage.removeItem('auth_user');
+        // Redirect to login
+        window.location.href = '/auth/login';
+      }
+    }
+    
+    return Promise.reject((error.response && error.response.data) || 'Something went wrong!');
+  }
 );
 
 export default axiosInstance;

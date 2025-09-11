@@ -4,7 +4,7 @@ import type { FC } from 'react';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { productsAPI, isSuccessResponse } from 'src/lib/api-client';
+import { auctionsAPI, isSuccessResponse } from 'src/lib/api-client';
 import type { ProductCard } from 'src/types/common';
 
 import {
@@ -49,10 +49,14 @@ export const EndingSoonSection: FC<EndingSoonSectionProps> = ({
         setLoading(true);
         setError(null);
 
-        const response = await productsAPI.getShowcaseProducts('ending-soon', limit);
+        const response = await auctionsAPI.getAuctions({ 
+          sortBy: 'ending_soon', 
+          limit,
+          auctionStatus: 'LIVE'
+        });
         
         if (isSuccessResponse(response)) {
-          const products = response.data.data || [];
+          const products = response.data || [];
           console.log('EndingSoonSection products:', products, 'isArray:', Array.isArray(products));
           setProducts(Array.isArray(products) ? products : []);
         } else {

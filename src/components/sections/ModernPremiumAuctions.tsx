@@ -23,7 +23,7 @@ import {
 } from '@mui/icons-material';
 
 import { SimplePremiumCard } from '../product-card/SimplePremiumCard';
-import { productsAPI, isSuccessResponse } from 'src/lib/api-client';
+import { auctionsAPI, isSuccessResponse } from 'src/lib/api-client';
 import type { ProductCard } from 'src/types/common';
 import { useLocale } from 'src/hooks/useLocale';
 
@@ -141,13 +141,17 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
       } else {
         // If no real data, try showcase API as fallback
         const apiSection = section === 'ending' ? 'ending-soon' : section;
-        const showcaseResponse = await productsAPI.getShowcaseProducts(apiSection, limit);
+        const showcaseResponse = await auctionsAPI.getAuctions({ 
+          featured: true, 
+          limit,
+          sortBy: apiSection === 'ending_soon' ? 'ending_soon' : apiSection === 'trending' ? 'relevance' : 'newest' 
+        });
         
-        if (isSuccessResponse(showcaseResponse) && showcaseResponse.data?.data?.length > 0) {
-          console.log(`Using showcase API data for ${section}`);
+        if (isSuccessResponse(showcaseResponse) && showcaseResponse.data?.length > 0) {
+          console.log(`Using auction API data for ${section}`);
           setProducts(prev => ({
             ...prev,
-            [section]: showcaseResponse.data.data
+            [section]: showcaseResponse.data
           }));
         } else {
           // No mock data fallback - show empty state

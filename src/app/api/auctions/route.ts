@@ -66,11 +66,119 @@ const createAuctionSchema = z.object({
   path: ['startTime'],
 });
 
+// GET /api/auctions - Get auctions with search and filtering
 export async function GET(request: NextRequest) {
-  return handleAPIError({
-    name: 'DeprecatedEndpointError',
-    message: 'Auction endpoints have been deprecated. Use /api/products instead.',
-  });
+  try {
+    validateMethod(request, ['GET']);
+
+    // Parse search parameters (similar to the old products endpoint but for auctions)
+    const { searchParams: urlParams } = new URL(request.url);
+    const page = parseInt(urlParams.get('page') || '1');
+    const limit = Math.min(parseInt(urlParams.get('limit') || '20'), 100);
+    const search = urlParams.get('search') || undefined;
+    const categoryId = urlParams.get('categoryId') || undefined;
+    const auctionStatus = urlParams.get('auctionStatus') || undefined;
+    const sortBy = urlParams.get('sortBy') || 'newest';
+    
+    // Build where clause for auctions (products with auction functionality)
+    const whereClause: any = {
+      status: 'APPROVED', // Only show approved auctions
+      auctionStatus: {
+        in: ['SCHEDULED', 'LIVE', 'ENDED']
+      }
+    };
+
+    if (search) {
+      whereClause.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (categoryId) {
+      whereClause.categoryId = categoryId;
+    }
+
+    if (auctionStatus) {
+      whereClause.auctionStatus = auctionStatus;
+    }
+
+    // Build order by clause
+    let orderBy: any = { createdAt: 'desc' };
+    switch (sortBy) {
+      case 'ending_soon':
+        orderBy = [
+          { endTime: 'asc' },
+          { createdAt: 'desc' }
+        ];
+        break;
+      case 'newest':
+        orderBy = { createdAt: 'desc' };
+        break;
+      case 'oldest':
+        orderBy = { createdAt: 'asc' };
+        break;
+    }
+
+    // Get total count
+    const totalCount = await prisma.product.count({ where: whereClause });
+
+    // Get auctions
+    const auctions = await prisma.product.findMany({
+      where: whereClause,
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        agent: {
+          select: {
+            id: true,
+            displayName: true,
+            businessName: true,
+            logoUrl: true,
+            rating: true,
+            reviewCount: true,
+          },
+        },
+      },
+      orderBy,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const auctionsData = auctions.map((auction: any) => ({
+      ...auction,
+      images: typeof auction.images === 'string' ? JSON.parse(auction.images) : auction.images,
+      estimatedValueMin: Number(auction.estimatedValueMin),
+      estimatedValueMax: Number(auction.estimatedValueMax),
+      reservePrice: auction.reservePrice ? Number(auction.reservePrice) : null,
+      startingBid: auction.startingBid ? Number(auction.startingBid) : null,
+      currentBid: auction.currentBid ? Number(auction.currentBid) : 0,
+      bidIncrement: auction.bidIncrement ? Number(auction.bidIncrement) : null,
+      buyNowPrice: auction.buyNowPrice ? Number(auction.buyNowPrice) : null,
+    }));
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return successResponse(auctionsData, {
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+      message: 'Auctions retrieved successfully',
+    });
+
+  } catch (error) {
+    return handleAPIError(error);
+  }
 }
 
 // POST /api/auctions - Create new auction
