@@ -837,54 +837,86 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                     <PersonIcon sx={{ color: '#CE0E2D', fontSize: '1.4rem' }} /> Seller Information
                   </Typography>
                   
-                  <Box sx={{
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    mb: 3,
-                    p: 2.5,
-                    borderRadius: 2,
-                    bgcolor: 'rgba(0, 0, 0, 0.02)',
-                    border: '2px solid rgba(0, 0, 0, 0.05)'
-                  }}>
-                    <Avatar 
-                      src={product.agent.logoUrl} 
-                      alt={product.agent.displayName}
-                      sx={{ 
-                        width: 56, 
-                        height: 56, 
-                        mr: 2.5,
-                        border: '3px solid #CE0E2D',
-                        boxShadow: '0 4px 12px rgba(206, 14, 45, 0.2)'
-                      }}
-                    />
-                    <Box>
-                      <Typography variant="h6" fontWeight="bold" color="#0f172a" mb={0.5}>
-                        {product.agent.displayName}
-                      </Typography>
-                      <Typography variant="body2" color="#64748b" mb={0.5} fontWeight={500}>
-                        {product.agent.businessName}
-                      </Typography>
-                      {product.agent.rating && (
-                        <Box sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          px: 1.5,
-                          py: 0.5,
-                          borderRadius: 1,
-                          bgcolor: 'rgba(245, 158, 11, 0.1)',
-                          border: '1px solid rgba(245, 158, 11, 0.2)'
-                        }}>
-                          <Typography variant="body2" fontWeight={600} color="#f59e0b">
-                            ⭐ {Number(product.agent.rating).toFixed(1)}
-                          </Typography>
-                          <Typography variant="caption" color="#92400e">
-                            ({product.agent.reviewCount} reviews)
-                          </Typography>
-                        </Box>
-                      )}
+                  {product.agent ? (
+                    <Box sx={{
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      mb: 3,
+                      p: 2.5,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(0, 0, 0, 0.02)',
+                      border: '2px solid rgba(0, 0, 0, 0.05)'
+                    }}>
+                      <Avatar 
+                        src={product.agent.logoUrl} 
+                        alt={product.agent.displayName}
+                        sx={{ 
+                          width: 56, 
+                          height: 56, 
+                          mr: 2.5,
+                          border: '3px solid #CE0E2D',
+                          boxShadow: '0 4px 12px rgba(206, 14, 45, 0.2)'
+                        }}
+                      />
+                      <Box>
+                        <Typography variant="h6" fontWeight="bold" color="#0f172a" mb={0.5}>
+                          {product.agent.displayName}
+                        </Typography>
+                        <Typography variant="body2" color="#64748b" mb={0.5} fontWeight={500}>
+                          {product.agent.businessName}
+                        </Typography>
+                        {product.agent.rating && (
+                          <Box sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: 1,
+                            bgcolor: 'rgba(245, 158, 11, 0.1)',
+                            border: '1px solid rgba(245, 158, 11, 0.2)'
+                          }}>
+                            <Typography variant="body2" fontWeight={600} color="#f59e0b">
+                              ⭐ {Number(product.agent.rating).toFixed(1)}
+                            </Typography>
+                            <Typography variant="caption" color="#92400e">
+                              ({product.agent.reviewCount} reviews)
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
                     </Box>
-                  </Box>
+                  ) : (
+                    <Box sx={{
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      mb: 3,
+                      p: 2.5,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(100, 116, 139, 0.05)',
+                      border: '2px solid rgba(100, 116, 139, 0.1)'
+                    }}>
+                      <Avatar 
+                        sx={{ 
+                          width: 56, 
+                          height: 56, 
+                          mr: 2.5,
+                          bgcolor: '#64748b',
+                          border: '3px solid #64748b'
+                        }}
+                      >
+                        ?
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h6" fontWeight="bold" color="#0f172a" mb={0.5}>
+                          Unknown Seller
+                        </Typography>
+                        <Typography variant="body2" color="#64748b" fontWeight={500}>
+                          Seller information not available
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
                 </CardContent>
               </Card>
             </Grid>

@@ -399,9 +399,13 @@ export default function AuctionsPage() {
                           {auction.category.name}
                         </Typography>
                       )}
-                      {auction.agent && (
+                      {auction.agent ? (
                         <Typography variant="caption" color="text.secondary">
                           by {auction.agent.displayName}
+                        </Typography>
+                      ) : (
+                        <Typography variant="caption" color="text.secondary">
+                          by Unknown Seller
                         </Typography>
                       )}
                     </Stack>
