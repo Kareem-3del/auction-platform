@@ -292,45 +292,86 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      backgroundColor: '#f8fafc',
-      py: 2
+      background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)',
+      py: { xs: 2, lg: 3 }
     }}>
-      <Container maxWidth="xl">
-        {/* Enhanced Breadcrumbs */}
+      <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, lg: 4 } }}>
+        {/* Modern Breadcrumbs */}
         <Paper sx={{ 
-          mb: 3, 
-          p: 2, 
-          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-          borderRadius: 2
+          mb: { xs: 3, lg: 4 }, 
+          p: { xs: 2, lg: 3 }, 
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          borderRadius: 3,
+          boxShadow: '0 10px 40px rgba(15, 23, 42, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
           <Breadcrumbs separator="›" sx={{ 
-            '& .MuiBreadcrumbs-separator': { color: '#CE0E2D', fontWeight: 'bold' }
+            '& .MuiBreadcrumbs-separator': { 
+              color: '#CE0E2D', 
+              fontWeight: 'bold',
+              mx: 1.5,
+              fontSize: '1.1rem'
+            }
           }}>
-            <MuiLink href="/" sx={{ color: 'white', textDecoration: 'none', '&:hover': { color: '#CE0E2D' } }}>
+            <MuiLink href="/" sx={{ 
+              color: 'rgba(255, 255, 255, 0.9)', 
+              textDecoration: 'none', 
+              fontSize: '0.95rem',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              '&:hover': { 
+                color: '#CE0E2D',
+                transform: 'translateY(-1px)',
+                transition: 'all 0.2s ease'
+              }
+            }}>
               🏠 Home
             </MuiLink>
-            <MuiLink href="/auctions" sx={{ color: 'white', textDecoration: 'none', '&:hover': { color: '#CE0E2D' } }}>
+            <MuiLink href="/auctions" sx={{ 
+              color: 'rgba(255, 255, 255, 0.9)', 
+              textDecoration: 'none', 
+              fontSize: '0.95rem',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              '&:hover': { 
+                color: '#CE0E2D',
+                transform: 'translateY(-1px)',
+                transition: 'all 0.2s ease'
+              }
+            }}>
               🔨 Auctions
             </MuiLink>
-            <Typography sx={{ color: '#CE0E2D', fontWeight: 'bold' }}>
-              {product.title.length > 50 ? `${product.title.substring(0, 50)}...` : product.title}
+            <Typography sx={{ 
+              color: '#CE0E2D', 
+              fontWeight: 'bold',
+              fontSize: '0.95rem',
+              maxWidth: '300px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>
+              {product.title}
             </Typography>
           </Breadcrumbs>
         </Paper>
 
-        {/* MAIN LAYOUT - Responsive No-Scroll Design */}
+        {/* MAIN LAYOUT - Modern Responsive Design */}
         <Box sx={{ 
-          height: { xs: 'auto', lg: 'calc(100vh - 140px)' }, 
+          height: { xs: 'auto', lg: 'calc(100vh - 160px)' }, 
           display: 'flex', 
           flexDirection: 'column',
-          minHeight: { xs: '100vh', lg: 'calc(100vh - 140px)' }
+          minHeight: { xs: '100vh', lg: 'calc(100vh - 160px)' }
         }}>
           
           {/* TOP SECTION - Auction Info + Image + Bidding */}
-          <Grid container spacing={3} sx={{ 
+          <Grid container spacing={{ xs: 2, md: 3, lg: 4 }} sx={{ 
             flex: { xs: 'none', lg: '1 1 auto' }, 
             minHeight: { xs: 'auto', lg: '60%' },
-            mb: { xs: 3, lg: 0 }
+            mb: { xs: 4, lg: 0 }
           }}>
             
             {/* LEFT PANEL - Auction Information */}
@@ -342,27 +383,53 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               
               {/* Auction Status & Timer */}
               <Card sx={{ 
-                mb: 2,
+                mb: 3,
                 background: product.auctionStatus === 'LIVE' 
-                  ? 'linear-gradient(135deg, #CE0E2D, #ff4444)' 
+                  ? 'linear-gradient(135deg, #CE0E2D, #dc2626)' 
                   : product.auctionStatus === 'ENDED'
-                    ? 'linear-gradient(135deg, #ffd700, #ffa500)'
-                    : 'linear-gradient(135deg, #6c757d, #495057)',
+                    ? 'linear-gradient(135deg, #f59e0b, #d97706)'
+                    : 'linear-gradient(135deg, #475569, #334155)',
                 color: 'white',
-                boxShadow: '0 8px 24px rgba(206, 14, 45, 0.3)'
+                boxShadow: product.auctionStatus === 'LIVE' 
+                  ? '0 20px 40px rgba(206, 14, 45, 0.3)'
+                  : '0 20px 40px rgba(0, 0, 0, 0.1)',
+                borderRadius: 3,
+                border: '2px solid rgba(255, 255, 255, 0.2)',
+                overflow: 'hidden',
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '4px',
+                  background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)'
+                }
               }}>
-                <CardContent>
+                <CardContent sx={{ p: 3 }}>
                   <Box textAlign="center">
-                    <Typography variant="h6" fontWeight="bold" mb={1}>
+                    <Typography variant="h5" fontWeight="bold" mb={2} sx={{ 
+                      fontSize: { xs: '1.25rem', md: '1.5rem' },
+                      letterSpacing: '0.5px'
+                    }}>
                       {product.auctionStatus === 'LIVE' && '🔴 LIVE AUCTION'}
                       {product.auctionStatus === 'ENDED' && '👑 AUCTION ENDED'}
-                      {product.auctionStatus === 'SCHEDULED' && '📅 UPCOMING'}
+                      {product.auctionStatus === 'SCHEDULED' && '📅 UPCOMING AUCTION'}
                     </Typography>
                     
                     {product.auctionStatus === 'LIVE' && timeLeft && (
-                      <Box>
-                        <Typography variant="body2" sx={{ opacity: 0.9 }}>Time Remaining:</Typography>
-                        <Typography variant="h6" fontWeight="bold">⏰ {timeLeft}</Typography>
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: 2, 
+                        bgcolor: 'rgba(255, 255, 255, 0.15)',
+                        backdropFilter: 'blur(10px)'
+                      }}>
+                        <Typography variant="body2" sx={{ opacity: 0.9, mb: 1, fontSize: '0.9rem' }}>Time Remaining:</Typography>
+                        <Typography variant="h5" fontWeight="bold" sx={{ 
+                          fontSize: { xs: '1.25rem', md: '1.5rem' },
+                          textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                        }}>⏰ {timeLeft}</Typography>
                       </Box>
                     )}
                     
@@ -378,35 +445,74 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               </Card>
 
               {/* Auction Title & Basic Info */}
-              <Card sx={{ mb: 2, flex: '1 1 auto' }}>
-                <CardContent>
-                  <Typography variant="h5" fontWeight="bold" mb={2} color="#1a1a1a">
+              <Card sx={{ 
+                mb: 3, 
+                flex: '1 1 auto',
+                borderRadius: 3,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                border: '1px solid rgba(0, 0, 0, 0.05)'
+              }}>
+                <CardContent sx={{ p: { xs: 2.5, lg: 3 } }}>
+                  <Typography variant="h4" fontWeight="bold" mb={3} sx={{
+                    color: '#0f172a',
+                    fontSize: { xs: '1.5rem', md: '1.75rem', lg: '2rem' },
+                    lineHeight: 1.3,
+                    letterSpacing: '-0.025em'
+                  }}>
                     {product.title}
                   </Typography>
                   
-                  <Stack spacing={2}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <LocationIcon color="primary" />
-                      <Typography variant="body2">{product.location}</Typography>
+                  <Stack spacing={3}>
+                    <Box display="flex" alignItems="center" gap={1.5} sx={{
+                      p: 2,
+                      bgcolor: '#f8fafc',
+                      borderRadius: 2,
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <LocationIcon sx={{ color: '#CE0E2D', fontSize: '1.25rem' }} />
+                      <Typography variant="body1" fontWeight={500} color="#334155">{product.location}</Typography>
                     </Box>
                     
                     <Box>
-                      <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                      <Typography variant="body2" color="#64748b" fontWeight={600} mb={1} sx={{
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        fontSize: '0.75rem'
+                      }}>
                         CONDITION
                       </Typography>
                       <Chip 
                         label={product.condition.replace('_', ' ')} 
                         color={getConditionColor(product.condition)}
-                        size="small"
-                        sx={{ ml: 1 }}
+                        sx={{ 
+                          fontWeight: 600,
+                          fontSize: '0.875rem',
+                          height: '36px',
+                          borderRadius: 2,
+                          '& .MuiChip-label': {
+                            px: 2
+                          }
+                        }}
                       />
                     </Box>
                     
-                    <Box>
-                      <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                        ESTIMATED VALUE
+                    <Box sx={{
+                      p: 2.5,
+                      bgcolor: 'linear-gradient(135deg, #fef7f0 0%, #fed7aa 100%)',
+                      borderRadius: 2,
+                      border: '2px solid #CE0E2D20'
+                    }}>
+                      <Typography variant="body2" color="#92400e" fontWeight={700} mb={1} sx={{
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        fontSize: '0.75rem'
+                      }}>
+                        💰 ESTIMATED VALUE
                       </Typography>
-                      <Typography variant="body1" fontWeight="bold" color="#CE0E2D">
+                      <Typography variant="h6" fontWeight="bold" sx={{
+                        color: '#CE0E2D',
+                        fontSize: { xs: '1.1rem', md: '1.25rem' }
+                      }}>
                         {formatCurrency(product.estimatedValueMin)} - {formatCurrency(product.estimatedValueMax)}
                       </Typography>
                     </Box>
@@ -415,21 +521,45 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               </Card>
 
               {/* Quick Actions */}
-              <Stack direction="row" spacing={1} justifyContent="center">
+              <Stack direction="row" spacing={2} justifyContent="center">
                 <Tooltip title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
                   <IconButton
                     onClick={() => setIsFavorite(!isFavorite)}
                     sx={{
-                      color: isFavorite ? '#CE0E2D' : '#666',
-                      border: '2px solid #e0e0e0',
-                      '&:hover': { borderColor: '#CE0E2D', transform: 'scale(1.1)' }
+                      color: isFavorite ? '#CE0E2D' : '#64748b',
+                      bgcolor: isFavorite ? 'rgba(206, 14, 45, 0.1)' : 'rgba(100, 116, 139, 0.1)',
+                      border: '2px solid',
+                      borderColor: isFavorite ? '#CE0E2D' : '#e2e8f0',
+                      borderRadius: 2,
+                      width: 48,
+                      height: 48,
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': { 
+                        borderColor: '#CE0E2D', 
+                        transform: 'translateY(-2px) scale(1.05)',
+                        boxShadow: '0 10px 20px rgba(206, 14, 45, 0.2)'
+                      }
                     }}
                   >
                     {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Share auction">
-                  <IconButton sx={{ border: '2px solid #e0e0e0', '&:hover': { borderColor: '#1976d2' } }}>
+                  <IconButton sx={{ 
+                    color: '#64748b',
+                    bgcolor: 'rgba(100, 116, 139, 0.1)',
+                    border: '2px solid #e2e8f0',
+                    borderRadius: 2,
+                    width: 48,
+                    height: 48,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&:hover': { 
+                      borderColor: '#1976d2',
+                      color: '#1976d2',
+                      transform: 'translateY(-2px) scale(1.05)',
+                      boxShadow: '0 10px 20px rgba(25, 118, 210, 0.2)'
+                    }
+                  }}>
                     <ShareIcon />
                   </IconButton>
                 </Tooltip>
@@ -447,10 +577,16 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                 position: 'relative',
                 width: '100%',
                 height: '100%',
-                minHeight: { xs: '300px', md: '400px', lg: '500px' },
+                minHeight: { xs: '350px', md: '450px', lg: '550px' },
                 overflow: 'hidden',
-                borderRadius: 3,
-                boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
+                borderRadius: 4,
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+                border: '1px solid rgba(0, 0, 0, 0.08)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  transform: 'translateY(-4px) scale(1.01)',
+                  boxShadow: '0 35px 60px -12px rgba(0,0,0,0.3)'
+                }
               }}>
                 <Box
                   component="img"
@@ -463,7 +599,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                   }}
                 />
                 
-                {/* Image Navigation */}
+                {/* Enhanced Image Navigation */}
                 {product.images?.length > 1 && (
                   <>
                     <IconButton
@@ -472,14 +608,25 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                       )}
                       sx={{
                         position: 'absolute',
-                        left: 16,
+                        left: 20,
                         top: '50%',
                         transform: 'translateY(-50%)',
-                        bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': { bgcolor: '#CE0E2D', color: 'white' }
+                        bgcolor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                        border: '2px solid rgba(255, 255, 255, 0.2)',
+                        width: 52,
+                        height: 52,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover': { 
+                          bgcolor: '#CE0E2D', 
+                          color: 'white',
+                          transform: 'translateY(-50%) scale(1.1)',
+                          boxShadow: '0 12px 40px rgba(206, 14, 45, 0.4)'
+                        }
                       }}
                     >
-                      <ChevronLeftIcon />
+                      <ChevronLeftIcon sx={{ fontSize: '1.5rem' }} />
                     </IconButton>
                     
                     <IconButton
@@ -488,28 +635,50 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                       )}
                       sx={{
                         position: 'absolute',
-                        right: 16,
+                        right: 20,
                         top: '50%',
                         transform: 'translateY(-50%)',
-                        bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': { bgcolor: '#CE0E2D', color: 'white' }
+                        bgcolor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                        border: '2px solid rgba(255, 255, 255, 0.2)',
+                        width: 52,
+                        height: 52,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover': { 
+                          bgcolor: '#CE0E2D', 
+                          color: 'white',
+                          transform: 'translateY(-50%) scale(1.1)',
+                          boxShadow: '0 12px 40px rgba(206, 14, 45, 0.4)'
+                        }
                       }}
                     >
-                      <ChevronRightIcon />
+                      <ChevronRightIcon sx={{ fontSize: '1.5rem' }} />
                     </IconButton>
                   </>
                 )}
                 
-                <Chip
-                  label={`${currentImageIndex + 1} / ${product.images?.length || 1}`}
-                  sx={{
-                    position: 'absolute',
-                    bottom: 16,
-                    right: 16,
-                    bgcolor: '#CE0E2D',
-                    color: 'white'
-                  }}
-                />
+                <Box sx={{
+                  position: 'absolute',
+                  bottom: 20,
+                  right: 20,
+                  display: 'flex',
+                  gap: 1
+                }}>
+                  <Chip
+                    label={`${currentImageIndex + 1} / ${product.images?.length || 1}`}
+                    sx={{
+                      bgcolor: 'rgba(15, 23, 42, 0.9)',
+                      color: 'white',
+                      fontWeight: 600,
+                      backdropFilter: 'blur(10px)',
+                      border: '2px solid rgba(255, 255, 255, 0.2)',
+                      '& .MuiChip-label': {
+                        px: 2
+                      }
+                    }}
+                  />
+                </Box>
               </Paper>
             </Grid>
 
@@ -522,61 +691,154 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               
               {/* Current Bid Display */}
               <Card sx={{ 
-                mb: 2,
+                mb: 3,
                 textAlign: 'center',
+                borderRadius: 3,
                 border: '3px solid',
                 borderColor: product.auctionStatus === 'LIVE' ? '#CE0E2D' : 
-                            product.auctionStatus === 'ENDED' ? '#ffd700' : '#e0e0e0',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+                            product.auctionStatus === 'ENDED' ? '#f59e0b' : '#e2e8f0',
+                boxShadow: product.auctionStatus === 'LIVE' 
+                  ? '0 20px 40px rgba(206, 14, 45, 0.15)' 
+                  : '0 8px 32px rgba(0,0,0,0.08)',
+                background: product.auctionStatus === 'LIVE' 
+                  ? 'linear-gradient(135deg, #fef2f2 0%, #ffffff 100%)'
+                  : product.auctionStatus === 'ENDED'
+                    ? 'linear-gradient(135deg, #fffbeb 0%, #ffffff 100%)'
+                    : 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
+                position: 'relative',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '6px',
+                  background: product.auctionStatus === 'LIVE' 
+                    ? 'linear-gradient(90deg, #CE0E2D 0%, #dc2626 100%)'
+                    : product.auctionStatus === 'ENDED'
+                      ? 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)'
+                      : 'linear-gradient(90deg, #64748b 0%, #475569 100%)'
+                }
               }}>
-                <CardContent>
-                  <Typography variant="body1" color="text.secondary" fontWeight="bold" mb={1}>
+                <CardContent sx={{ p: { xs: 2.5, lg: 3 }, pt: 4 }}>
+                  <Typography variant="h6" fontWeight={700} mb={2} sx={{
+                    color: product.auctionStatus === 'LIVE' ? '#dc2626' : 
+                           product.auctionStatus === 'ENDED' ? '#d97706' : '#64748b',
+                    fontSize: { xs: '1rem', md: '1.1rem' },
+                    letterSpacing: '0.5px'
+                  }}>
                     {product.auctionStatus === 'ENDED' ? '👑 WINNING BID' : 
                      product.auctionStatus === 'LIVE' ? '💰 CURRENT BID' : '💵 STARTING BID'}
                   </Typography>
-                  <Typography variant="h3" fontWeight="bold" color="#CE0E2D" mb={2}>
+                  <Typography variant="h2" fontWeight="bold" mb={3} sx={{
+                    color: '#0f172a',
+                    fontSize: { xs: '2rem', md: '2.5rem', lg: '3rem' },
+                    lineHeight: 1,
+                    textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}>
                     {formatCurrency(displayCurrentBid)}
                   </Typography>
                   
-                  {/* Bid Statistics */}
-                  <Grid container spacing={1}>
+                  {/* Enhanced Bid Statistics */}
+                  <Grid container spacing={2}>
                     <Grid item xs={6}>
-                      <Box textAlign="center" p={1} bgcolor="#f5f5f5" borderRadius={1}>
-                        <Typography variant="h6" color="#CE0E2D" fontWeight="bold">
+                      <Box sx={{ 
+                        textAlign: 'center', 
+                        p: 2, 
+                        bgcolor: 'rgba(206, 14, 45, 0.05)',
+                        borderRadius: 2,
+                        border: '2px solid rgba(206, 14, 45, 0.1)',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: 'rgba(206, 14, 45, 0.1)',
+                          transform: 'translateY(-2px)'
+                        }
+                      }}>
+                        <Typography variant="h5" fontWeight="bold" sx={{ 
+                          color: '#CE0E2D',
+                          fontSize: { xs: '1.25rem', md: '1.5rem' }
+                        }}>
                           {displayBidCount}
                         </Typography>
-                        <Typography variant="caption">Total Bids</Typography>
+                        <Typography variant="body2" color="#64748b" fontWeight={600} sx={{
+                          fontSize: '0.8rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>Total Bids</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={6}>
-                      <Box textAlign="center" p={1} bgcolor="#f5f5f5" borderRadius={1}>
-                        <Typography variant="h6" color="#CE0E2D" fontWeight="bold">
+                      <Box sx={{ 
+                        textAlign: 'center', 
+                        p: 2, 
+                        bgcolor: 'rgba(59, 130, 246, 0.05)',
+                        borderRadius: 2,
+                        border: '2px solid rgba(59, 130, 246, 0.1)',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: 'rgba(59, 130, 246, 0.1)',
+                          transform: 'translateY(-2px)'
+                        }
+                      }}>
+                        <Typography variant="h5" fontWeight="bold" sx={{ 
+                          color: '#3b82f6',
+                          fontSize: { xs: '1.25rem', md: '1.5rem' }
+                        }}>
                           {product.uniqueBidders}
                         </Typography>
-                        <Typography variant="caption">Bidders</Typography>
+                        <Typography variant="body2" color="#64748b" fontWeight={600} sx={{
+                          fontSize: '0.8rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>Bidders</Typography>
                       </Box>
                     </Grid>
                   </Grid>
                 </CardContent>
               </Card>
 
-              {/* Bid Increment & Starting Info */}
-              <Card sx={{ mb: 2 }}>
-                <CardContent>
-                  <Stack spacing={1.5}>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                        STARTING BID
+              {/* Enhanced Bid Increment & Starting Info */}
+              <Card sx={{ 
+                mb: 3,
+                borderRadius: 3,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                border: '1px solid rgba(0, 0, 0, 0.05)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
+              }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack spacing={2.5}>
+                    <Box sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(34, 197, 94, 0.05)',
+                      border: '2px solid rgba(34, 197, 94, 0.1)'
+                    }}>
+                      <Typography variant="body2" color="#15803d" fontWeight={700} mb={1} sx={{
+                        fontSize: '0.75rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        💰 STARTING BID
                       </Typography>
-                      <Typography variant="body1" fontWeight="bold">
+                      <Typography variant="h6" fontWeight="bold" color="#0f172a">
                         {formatCurrency(product.startingBid || 0)}
                       </Typography>
                     </Box>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                        BID INCREMENT
+                    <Box sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(168, 85, 247, 0.05)',
+                      border: '2px solid rgba(168, 85, 247, 0.1)'
+                    }}>
+                      <Typography variant="body2" color="#7c3aed" fontWeight={700} mb={1} sx={{
+                        fontSize: '0.75rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        📈 BID INCREMENT
                       </Typography>
-                      <Typography variant="body1" fontWeight="bold">
+                      <Typography variant="h6" fontWeight="bold" color="#0f172a">
                         {formatCurrency(product.bidIncrement || 1)}
                       </Typography>
                     </Box>
@@ -584,30 +846,70 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                 </CardContent>
               </Card>
 
-              {/* Seller Information */}
-              <Card sx={{ flex: '1 1 auto' }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight="bold" mb={2} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <PersonIcon color="primary" /> Seller
+              {/* Enhanced Seller Information */}
+              <Card sx={{ 
+                flex: '1 1 auto',
+                borderRadius: 3,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                border: '1px solid rgba(0, 0, 0, 0.05)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)'
+              }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" fontWeight="bold" mb={3} sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1.5,
+                    color: '#0f172a',
+                    fontSize: '1.1rem'
+                  }}>
+                    <PersonIcon sx={{ color: '#CE0E2D', fontSize: '1.4rem' }} /> Seller Information
                   </Typography>
                   
-                  <Box display="flex" alignItems="center" mb={2}>
+                  <Box sx={{
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    mb: 3,
+                    p: 2.5,
+                    borderRadius: 2,
+                    bgcolor: 'rgba(0, 0, 0, 0.02)',
+                    border: '2px solid rgba(0, 0, 0, 0.05)'
+                  }}>
                     <Avatar 
                       src={product.agent.logoUrl} 
                       alt={product.agent.displayName}
-                      sx={{ width: 48, height: 48, mr: 2, border: '2px solid #e0e0e0' }}
+                      sx={{ 
+                        width: 56, 
+                        height: 56, 
+                        mr: 2.5,
+                        border: '3px solid #CE0E2D',
+                        boxShadow: '0 4px 12px rgba(206, 14, 45, 0.2)'
+                      }}
                     />
                     <Box>
-                      <Typography variant="body1" fontWeight="bold">
+                      <Typography variant="h6" fontWeight="bold" color="#0f172a" mb={0.5}>
                         {product.agent.displayName}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="#64748b" mb={0.5} fontWeight={500}>
                         {product.agent.businessName}
                       </Typography>
                       {product.agent.rating && (
-                        <Typography variant="caption" color="#ffa726">
-                          ⭐ {Number(product.agent.rating).toFixed(1)} ({product.agent.reviewCount})
-                        </Typography>
+                        <Box sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 1,
+                          bgcolor: 'rgba(245, 158, 11, 0.1)',
+                          border: '1px solid rgba(245, 158, 11, 0.2)'
+                        }}>
+                          <Typography variant="body2" fontWeight={600} color="#f59e0b">
+                            ⭐ {Number(product.agent.rating).toFixed(1)}
+                          </Typography>
+                          <Typography variant="caption" color="#92400e">
+                            ({product.agent.reviewCount} reviews)
+                          </Typography>
+                        </Box>
                       )}
                     </Box>
                   </Box>
@@ -616,20 +918,40 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
             </Grid>
           </Grid>
 
-          {/* BOTTOM SECTION - Bidding History & Details */}
-          <Grid container spacing={3} sx={{ 
+          {/* BOTTOM SECTION - Enhanced Bidding History & Details */}
+          <Grid container spacing={{ xs: 2, md: 3, lg: 4 }} sx={{ 
             flex: { xs: 'none', lg: '0 0 40%' }, 
-            mt: { xs: 0, lg: 2 },
+            mt: { xs: 2, lg: 3 },
             minHeight: { xs: 'auto', lg: '40%' }
           }}>
             
-            {/* Left - Bid History */}
+            {/* Enhanced Bid History */}
             <Grid item xs={12} md={6} lg={4}>
-              <Card sx={{ height: { xs: 'auto', lg: '100%' }, minHeight: { xs: '300px', lg: 'auto' } }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight="bold" mb={2} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <AssessmentIcon color="primary" /> Bidding History
+              <Card sx={{ 
+                height: { xs: 'auto', lg: '100%' }, 
+                minHeight: { xs: '350px', lg: 'auto' },
+                borderRadius: 3,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                border: '1px solid rgba(0, 0, 0, 0.05)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{
+                  p: 3,
+                  pb: 2,
+                  background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                  color: 'white'
+                }}>
+                  <Typography variant="h6" fontWeight="bold" sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1.5,
+                    fontSize: '1.1rem'
+                  }}>
+                    <AssessmentIcon sx={{ color: '#CE0E2D' }} /> Bidding History
                   </Typography>
+                </Box>
+                <CardContent sx={{ p: 0 }}>
                   <Box sx={{ height: { xs: 'auto', lg: '280px' }, minHeight: { xs: '200px', lg: '280px' }, overflow: 'auto' }}>
                     <BidHistory
                       auctionId={product.id}
@@ -643,13 +965,33 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               </Card>
             </Grid>
 
-            {/* Center - Product Description */}
+            {/* Enhanced Product Description */}
             <Grid item xs={12} md={6} lg={4}>
-              <Card sx={{ height: { xs: 'auto', lg: '100%' }, minHeight: { xs: '300px', lg: 'auto' } }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight="bold" mb={2} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    📝 Description
+              <Card sx={{ 
+                height: { xs: 'auto', lg: '100%' }, 
+                minHeight: { xs: '350px', lg: 'auto' },
+                borderRadius: 3,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                border: '1px solid rgba(0, 0, 0, 0.05)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{
+                  p: 3,
+                  pb: 2,
+                  background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                  color: 'white'
+                }}>
+                  <Typography variant="h6" fontWeight="bold" sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1.5,
+                    fontSize: '1.1rem'
+                  }}>
+                    📝 Product Description
                   </Typography>
+                </Box>
+                <CardContent sx={{ p: 3 }}>
                   <Box sx={{ height: { xs: 'auto', lg: '280px' }, minHeight: { xs: '200px', lg: '280px' }, overflow: 'auto' }}>
                     <Typography variant="body1" sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
                       {product.description}
@@ -659,13 +1001,33 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               </Card>
             </Grid>
 
-            {/* Right - Quick Bid Interface */}
+            {/* Enhanced Quick Bid Interface */}
             <Grid item xs={12} md={12} lg={4}>
-              <Card sx={{ height: { xs: 'auto', lg: '100%' }, minHeight: { xs: '300px', lg: 'auto' } }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight="bold" mb={2} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <BidIcon color="primary" /> Quick Bid
+              <Card sx={{ 
+                height: { xs: 'auto', lg: '100%' }, 
+                minHeight: { xs: '350px', lg: 'auto' },
+                borderRadius: 3,
+                boxShadow: '0 8px 32px rgba(206, 14, 45, 0.15)',
+                border: '2px solid rgba(206, 14, 45, 0.1)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #fef2f2 100%)',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{
+                  p: 3,
+                  pb: 2,
+                  background: 'linear-gradient(135deg, #CE0E2D 0%, #dc2626 100%)',
+                  color: 'white'
+                }}>
+                  <Typography variant="h6" fontWeight="bold" sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1.5,
+                    fontSize: '1.1rem'
+                  }}>
+                    <BidIcon sx={{ fontSize: '1.4rem' }} /> Quick Bid Interface
                   </Typography>
+                </Box>
+                <CardContent sx={{ p: 3 }}>
                   <Box sx={{ height: '280px' }}>
                     {product.auctionStatus === 'LIVE' && timeLeft && timeLeft !== 'Auction Ended' ? (
                       <QuickBidDialog
