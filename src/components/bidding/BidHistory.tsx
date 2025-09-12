@@ -129,7 +129,7 @@ export default function BidHistory({
     );
   }
 
-  const displayBids = expanded ? bids : bids.slice(0, 3);
+  const displayBids = expanded ? (bids || []) : (bids || []).slice(0, 3);
 
   return (
     <Box sx={{ position: 'relative' }}>

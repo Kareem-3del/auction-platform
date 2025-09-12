@@ -468,7 +468,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                   <>
                     <IconButton
                       onClick={() => setCurrentImageIndex(prev => 
-                        prev === 0 ? product.images.length - 1 : prev - 1
+                        prev === 0 ? (product.images?.length || 1) - 1 : prev - 1
                       )}
                       sx={{
                         position: 'absolute',
@@ -484,7 +484,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                     
                     <IconButton
                       onClick={() => setCurrentImageIndex(prev => 
-                        prev === product.images.length - 1 ? 0 : prev + 1
+                        prev === (product.images?.length || 1) - 1 ? 0 : prev + 1
                       )}
                       sx={{
                         position: 'absolute',
