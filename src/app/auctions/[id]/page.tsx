@@ -360,11 +360,13 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
           </Breadcrumbs>
         </Paper>
 
-        {/* MAIN LAYOUT - Clean Responsive Design */}
+        {/* MAIN LAYOUT - Compact Design */}
         <Box sx={{ 
           display: 'flex', 
           flexDirection: 'column',
-          gap: { xs: 4, md: 5, lg: 6 }
+          gap: { xs: 2, md: 3 },
+          maxHeight: 'calc(100vh - 200px)',
+          overflow: 'hidden'
         }}>
           
           {/* TOP SECTION - Main Content */}
@@ -379,35 +381,19 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               
               {/* Auction Status & Timer */}
               <Card sx={{ 
-                mb: 3,
                 background: product.auctionStatus === 'LIVE' 
                   ? 'linear-gradient(135deg, #CE0E2D, #dc2626)' 
                   : product.auctionStatus === 'ENDED'
                     ? 'linear-gradient(135deg, #f59e0b, #d97706)'
                     : 'linear-gradient(135deg, #475569, #334155)',
                 color: 'white',
-                boxShadow: product.auctionStatus === 'LIVE' 
-                  ? '0 20px 40px rgba(206, 14, 45, 0.3)'
-                  : '0 20px 40px rgba(0, 0, 0, 0.1)',
-                borderRadius: 3,
-                border: '2px solid rgba(255, 255, 255, 0.2)',
-                overflow: 'hidden',
-                position: 'relative',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '4px',
-                  background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)'
-                }
+                borderRadius: 2,
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
               }}>
-                <CardContent sx={{ p: 3 }}>
+                <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
                   <Box textAlign="center">
-                    <Typography variant="h5" fontWeight="bold" mb={2} sx={{ 
-                      fontSize: { xs: '1.25rem', md: '1.5rem' },
-                      letterSpacing: '0.5px'
+                    <Typography variant="h6" fontWeight="bold" mb={1.5} sx={{ 
+                      fontSize: { xs: '1.1rem', md: '1.25rem' }
                     }}>
                       {product.auctionStatus === 'LIVE' && '🔴 LIVE AUCTION'}
                       {product.auctionStatus === 'ENDED' && '👑 AUCTION ENDED'}
@@ -416,15 +402,13 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                     
                     {product.auctionStatus === 'LIVE' && timeLeft && (
                       <Box sx={{ 
-                        p: 2, 
+                        p: 1.5, 
                         borderRadius: 2, 
-                        bgcolor: 'rgba(255, 255, 255, 0.15)',
-                        backdropFilter: 'blur(10px)'
+                        bgcolor: 'rgba(255, 255, 255, 0.15)'
                       }}>
-                        <Typography variant="body2" sx={{ opacity: 0.9, mb: 1, fontSize: '0.9rem' }}>Time Remaining:</Typography>
-                        <Typography variant="h5" fontWeight="bold" sx={{ 
-                          fontSize: { xs: '1.25rem', md: '1.5rem' },
-                          textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                        <Typography variant="body2" sx={{ opacity: 0.9, mb: 0.5, fontSize: '0.8rem' }}>Time Remaining:</Typography>
+                        <Typography variant="h6" fontWeight="bold" sx={{ 
+                          fontSize: { xs: '1.1rem', md: '1.25rem' }
                         }}>⏰ {timeLeft}</Typography>
                       </Box>
                     )}
@@ -570,17 +554,11 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               <Paper sx={{ 
                 position: 'relative',
                 width: '100%',
-                height: '100%',
-                minHeight: { xs: '350px', md: '450px', lg: '550px' },
+                aspectRatio: '16/10',
+                maxHeight: { xs: '250px', md: '300px', lg: '350px' },
                 overflow: 'hidden',
-                borderRadius: 4,
-                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-                border: '1px solid rgba(0, 0, 0, 0.08)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                '&:hover': {
-                  transform: 'translateY(-4px) scale(1.01)',
-                  boxShadow: '0 35px 60px -12px rgba(0,0,0,0.3)'
-                }
+                borderRadius: 2,
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
               }}>
                 <Box
                   component="img"
@@ -913,23 +891,21 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
           </Grid>
 
           {/* BOTTOM SECTION - Bidding History & Details */}
-          <Grid container spacing={{ xs: 3, md: 4, lg: 5 }}>
+          <Grid container spacing={{ xs: 2, md: 3 }}>
             
-            {/* Enhanced Bid History */}
+            {/* Bid History */}
             <Grid item xs={12} md={6} lg={4}>
               <Card sx={{ 
-                height: { xs: 'auto', lg: '100%' }, 
-                minHeight: { xs: '350px', lg: 'auto' },
-                borderRadius: 3,
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-                border: '1px solid rgba(0, 0, 0, 0.05)',
-                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-                overflow: 'hidden'
+                height: { xs: '300px', md: '320px' },
+                borderRadius: 2,
+                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.08)',
+                bgcolor: '#ffffff',
+                display: 'flex',
+                flexDirection: 'column'
               }}>
                 <Box sx={{
-                  p: 3,
-                  pb: 2,
-                  background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                  p: 2,
+                  bgcolor: '#1e293b',
                   color: 'white'
                 }}>
                   <Typography variant="h6" fontWeight="bold" sx={{ 
@@ -955,16 +931,15 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               </Card>
             </Grid>
 
-            {/* Enhanced Product Description */}
+            {/* Product Description */}
             <Grid item xs={12} md={6} lg={4}>
               <Card sx={{ 
-                height: { xs: 'auto', lg: '100%' }, 
-                minHeight: { xs: '350px', lg: 'auto' },
-                borderRadius: 3,
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-                border: '1px solid rgba(0, 0, 0, 0.05)',
-                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-                overflow: 'hidden'
+                height: { xs: '300px', md: '320px' },
+                borderRadius: 2,
+                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.08)',
+                bgcolor: '#ffffff',
+                display: 'flex',
+                flexDirection: 'column'
               }}>
                 <Box sx={{
                   p: 3,
@@ -991,16 +966,16 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               </Card>
             </Grid>
 
-            {/* Enhanced Quick Bid Interface */}
-            <Grid item xs={12} md={12} lg={4}>
+            {/* Quick Bid Interface */}
+            <Grid item xs={12} lg={4}>
               <Card sx={{ 
-                height: { xs: 'auto', lg: '100%' }, 
-                minHeight: { xs: '350px', lg: 'auto' },
-                borderRadius: 3,
-                boxShadow: '0 8px 32px rgba(206, 14, 45, 0.15)',
-                border: '2px solid rgba(206, 14, 45, 0.1)',
-                background: 'linear-gradient(135deg, #ffffff 0%, #fef2f2 100%)',
-                overflow: 'hidden'
+                height: { xs: '300px', md: '320px' },
+                borderRadius: 2,
+                boxShadow: '0 2px 10px rgba(206, 14, 45, 0.15)',
+                border: '1px solid rgba(206, 14, 45, 0.1)',
+                bgcolor: '#ffffff',
+                display: 'flex',
+                flexDirection: 'column'
               }}>
                 <Box sx={{
                   p: { xs: 3, md: 4 },
