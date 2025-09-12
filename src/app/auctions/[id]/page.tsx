@@ -124,6 +124,37 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
     }
   });
 
+  // Countdown timer effect
+  useEffect(() => {
+    if (!product?.endTime || product?.auctionStatus !== 'LIVE') {
+      setTimeLeft('');
+      return;
+    }
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const end = new Date(product.endTime!).getTime();
+      const distance = end - now;
+
+      if (distance > 0) {
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        setTimeLeft(
+          days > 0 
+            ? `${days}d ${hours}h ${minutes}m ${seconds}s`
+            : `${hours}h ${minutes}m ${seconds}s`
+        );
+      } else {
+        setTimeLeft('Auction Ended');
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [product]);
+
   useEffect(() => {
     params.then(p => {
       if (p.id) {
@@ -250,37 +281,6 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
       </Box>
     );
   }
-
-  // Countdown timer effect
-  useEffect(() => {
-    if (!product?.endTime || product?.auctionStatus !== 'LIVE') {
-      setTimeLeft('');
-      return;
-    }
-
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const end = new Date(product.endTime!).getTime();
-      const distance = end - now;
-
-      if (distance > 0) {
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        setTimeLeft(
-          days > 0 
-            ? `${days}d ${hours}h ${minutes}m ${seconds}s`
-            : `${hours}h ${minutes}m ${seconds}s`
-        );
-      } else {
-        setTimeLeft('Auction Ended');
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [product]);
 
   const handleBidPlaced = () => {
     setBidRefreshTrigger(prev => prev + 1);
