@@ -97,6 +97,32 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
   const [winner, setWinner] = useState<BidWinner | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<string>('');
+  const [bidRefreshTrigger, setBidRefreshTrigger] = useState(0);
+  const [liveCurrentBid, setLiveCurrentBid] = useState<number | null>(null);
+  const [liveBidCount, setLiveBidCount] = useState<number | null>(null);
+
+  // WebSocket connection for live updates
+  const { 
+    isConnected,
+    currentBid: wsCurrentBid, 
+    bidCount: wsBidCount,
+    lastBid,
+    connectionError,
+    reconnect 
+  } = useRealtimeBidding({
+    productId: product?.id || '',
+    onBidUpdate: (update) => {
+      setLiveCurrentBid(update.currentBid);
+      setLiveBidCount(update.bidCount);
+      setBidRefreshTrigger(prev => prev + 1);
+    },
+    onError: (error) => {
+      console.error('WebSocket error:', error);
+    }
+  });
 
   useEffect(() => {
     params.then(p => {
@@ -224,33 +250,6 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
       </Box>
     );
   }
-
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<string>('');
-  const [bidRefreshTrigger, setBidRefreshTrigger] = useState(0);
-  const [liveCurrentBid, setLiveCurrentBid] = useState<number | null>(null);
-  const [liveBidCount, setLiveBidCount] = useState<number | null>(null);
-
-  // WebSocket connection for live updates
-  const { 
-    isConnected,
-    currentBid: wsCurrentBid, 
-    bidCount: wsBidCount,
-    lastBid,
-    connectionError,
-    reconnect 
-  } = useRealtimeBidding({
-    productId: product?.id || '',
-    onBidUpdate: (update) => {
-      setLiveCurrentBid(update.currentBid);
-      setLiveBidCount(update.bidCount);
-      setBidRefreshTrigger(prev => prev + 1);
-    },
-    onError: (error) => {
-      console.error('WebSocket error:', error);
-    }
-  });
 
   // Countdown timer effect
   useEffect(() => {
