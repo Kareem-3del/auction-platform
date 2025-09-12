@@ -315,10 +315,10 @@ export default function AuctionsPage() {
                   onClick={() => router.push(`/auctions/${auction.id}`)}
                 >
                   {/* Image */}
-                  {auction.images.length > 0 && (
+                  {auction.images?.length > 0 && (
                     <Box
                       component="img"
-                      src={auction.images[0]}
+                      src={auction.images?.[0]}
                       alt={auction.title}
                       sx={{
                         width: '100%',

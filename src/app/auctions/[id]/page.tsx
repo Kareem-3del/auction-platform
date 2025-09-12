@@ -204,7 +204,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
       const bidsResponse = await fetch(`/api/auctions/${productId}/bids`);
       if (bidsResponse.ok) {
         const bidsData = await bidsResponse.json();
-        if (bidsData.success && bidsData.data.bids.length > 0) {
+        if (bidsData.success && bidsData.data?.bids?.length > 0) {
           const winningBid = bidsData.data.bids[0]; // Highest bid
           setWinner({
             id: winningBid.bidder.id,

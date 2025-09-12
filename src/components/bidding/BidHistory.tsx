@@ -72,7 +72,7 @@ export default function BidHistory({
         const newBids = data.data.bids;
         
         // Check for new bids to animate
-        if (bids.length > 0 && newBids.length > bids.length) {
+        if ((bids || []).length > 0 && (newBids || []).length > (bids || []).length) {
           const newestBid = newBids[0];
           setNewBidAnimation(newestBid.id);
           setTimeout(() => setNewBidAnimation(null), 2000);
@@ -144,7 +144,7 @@ export default function BidHistory({
       }}>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
-            📊 Recent Bids ({bids.length})
+            📊 Recent Bids ({(bids || []).length})
           </Typography>
           {isLive && (
             <Box display="flex" alignItems="center" gap={0.5}>
@@ -172,7 +172,7 @@ export default function BidHistory({
             </Box>
           )}
         </Box>
-        {bids.length > 3 && (
+        {(bids || []).length > 3 && (
           <IconButton 
             onClick={() => setExpanded(!expanded)}
             size="small"
@@ -188,7 +188,7 @@ export default function BidHistory({
         )}
       </Box>
 
-      {bids.length === 0 ? (
+      {(bids || []).length === 0 ? (
         <Box 
           textAlign="center" 
           py={3} 
@@ -219,7 +219,7 @@ export default function BidHistory({
               sx={{
                 px: 1.5,
                 py: 1,
-                borderBottom: index < displayBids.length - 1 ? '1px solid #f0f0f0' : 'none',
+                borderBottom: index < (displayBids || []).length - 1 ? '1px solid #f0f0f0' : 'none',
                 backgroundColor: newBidAnimation === bid.id 
                   ? 'rgba(206, 14, 45, 0.1)' 
                   : bid.isWinning 
@@ -319,7 +319,7 @@ export default function BidHistory({
             </ListItem>
           ))}
           
-          {!expanded && bids.length > 3 && (
+          {!expanded && (bids || []).length > 3 && (
             <ListItem sx={{ px: 1.5, py: 0.5, justifyContent: 'center' }}>
               <Typography
                 variant="caption"
@@ -327,7 +327,7 @@ export default function BidHistory({
                 sx={{ cursor: 'pointer', fontSize: '0.75rem' }}
                 onClick={() => setExpanded(true)}
               >
-                +{bids.length - 3} more bids
+                +{(bids || []).length - 3} more bids
               </Typography>
             </ListItem>
           )}
