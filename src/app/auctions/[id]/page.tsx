@@ -101,7 +101,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
 
       const data = await response.json();
       if (data.success) {
-        const productData = data.data.product;
+        const productData = data.data;
         setProduct(productData);
         
         // Load winner information if auction has ended and there's a highest bidder
