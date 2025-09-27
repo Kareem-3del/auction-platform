@@ -11,11 +11,11 @@ import {
 import { useLocale } from 'src/hooks/useLocale';
 
 import { ErrorBoundary } from 'src/components/ErrorBoundary';
-import { ModernHeroSection } from 'src/components/sections/ModernHeroSection';
+import { SpotifyHeroSection } from 'src/components/sections/SpotifyHeroSection';
 import { ModernPremiumAuctions } from 'src/components/sections/ModernPremiumAuctions';
 import { SimpleCategoryShowcase } from 'src/components/sections/SimpleCategoryShowcase';
 import { TrustAndTestimonials } from 'src/components/sections/TrustAndTestimonials';
-import HomepageLayout from 'src/components/layout/HomepageLayout';
+import SpotifyLayout from 'src/components/layout/SpotifyLayout';
 
 export default function NewHomePageClient() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function NewHomePageClient() {
 
   return (
     <ErrorBoundary>
-      <HomepageLayout>
+      <SpotifyLayout transparent>
         {/* Error Message Display */}
         {error === 'dashboard_access_denied' && (
           <Container maxWidth="lg" sx={{ mt: 4, mb: 2 }}>
@@ -51,9 +51,9 @@ export default function NewHomePageClient() {
           </Container>
         )}
 
-        {/* Modern Hero Section */}
+        {/* Spotify-Inspired Hero Section */}
         <ErrorBoundary>
-          <ModernHeroSection />
+          <SpotifyHeroSection />
         </ErrorBoundary>
 
 
@@ -259,7 +259,7 @@ export default function NewHomePageClient() {
             </Container>
           </Box>
         </ErrorBoundary>
-      </HomepageLayout>
+      </SpotifyLayout>
     </ErrorBoundary>
   );
 }
