@@ -33,6 +33,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import Footer from './Footer';
 import CursorTrail from '../animations/CursorTrail';
 import ScrollAnimations from '../animations/ScrollAnimations';
+import UltraModernHeader from './UltraModernHeader';
 
 interface HomepageLayoutProps {
   children: ReactNode;
@@ -449,9 +450,9 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
       <ScrollAnimations />
       <CursorTrail />
       
-      {renderHeader()}
+      <UltraModernHeader />
       
-      <Box component="main" sx={{ flexGrow: 1, pt: '82px' }}>
+      <Box component="main" sx={{ flexGrow: 1 }}>
         {children}
       </Box>
       
