@@ -68,7 +68,7 @@ export function FooterCTA() {
     >
       <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ textAlign: 'center', maxWidth: 900, mx: 'auto' }}>
-          {/* Emirates-style Stats Section */}
+          {/* Lebanon Auction Stats Section */}
           <Box
             sx={{
               display: 'flex',

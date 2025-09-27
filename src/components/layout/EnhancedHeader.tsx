@@ -85,7 +85,7 @@ const getNavigationItems = (t: any) => [
 ];
 
 const getUtilityLinks = (t: any) => [
-  { label: t('navigation.aboutEA'), path: '/about', icon: 'solar:info-circle-bold-duotone' },
+  { label: t('navigation.about'), path: '/about', icon: 'solar:info-circle-bold-duotone' },
   { label: t('navigation.contactUs'), path: '/contact', icon: 'solar:phone-bold-duotone' },
   { label: t('navigation.help'), path: '/help', icon: 'solar:question-circle-bold-duotone' },
 ];

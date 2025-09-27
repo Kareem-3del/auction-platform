@@ -60,13 +60,13 @@ import LanguageSwitcher from '../language-switcher/LanguageSwitcher';
 // Styled components for modern design
 const StyledAppBar = styled(AppBar)(({ theme, scrolled }: { theme: any; scrolled: boolean }) => ({
   background: scrolled 
-    ? 'rgba(255, 255, 255, 0.9)' 
-    : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+    ? 'rgba(255, 255, 255, 0.95)' 
+    : 'linear-gradient(135deg, #CE0E2D 0%, #B71C1C 100%)',
   backdropFilter: scrolled ? 'blur(20px)' : 'none',
   borderBottom: scrolled ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
   boxShadow: scrolled 
-    ? '0 8px 32px rgba(0, 0, 0, 0.08)' 
-    : '0 4px 20px rgba(25, 118, 210, 0.3)',
+    ? '0 8px 32px rgba(0, 0, 0, 0.12)' 
+    : '0 4px 20px rgba(206, 14, 45, 0.4)',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   '&::before': {
     content: '""',
@@ -86,32 +86,35 @@ const StyledAppBar = styled(AppBar)(({ theme, scrolled }: { theme: any; scrolled
 const SearchContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
   borderRadius: 50,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  border: `1px solid ${alpha(theme.palette.common.white, 0.2)}`,
+  backgroundColor: alpha(theme.palette.common.white, 0.2),
+  border: `1px solid ${alpha(theme.palette.common.white, 0.3)}`,
+  backdropFilter: 'blur(10px)',
   '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-    border: `1px solid ${alpha(theme.palette.common.white, 0.3)}`,
+    backgroundColor: alpha(theme.palette.common.white, 0.3),
+    border: `1px solid ${alpha(theme.palette.common.white, 0.4)}`,
+    transform: 'translateY(-1px)',
   },
   '&:focus-within': {
-    backgroundColor: alpha(theme.palette.common.white, 0.9),
-    border: `1px solid ${theme.palette.primary.main}`,
-    boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
+    backgroundColor: alpha(theme.palette.common.white, 0.95),
+    border: `1px solid #CE0E2D`,
+    boxShadow: `0 0 0 3px ${alpha('#CE0E2D', 0.15)}, 0 8px 32px rgba(206, 14, 45, 0.2)`,
     '& input': {
       color: theme.palette.text.primary,
     },
     '& .MuiSvgIcon-root': {
-      color: theme.palette.primary.main,
+      color: '#CE0E2D',
     },
+    transform: 'translateY(-2px)',
   },
   marginLeft: theme.spacing(1),
   marginRight: theme.spacing(1),
   width: 'auto',
-  minWidth: 280,
+  minWidth: 320,
   [theme.breakpoints.down('md')]: {
-    minWidth: 200,
+    minWidth: 240,
   },
   [theme.breakpoints.down('sm')]: {
-    minWidth: 150,
+    minWidth: 180,
   },
 }));
 
@@ -131,44 +134,76 @@ const SearchInput = styled(InputBase)(({ theme }) => ({
 }));
 
 const NavButton = styled(Button)(({ theme, active }: { theme: any; active: boolean }) => ({
-  color: active ? theme.palette.primary.main : 'white',
-  backgroundColor: active ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
-  fontWeight: active ? 600 : 500,
-  borderRadius: 25,
-  padding: '8px 20px',
-  margin: '0 4px',
+  color: active ? '#CE0E2D' : 'white',
+  backgroundColor: active ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+  fontWeight: active ? 700 : 500,
+  borderRadius: 30,
+  padding: '10px 24px',
+  margin: '0 6px',
   textTransform: 'none',
-  fontSize: '0.9rem',
-  transition: 'all 0.2s ease-in-out',
+  fontSize: '0.95rem',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  backdropFilter: active ? 'blur(10px)' : 'none',
+  boxShadow: active ? '0 4px 20px rgba(206, 14, 45, 0.2)' : 'none',
   '&:hover': {
     backgroundColor: active 
       ? 'rgba(255, 255, 255, 1)' 
-      : 'rgba(255, 255, 255, 0.15)',
-    transform: 'translateY(-1px)',
+      : 'rgba(255, 255, 255, 0.2)',
+    transform: 'translateY(-2px)',
+    boxShadow: active 
+      ? '0 8px 25px rgba(206, 14, 45, 0.3)'
+      : '0 4px 15px rgba(255, 255, 255, 0.1)',
   },
 }));
 
 const UserChip = styled(Chip)(({ theme }) => ({
-  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  backgroundColor: 'rgba(255, 255, 255, 0.25)',
   color: 'white',
-  border: '1px solid rgba(255, 255, 255, 0.3)',
+  border: '2px solid rgba(255, 255, 255, 0.4)',
+  borderRadius: 25,
+  height: 44,
+  fontSize: '0.9rem',
+  fontWeight: 600,
+  backdropFilter: 'blur(10px)',
   '& .MuiChip-avatar': {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    color: theme.palette.primary.main,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    color: '#CE0E2D',
+    border: '2px solid rgba(255, 255, 255, 0.8)',
+    fontWeight: 700,
+  },
+  '& .MuiChip-label': {
+    paddingLeft: 12,
+    paddingRight: 16,
   },
   '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 15px rgba(255, 255, 255, 0.1)',
   },
-  transition: 'all 0.2s ease-in-out',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 }));
 
 const ModernDrawer = styled(Drawer)(({ theme }) => ({
   '& .MuiDrawer-paper': {
-    width: 300,
-    background: 'linear-gradient(180deg, #1976d2 0%, #1565c0 100%)',
+    width: 320,
+    background: 'linear-gradient(180deg, #CE0E2D 0%, #B71C1C 100%)',
     color: 'white',
     borderTopRightRadius: 24,
     borderBottomRightRadius: 24,
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+    backdropFilter: 'blur(20px)',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'url("data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.05\"%3E%3Cpath d=\"m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+      opacity: 0.1,
+      pointerEvents: 'none',
+    },
   },
 }));
 
@@ -280,24 +315,29 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
             onClick={() => handleNavigation('/auth/login')}
             startIcon={<LoginIcon />}
             sx={{
-              color: 'white',
-              borderColor: 'rgba(255, 255, 255, 0.5)',
+              color: scrollTrigger ? '#CE0E2D' : 'white',
+              borderColor: scrollTrigger ? 'rgba(206, 14, 45, 0.5)' : 'rgba(255, 255, 255, 0.5)',
               minWidth: '120px !important',
               width: '120px !important',
-              height: '40px !important',
+              height: '42px !important',
               textTransform: 'none',
-              fontWeight: 500,
+              fontWeight: 600,
               fontSize: '0.875rem',
               whiteSpace: 'nowrap',
-              padding: '8px 16px',
+              padding: '10px 18px',
               lineHeight: 1.2,
+              borderRadius: 25,
+              backdropFilter: 'blur(10px)',
               '& .MuiButton-startIcon': {
                 marginRight: '6px',
               },
               '&:hover': {
-                borderColor: 'white',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderColor: scrollTrigger ? '#CE0E2D' : 'white',
+                backgroundColor: scrollTrigger ? 'rgba(206, 14, 45, 0.1)' : 'rgba(255, 255, 255, 0.15)',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
               },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             {t('auth.login')}
@@ -307,25 +347,34 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
             onClick={() => handleNavigation('/auth/register')}
             startIcon={<RegisterIcon />}
             sx={{
-              backgroundColor: 'white',
-              color: theme.palette.primary.main,
-              minWidth: '120px !important',
-              width: '120px !important',
-              height: '40px !important',
+              background: scrollTrigger 
+                ? 'linear-gradient(135deg, #CE0E2D 0%, #B71C1C 100%)'
+                : 'rgba(255, 255, 255, 0.95)',
+              color: scrollTrigger ? 'white' : '#CE0E2D',
+              minWidth: '130px !important',
+              width: '130px !important',
+              height: '42px !important',
               textTransform: 'none',
-              fontWeight: 500,
+              fontWeight: 700,
               fontSize: '0.875rem',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
-              padding: '8px 16px',
+              padding: '10px 18px',
               lineHeight: 1.2,
+              borderRadius: 25,
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 15px rgba(206, 14, 45, 0.2)',
               '& .MuiButton-startIcon': {
                 marginRight: '6px',
               },
               '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                transform: 'translateY(-1px)',
+                background: scrollTrigger 
+                  ? 'linear-gradient(135deg, #B71C1C 0%, #CE0E2D 100%)'
+                  : 'rgba(255, 255, 255, 1)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 8px 25px rgba(206, 14, 45, 0.3)',
               },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             {t('auth.createAccount')}
@@ -655,7 +704,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
             left: 0,
             right: 0,
             zIndex: theme.zIndex.appBar + 1,
-            background: 'linear-gradient(90deg, #ff6b6b 0%, #ee5a24 100%)',
+            background: 'linear-gradient(90deg, #CE0E2D 0%, #D32F2F 100%)',
             color: 'white',
             py: 0.5,
             px: 2,
@@ -667,7 +716,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
           <Container maxWidth={maxWidth}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
               <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-                🔥 <strong>{t('auction.liveBiddingActive')}:</strong> {t('announcements.liveWatchCollection')}
+                🏆 <strong>{t('auction.liveBiddingActive')}:</strong> {t('announcements.liveWatchCollection')}
               </Typography>
               <Button
                 size="small"
@@ -681,7 +730,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                   mr: isRTL ? 1 : 0,
                 }}
                 variant="outlined"
-                onClick={() => router.push('/categories/watches-jewelry')}
+                onClick={() => router.push('/products')}
               >
                 {t('common.view')} {t('navigation.auctions')}
               </Button>
@@ -714,7 +763,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
               sx={{ 
                 mr: 2, 
                 display: { md: 'none' },
-                color: scrollTrigger ? 'primary.main' : 'white',
+                color: scrollTrigger ? '#CE0E2D' : 'white',
               }}
             >
               <MenuIcon />
@@ -729,7 +778,23 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
               }}
               onClick={() => handleNavigation('/')}
             >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Logo sx={{ height: { xs: 32, md: 40 } }} />
+              <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    color: scrollTrigger ? '#CE0E2D' : 'white',
+                    fontWeight: 700,
+                    fontSize: { xs: '1rem', md: '1.1rem' },
+                    letterSpacing: 0.5,
+                    textShadow: scrollTrigger ? 'none' : '0 2px 4px rgba(0,0,0,0.3)',
+                  }}
+                >
+                  Lebanon Auction
+                </Typography>
+              </Box>
+            </Box>
             </Box>
 
             {/* Desktop Navigation */}
@@ -779,50 +844,53 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                     }}
                   >
                     <List sx={{ py: 1 }}>
-                      <ListItem
-                        button
-                        onClick={() => {
-                          setSearchValue('vintage watches');
-                          handleSearch({ preventDefault: () => {} } as any);
-                        }}
-                      >
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          onClick={() => {
+                            setSearchValue('vintage watches');
+                            handleSearch({ preventDefault: () => {} } as any);
+                          }}
+                        >
                         <ListItemIcon>
                           <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
                         </ListItemIcon>
-                        <ListItemText 
-                          primary="vintage watches"
-                          primaryTypographyProps={{ fontSize: '0.9rem' }}
-                        />
+                          <ListItemText 
+                            primary="vintage watches"
+                            primaryTypographyProps={{ fontSize: '0.9rem' }}
+                          />
+                        </ListItemButton>
                       </ListItem>
-                      <ListItem
-                        button
-                        onClick={() => {
-                          setSearchValue('luxury cars');
-                          handleSearch({ preventDefault: () => {} } as any);
-                        }}
-                      >
-                        <ListItemIcon>
-                          <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary="luxury cars"
-                          primaryTypographyProps={{ fontSize: '0.9rem' }}
-                        />
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          onClick={() => {
+                            setSearchValue('luxury cars');
+                            handleSearch({ preventDefault: () => {} } as any);
+                          }}
+                        >
+                          <ListItemIcon>
+                            <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary="luxury cars"
+                            primaryTypographyProps={{ fontSize: '0.9rem' }}
+                          />
+                        </ListItemButton>
                       </ListItem>
-                      <ListItem
-                        button
-                        onClick={() => {
-                          setSearchValue('art collectibles');
-                          handleSearch({ preventDefault: () => {} } as any);
-                        }}
-                      >
-                        <ListItemIcon>
-                          <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary="art collectibles"
-                          primaryTypographyProps={{ fontSize: '0.9rem' }}
-                        />
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          onClick={() => {
+                            setSearchValue('art collectibles');
+                            handleSearch({ preventDefault: () => {} } as any);
+                          }}
+                        >
+                          <ListItemIcon>
+                            <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary="art collectibles"
+                            primaryTypographyProps={{ fontSize: '0.9rem' }}
+                          />
+                        </ListItemButton>
                       </ListItem>
                     </List>
                   </Box>
@@ -842,7 +910,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                 <>
                   <IconButton
                     color="inherit"
-                    sx={{ color: scrollTrigger ? 'primary.main' : 'white' }}
+                    sx={{ color: scrollTrigger ? '#CE0E2D' : 'white' }}
                   >
                     <Badge badgeContent={3} color="error">
                       <NotificationsIcon />
@@ -852,7 +920,7 @@ export default function ModernHeader({ maxWidth = 'xl' }: ModernHeaderProps) {
                   <IconButton
                     color="inherit"
                     onClick={() => handleNavigation('/watchlist')}
-                    sx={{ color: scrollTrigger ? 'primary.main' : 'white' }}
+                    sx={{ color: scrollTrigger ? '#CE0E2D' : 'white' }}
                   >
                     <Badge badgeContent={2} color="secondary">
                       <FavoriteIcon />

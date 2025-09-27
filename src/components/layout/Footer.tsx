@@ -81,7 +81,7 @@ export default function Footer() {
       {/* Main Footer */}
       <Box
         sx={{
-          bgcolor: '#0F1419', // Darker professional background like Emirates Auction
+          bgcolor: '#0F1419', // Darker professional background for Lebanon Auction
           color: 'white',
           position: 'relative',
         }}
