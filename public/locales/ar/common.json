@@ -1197,6 +1197,26 @@
       "fineJewelry": "65 ألف دولار"
     }
   },
+  "search": {
+    "title": "البحث في المزادات",
+    "placeholder": "ابحث عن السيارات الفاخرة، العقارات، المجوهرات، المقتنيات...",
+    "browseCategories": "تصفح الفئات",
+    "items": "قطعة",
+    "trendingSearches": "عمليات البحث الرائجة",
+    "results": "نتائج البحث",
+    "noResults": "لم يتم العثور على نتائج",
+    "tryDifferentKeywords": "جرب كلمات مفتاحية مختلفة أو تصفح الفئات",
+    "showingResults": "عرض {{count}} نتيجة لـ \"{{query}}\"",
+    "allCategories": "جميع الفئات",
+    "filters": "المرشحات",
+    "clearFilters": "مسح المرشحات",
+    "sortBy": "ترتيب حسب",
+    "relevance": "الصلة",
+    "priceHighToLow": "السعر: من الأعلى إلى الأقل",
+    "priceLowToHigh": "السعر: من الأقل إلى الأعلى",
+    "endingSoon": "تنتهي قريباً",
+    "recentlyAdded": "أضيفت حديثاً"
+  },
   "announcements": {
     "liveWatchCollection": "ساعات نادرة من مجموعة فينتج تنتهي خلال ساعتين!"
   }

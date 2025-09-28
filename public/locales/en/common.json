@@ -684,6 +684,26 @@
       }
     }
   },
+  "search": {
+    "title": "Search Auctions",
+    "placeholder": "Search luxury cars, properties, jewelry, collectibles...",
+    "browseCategories": "Browse Categories",
+    "items": "items",
+    "trendingSearches": "Trending Searches",
+    "results": "Search Results",
+    "noResults": "No results found",
+    "tryDifferentKeywords": "Try different keywords or browse categories",
+    "showingResults": "Showing {{count}} results for \"{{query}}\"",
+    "allCategories": "All Categories",
+    "filters": "Filters",
+    "clearFilters": "Clear Filters",
+    "sortBy": "Sort By",
+    "relevance": "Relevance",
+    "priceHighToLow": "Price: High to Low",
+    "priceLowToHigh": "Price: Low to High",
+    "endingSoon": "Ending Soon",
+    "recentlyAdded": "Recently Added"
+  },
   "announcements": {
     "liveWatchCollection": "Rare vintage watch collection ending in 2 hours!"
   },
