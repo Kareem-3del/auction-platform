@@ -49,25 +49,29 @@ export function LanguageSwitcher() {
 
   return (
     <>
-      <Box
+      <IconButton
         onClick={handleClick}
         sx={{
           cursor: 'pointer',
-          color: 'rgba(255, 255, 255, 0.7)',
-          fontSize: '11px',
-          fontWeight: 400,
-          transition: 'color 0.3s ease',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          '&:hover': { 
-            color: '#CE0E2D',
+          color: 'text.secondary',
+          p: 1.5,
+          borderRadius: 2,
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            color: 'primary.main',
+            backgroundColor: 'rgba(206, 14, 45, 0.08)',
+            transform: 'translateY(-1px)',
           },
         }}
       >
-        {currentLanguage.name}
-        <Iconify icon="eva:chevron-down-fill" width={12} />
-      </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.9rem', fontWeight: 500 }}>
+          {currentLanguage.flag}
+          <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 500 }}>
+            {currentLanguage.code.toUpperCase()}
+          </Typography>
+          <Iconify icon="eva:chevron-down-fill" width={12} />
+        </Box>
+      </IconButton>
 
       <Menu
         anchorEl={anchorEl}
@@ -86,10 +90,12 @@ export function LanguageSwitcher() {
             sx: {
               mt: 1,
               minWidth: 140,
-              backgroundColor: '#0F1419',
-              color: 'white',
-              borderRadius: 2,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+              backdropFilter: 'blur(20px)',
+              color: 'text.primary',
+              borderRadius: 3,
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
             },
           },
         }}
@@ -103,14 +109,21 @@ export function LanguageSwitcher() {
               typography: 'body2',
               px: 2,
               py: 1,
-              color: 'rgba(255, 255, 255, 0.9)',
+              mx: 1,
+              my: 0.5,
+              borderRadius: 2,
+              color: 'text.primary',
+              fontFamily: '"Inter", sans-serif',
+              fontWeight: 500,
+              transition: 'all 0.15s ease',
               '&:hover': {
-                backgroundColor: 'rgba(206, 14, 45, 0.1)',
-                color: '#CE0E2D',
+                backgroundColor: 'rgba(206, 14, 45, 0.08)',
+                color: 'primary.main',
               },
               '&.Mui-selected': {
-                backgroundColor: 'rgba(206, 14, 45, 0.2)',
-                color: '#CE0E2D',
+                backgroundColor: 'rgba(206, 14, 45, 0.12)',
+                color: 'primary.main',
+                fontWeight: 600,
               },
             }}
           >

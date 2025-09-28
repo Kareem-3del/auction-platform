@@ -360,13 +360,11 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
           </Breadcrumbs>
         </Paper>
 
-        {/* MAIN LAYOUT - Ultra Compact Design */}
+        {/* MAIN LAYOUT - Spacious Design */}
         <Box sx={{ 
           display: 'flex', 
           flexDirection: 'column',
-          gap: { xs: 1.5, md: 2 },
-          maxHeight: 'calc(100vh - 120px)',
-          overflow: 'hidden'
+          gap: { xs: 3, md: 4 }
         }}>
           
           {/* TOP SECTION - Main Content */}
@@ -376,7 +374,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
             <Grid item xs={12} lg={3} sx={{ 
               display: 'flex', 
               flexDirection: 'column',
-              gap: { xs: 1.5, md: 2 }
+              gap: { xs: 2.5, md: 3 }
             }}>
               
               {/* Auction Status & Timer */}
@@ -554,11 +552,12 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               <Paper sx={{ 
                 position: 'relative',
                 width: '100%',
-                aspectRatio: '4/3',
-                maxHeight: { xs: '220px', md: '280px', lg: '320px' },
+                aspectRatio: '16/10',
+                minHeight: { xs: '350px', md: '450px', lg: '500px' },
+                maxHeight: { xs: '400px', md: '500px', lg: '600px' },
                 overflow: 'hidden',
-                borderRadius: 1.5,
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                borderRadius: 2,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
               }}>
                 <Box
                   component="img"
@@ -658,7 +657,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
             <Grid item xs={12} lg={3} sx={{ 
               display: 'flex', 
               flexDirection: 'column',
-              gap: { xs: 3, md: 4 }
+              gap: { xs: 3.5, md: 4.5 }
             }}>
               
               {/* Current Bid Display */}
@@ -928,9 +927,9 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
             {/* Bid History */}
             <Grid item xs={12} md={6} lg={4}>
               <Card sx={{ 
-                height: { xs: '250px', md: '280px' },
-                borderRadius: 1.5,
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                minHeight: { xs: '350px', md: '400px' },
+                borderRadius: 2,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
                 bgcolor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column'
@@ -950,7 +949,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                   </Typography>
                 </Box>
                 <CardContent sx={{ p: 0 }}>
-                  <Box sx={{ height: { xs: 'auto', lg: '280px' }, minHeight: { xs: '200px', lg: '280px' }, overflow: 'auto' }}>
+                  <Box sx={{ height: { xs: 'auto', lg: '350px' }, minHeight: { xs: '280px', lg: '350px' }, overflow: 'auto' }}>
                     <BidHistory
                       auctionId={product.id}
                       currentBid={displayCurrentBid}
@@ -966,9 +965,9 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
             {/* Product Description */}
             <Grid item xs={12} md={6} lg={4}>
               <Card sx={{ 
-                height: { xs: '250px', md: '280px' },
-                borderRadius: 1.5,
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                minHeight: { xs: '350px', md: '400px' },
+                borderRadius: 2,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
                 bgcolor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column'
@@ -989,7 +988,7 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                   </Typography>
                 </Box>
                 <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ height: { xs: 'auto', lg: '280px' }, minHeight: { xs: '200px', lg: '280px' }, overflow: 'auto' }}>
+                  <Box sx={{ height: { xs: 'auto', lg: '350px' }, minHeight: { xs: '280px', lg: '350px' }, overflow: 'auto' }}>
                     <Typography variant="body1" sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
                       {product.description}
                     </Typography>
@@ -1001,10 +1000,10 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
             {/* Quick Bid Interface */}
             <Grid item xs={12} lg={4}>
               <Card sx={{ 
-                height: { xs: '250px', md: '280px' },
-                borderRadius: 1.5,
-                boxShadow: '0 2px 8px rgba(206, 14, 45, 0.15)',
-                border: '1px solid rgba(206, 14, 45, 0.1)',
+                minHeight: { xs: '350px', md: '400px' },
+                borderRadius: 2,
+                boxShadow: '0 8px 32px rgba(206, 14, 45, 0.15)',
+                border: '2px solid rgba(206, 14, 45, 0.2)',
                 bgcolor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column'

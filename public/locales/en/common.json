@@ -60,7 +60,14 @@
     "tickets": "Support Tickets",
     "createTicket": "Create Ticket",
     "profile": "My Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "watchlist": "Watchlist"
+  },
+  "header": {
+    "liveAuctions": "Live Auctions",
+    "featuredCollection": "Featured Collection",
+    "premiumWatchesAndCars": "Premium Watches & Luxury Cars",
+    "viewAuctions": "View Auctions"
   },
   "common": {
     "save": "Save",
@@ -120,6 +127,7 @@
     "private": "Private",
     "required": "Required",
     "optional": "Optional",
+    "siteName": "Lebanon Auction",
     "user": "User",
     "all": "All",
     "category": "Category",
@@ -507,7 +515,9 @@
       "learnMore": "Learn More",
       "activeUsers": "Active Users",
       "itemsSold": "Items Sold",
-      "totalVolume": "Total Volume", 
+      "totalVolume": "Total Volume",
+      "topAuctions": "Top Auctions",
+      "hottestDeals": "Hottest deals ending soon", 
       "scrollToExplore": "Scroll to explore",
       "currentBid": "Current Bid",
       "participants": "Participants",
@@ -672,20 +682,6 @@
         "fineArt": "Paintings & Sculptures",
         "fineJewelry": "Diamonds & Precious Stones"
       }
-    },
-    "sections": {
-      "endingSoon": "Ending Soon",
-      "endingSoonSubtitle": "Don't miss these final opportunities",
-      "trendingAuctions": "Trending Auctions",
-      "mostPopular": "Most popular this week",
-      "featuredCollection": "Featured Collection",
-      "editorsChoice": "Editor's pick of exceptional pieces",
-      "trending": "Trending",
-      "explorePremiumCategories": "Explore Premium Categories",
-      "discoverExtraordinaryItems": "Discover extraordinary items across our curated collection of luxury categories",
-      "viewAll": "View All",
-      "retry": "Retry",
-      "items": "items"
     }
   },
   "announcements": {

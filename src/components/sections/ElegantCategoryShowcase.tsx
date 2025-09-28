@@ -256,7 +256,7 @@ export function ElegantCategoryShowcase() {
                       }}
                     >
                       {featuredCategories[0] && (
-                        <featuredCategories[0].icon sx={{ fontSize: 40, color: 'white' }} />
+                        <Box component={featuredCategories[0].icon} sx={{ fontSize: 40, color: 'white' }} />
                       )}
                     </Box>
                     <Typography

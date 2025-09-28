@@ -14,6 +14,7 @@ interface LocaleContextType {
   t: (key: string, params?: Record<string, any>) => string;
   isRTL: boolean;
   translations: Translations;
+  isLoading: boolean;
   getLocalizedField: (obj: any, fieldName: string, fallbackLocale?: string) => string;
   formatCurrency: (amount: number, currency?: string) => string;
   formatDate: (date: Date | string, options?: Intl.DateTimeFormatOptions) => string;
@@ -44,28 +45,35 @@ interface LocaleProviderProps {
 export function LocaleProvider({ children, initialLocale }: LocaleProviderProps) {
   const [locale, setLocaleState] = useState<string>(initialLocale || defaultLocale);
   const [translations, setTranslations] = useState<Translations>({});
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
   const pathname = usePathname();
 
   // Load translations
   useEffect(() => {
     const loadTranslations = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch(`/locales/${locale}/common.json`);
         if (response.ok) {
           const data = await response.json();
           setTranslations(data);
+          console.log('Translations loaded successfully for locale:', locale);
         } else {
           // Fallback to default locale
+          console.warn(`Failed to load translations for ${locale}, falling back to ${defaultLocale}`);
           const fallbackResponse = await fetch(`/locales/${defaultLocale}/common.json`);
           if (fallbackResponse.ok) {
             const fallbackData = await fallbackResponse.json();
             setTranslations(fallbackData);
+            console.log('Fallback translations loaded for locale:', defaultLocale);
           }
         }
       } catch (error) {
         console.error('Failed to load translations:', error);
         setTranslations({});
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -99,10 +107,17 @@ export function LocaleProvider({ children, initialLocale }: LocaleProviderProps)
   };
 
   const t = (key: string, params?: Record<string, any>): string => {
+    // If translations are still loading, return a placeholder or the key
+    if (isLoading || Object.keys(translations).length === 0) {
+      return key;
+    }
+    
     const value = getNestedValue(translations, key);
     if (typeof value === 'string') {
       return params ? interpolate(value, params) : value;
     }
+    
+    console.warn(`Translation missing for key: ${key}`);
     return key; // Return key if translation not found
   };
 
@@ -166,6 +181,7 @@ export function LocaleProvider({ children, initialLocale }: LocaleProviderProps)
         t,
         isRTL,
         translations,
+        isLoading,
         getLocalizedField,
         formatCurrency,
         formatDate,

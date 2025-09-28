@@ -72,7 +72,7 @@ const getSectionConfigs = (t: (key: string) => string) => ({
 
 export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPremiumAuctionsProps) {
   const router = useRouter();
-  const { t, isRTL } = useLocale();
+  const { t, isRTL, isLoading: translationsLoading } = useLocale();
   const [activeTab, setActiveTab] = useState(0);
   const [products, setProducts] = useState<{ [key: string]: ProductCard[] }>({});
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
@@ -327,11 +327,13 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
                           },
                         }}
                       >
-                        {sectionKey === 'ending' ? t('homepage.sections.viewAllEndingSoon') :
-                         sectionKey === 'trending' ? t('homepage.sections.viewAllTrending') :
-                         sectionKey === 'featured' ? t('homepage.sections.viewAllFeatured') :
-                         sectionKey === 'recent' ? t('homepage.sections.viewAllRecent') :
-                         t('homepage.sections.viewAll')}
+                        {translationsLoading ? 'Loading...' : (
+                          sectionKey === 'ending' ? t('homepage.sections.viewAllEndingSoon') :
+                          sectionKey === 'trending' ? t('homepage.sections.viewAllTrending') :
+                          sectionKey === 'featured' ? t('homepage.sections.viewAllFeatured') :
+                          sectionKey === 'recent' ? t('homepage.sections.viewAllRecent') :
+                          t('homepage.sections.viewAll')
+                        )}
                       </Button>
                     </Box>
                   </>
@@ -483,11 +485,13 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
                       },
                     }}
                   >
-                    {currentSection === 'ending' ? t('homepage.sections.viewAllEndingSoon') :
-                     currentSection === 'trending' ? t('homepage.sections.viewAllTrending') :
-                     currentSection === 'featured' ? t('homepage.sections.viewAllFeatured') :
-                     currentSection === 'recent' ? t('homepage.sections.viewAllRecent') :
-                     t('homepage.sections.viewAll')}
+                    {translationsLoading ? 'Loading...' : (
+                      currentSection === 'ending' ? t('homepage.sections.viewAllEndingSoon') :
+                      currentSection === 'trending' ? t('homepage.sections.viewAllTrending') :
+                      currentSection === 'featured' ? t('homepage.sections.viewAllFeatured') :
+                      currentSection === 'recent' ? t('homepage.sections.viewAllRecent') :
+                      t('homepage.sections.viewAll')
+                    )}
                   </Button>
                 </Box>
               </>

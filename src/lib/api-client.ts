@@ -425,7 +425,7 @@ export const notificationsAPI = {
 // Search APIs
 export const searchAPI = {
   searchAuctions: (query: string, filters?: Partial<SearchFilters>): Promise<APIResponse<SearchResponse<ProductCard>>> => 
-    apiClient.get('/api/search', { q: query, ...filters }),
+    apiClient.get('/api/search/', { q: query, ...filters }),
 
   getSuggestions: (query: string): Promise<APIResponse<{ suggestions: SearchSuggestion[] }>> => 
     apiClient.get('/api/search/suggestions', { q: query }),

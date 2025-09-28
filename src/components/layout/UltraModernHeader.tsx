@@ -117,8 +117,8 @@ const SearchInput = styled(InputBase)(({ theme }) => ({
   fontWeight: 500,
   '& .MuiInputBase-input': {
     padding: theme.spacing(1.5, 1, 1.5, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(5)})`,
-    paddingRight: theme.spacing(2),
+    paddingLeft: theme.direction === 'rtl' ? theme.spacing(2) : `calc(1em + ${theme.spacing(5)})`,
+    paddingRight: theme.direction === 'rtl' ? `calc(1em + ${theme.spacing(5)})` : theme.spacing(2),
     transition: theme.transitions.create(['width', 'color']),
     '&::placeholder': {
       opacity: 0.7,
@@ -131,6 +131,8 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 2),
   height: '100%',
   position: 'absolute',
+  left: theme.direction === 'rtl' ? 'auto' : 0,
+  right: theme.direction === 'rtl' ? 0 : 'auto',
   pointerEvents: 'none',
   display: 'flex',
   alignItems: 'center',
@@ -145,7 +147,7 @@ const NavButton = styled(Button)(({ theme, active }: { theme: any; active: boole
   fontWeight: active ? 700 : 500,
   borderRadius: 12,
   padding: '10px 20px',
-  margin: '0 4px',
+  margin: theme.direction === 'rtl' ? '0 4px' : '0 4px',
   textTransform: 'none',
   fontSize: '0.95rem',
   fontFamily: '"Inter", sans-serif',
@@ -174,7 +176,13 @@ const NavButton = styled(Button)(({ theme, active }: { theme: any; active: boole
     },
   },
   '& .MuiButton-startIcon': {
-    marginRight: 8,
+    marginRight: theme.direction === 'rtl' ? 0 : 8,
+    marginLeft: theme.direction === 'rtl' ? 8 : -4,
+    fontSize: '1.1rem',
+  },
+  '& .MuiButton-endIcon': {
+    marginLeft: theme.direction === 'rtl' ? 0 : 8,
+    marginRight: theme.direction === 'rtl' ? 8 : 0,
     fontSize: '1.1rem',
   },
 }));
@@ -198,8 +206,8 @@ const UserChip = styled(Chip)(({ theme }) => ({
     fontSize: '0.85rem',
   },
   '& .MuiChip-label': {
-    paddingLeft: 12,
-    paddingRight: 16,
+    paddingLeft: theme.direction === 'rtl' ? 16 : 12,
+    paddingRight: theme.direction === 'rtl' ? 12 : 16,
   },
   '&:hover': {
     backgroundColor: alpha(theme.palette.grey[100], 1),
@@ -214,8 +222,10 @@ const ModernDrawer = styled(Drawer)(({ theme }) => ({
     width: 300,
     background: 'rgba(255, 255, 255, 0.98)',
     backdropFilter: 'blur(20px)',
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
+    borderTopRightRadius: theme.direction === 'rtl' ? 0 : 20,
+    borderBottomRightRadius: theme.direction === 'rtl' ? 0 : 20,
+    borderTopLeftRadius: theme.direction === 'rtl' ? 20 : 0,
+    borderBottomLeftRadius: theme.direction === 'rtl' ? 20 : 0,
     border: 'none',
     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
     color: theme.palette.text.primary,
@@ -338,10 +348,10 @@ export default function UltraModernHeader() {
           <Container maxWidth="xl">
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
               <LiveBadge>
-                🔴 Live Auctions
+                🔴 {t('header.liveAuctions', 'Live Auctions')}
               </LiveBadge>
               <Typography variant="body2" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
-                🏆 <strong>Featured Collection:</strong> Premium Watches & Luxury Cars
+                🏆 <strong>{t('header.featuredCollection', 'Featured Collection')}:</strong> {t('header.premiumWatchesAndCars', 'Premium Watches & Luxury Cars')}
               </Typography>
               <Button
                 size="small"
@@ -362,7 +372,7 @@ export default function UltraModernHeader() {
                   },
                 }}
               >
-                View Auctions
+{t('header.viewAuctions', 'View Auctions')}
               </Button>
             </Box>
           </Container>
@@ -371,95 +381,108 @@ export default function UltraModernHeader() {
 
       <UltraModernAppBar position="fixed" scrolled={scrollTrigger} sx={{ top: 48 }}>
         <Container maxWidth="xl">
-          <Toolbar sx={{ px: { xs: 0, sm: 2 }, py: 1.5, minHeight: '80px !important' }}>
-            {/* Mobile Menu Button */}
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ 
-                mr: 2, 
-                display: { md: 'none' },
-                color: 'text.primary',
-                p: 1.5,
-                borderRadius: 2,
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                },
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
+          <Toolbar sx={{ 
+            px: { xs: 0, sm: 2 }, 
+            py: 1.5, 
+            minHeight: '80px !important',
+            direction: isRTL ? 'rtl' : 'ltr',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            {/* Left Section (Right in RTL) */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: { xs: 1, md: 2 },
+              order: { xs: isRTL ? 2 : 1, md: 1 }
+            }}>
+              {/* Mobile Menu Button */}
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerToggle}
+                sx={{ 
+                  display: { md: 'none' },
+                  color: 'text.primary',
+                  p: 1.5,
+                  borderRadius: 2,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
 
-            {/* Logo & Brand */}
-            <Box 
-              sx={{ 
-                flexGrow: 0, 
-                mr: { xs: 2, md: 4 },
-                cursor: 'pointer',
-                display: 'flex',
+              {/* Logo & Brand */}
+              <Box 
+                sx={{ 
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  py: 1,
+                  px: 1,
+                  borderRadius: 2,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                    transform: 'translateY(-1px)',
+                  },
+                }}
+                onClick={() => handleNavigation('/')}
+              >
+                <Logo sx={{ height: { xs: 36, md: 40 } }} />
+                <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      color: 'text.primary',
+                      fontWeight: 800,
+                      fontSize: { xs: '1.1rem', md: '1.2rem' },
+                      fontFamily: '"Inter", sans-serif',
+                      letterSpacing: '-0.02em',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    {t('common.siteName', 'Lebanon Auction')}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Desktop Navigation */}
+              <Box sx={{ 
+                display: { xs: 'none', md: 'flex' },
                 alignItems: 'center',
-                gap: 2,
-                py: 1,
-                px: 1,
-                borderRadius: 2,
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.04),
-                  transform: 'translateY(-1px)',
-                },
-              }}
-              onClick={() => handleNavigation('/')}
-            >
-              <Logo sx={{ height: { xs: 36, md: 40 } }} />
-              <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    color: 'text.primary',
-                    fontWeight: 800,
-                    fontSize: { xs: '1.1rem', md: '1.2rem' },
-                    fontFamily: '"Inter", sans-serif',
-                    letterSpacing: '-0.02em',
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  Lebanon Auction
-                </Typography>
+                gap: 0.5,
+                ml: 2,
+              }}>
+                {navigation.map((item) => (
+                  <NavButton
+                    key={item.name}
+                    active={isActivePath(item.href)}
+                    onClick={() => handleNavigation(item.href)}
+                    startIcon={!isRTL ? <item.icon /> : undefined}
+                    endIcon={isRTL ? <item.icon /> : undefined}
+                  >
+                    {t(item.name)}
+                  </NavButton>
+                ))}
               </Box>
             </Box>
 
-            {/* Desktop Navigation */}
-            <Box sx={{ 
-              display: { xs: 'none', md: 'flex' },
-              alignItems: 'center',
-              gap: 0.5,
-              flexGrow: 0,
-              mr: 2,
-            }}>
-              {navigation.map((item) => (
-                <NavButton
-                  key={item.name}
-                  active={isActivePath(item.href)}
-                  onClick={() => handleNavigation(item.href)}
-                  startIcon={<item.icon />}
-                >
-                  {t(item.name)}
-                </NavButton>
-              ))}
-            </Box>
-
-            {/* Search Bar */}
+            {/* Center Section - Search Bar */}
             <Box sx={{ 
               flexGrow: 1, 
               display: 'flex', 
               justifyContent: 'center',
               maxWidth: 400,
               mx: 'auto',
+              order: 2
             }}>
               <SearchContainer>
                 <SearchIconWrapper>
@@ -478,12 +501,12 @@ export default function UltraModernHeader() {
               </SearchContainer>
             </Box>
 
-            {/* Right Actions */}
+            {/* Right Section (Left in RTL) */}
             <Box sx={{ 
               display: 'flex', 
               alignItems: 'center', 
               gap: 1,
-              ml: 2,
+              order: { xs: isRTL ? 1 : 3, md: 3 }
             }}>
               {/* Language Switcher */}
               <LanguageSwitcher />
@@ -515,15 +538,58 @@ export default function UltraModernHeader() {
               {isAuthenticated ? (
                 <UserChip
                   avatar={
-                    <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}>
+                    <Avatar sx={{ 
+                      bgcolor: '#CE0E2D', 
+                      color: 'white',
+                      width: 36,
+                      height: 36,
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 8px rgba(206, 14, 45, 0.3)'
+                    }}>
                       {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                     </Avatar>
                   }
-                  label={`${user?.firstName || 'User'}`}
+                  label={
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <Typography variant="body2" sx={{ 
+                        fontWeight: 600, 
+                        fontSize: '0.85rem',
+                        color: 'text.primary'
+                      }}>
+                        {user?.firstName || 'User'}
+                      </Typography>
+                      {user?.userType && (
+                        <Typography variant="caption" sx={{ 
+                          color: '#CE0E2D', 
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>
+                          {user.userType === 'SUPER_ADMIN' ? 'Admin' : 
+                           user.userType === 'AGENT' ? 'Agent' : 
+                           user.userType === 'ADMIN' ? 'Admin' : 'Member'}
+                        </Typography>
+                      )}
+                    </Box>
+                  }
                   onClick={handleUserMenuOpen}
-                  deleteIcon={<ArrowDownIcon />}
+                  deleteIcon={<ArrowDownIcon sx={{ fontSize: '18px', color: 'text.secondary' }} />}
                   onDelete={handleUserMenuOpen}
                   clickable
+                  sx={{
+                    '& .MuiChip-label': {
+                      px: 1.5,
+                      py: 0.5
+                    },
+                    minHeight: 48,
+                    border: '2px solid rgba(206, 14, 45, 0.1)',
+                    '&:hover': {
+                      border: '2px solid rgba(206, 14, 45, 0.2)',
+                      backgroundColor: 'rgba(206, 14, 45, 0.04)',
+                    }
+                  }}
                 />
               ) : (
                 <Stack direction="row" spacing={1}>
@@ -549,7 +615,7 @@ export default function UltraModernHeader() {
                       },
                     }}
                   >
-                    Log in
+{t('auth.login', 'Log in')}
                   </Button>
                   <Button
                     variant="contained"
@@ -574,7 +640,7 @@ export default function UltraModernHeader() {
                       },
                     }}
                   >
-                    Sign up
+{t('auth.signUp', 'Sign up')}
                   </Button>
                 </Stack>
               )}
@@ -611,27 +677,68 @@ export default function UltraModernHeader() {
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
                 {/* User Info */}
-                <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <Typography variant="subtitle2" fontWeight={700} fontFamily='"Inter", sans-serif'>
-                    {user?.firstName} {user?.lastName}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: '"Inter", sans-serif' }}>
-                    {user?.email}
-                  </Typography>
+                <Box sx={{ px: 3, py: 2.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                    <Avatar sx={{ 
+                      bgcolor: '#CE0E2D', 
+                      color: 'white',
+                      width: 40,
+                      height: 40,
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      boxShadow: '0 2px 8px rgba(206, 14, 45, 0.3)'
+                    }}>
+                      {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={700} fontFamily='"Inter", sans-serif' sx={{ mb: 0.5 }}>
+                        {user?.firstName} {user?.lastName}
+                      </Typography>
+                      <Typography variant="caption" sx={{ 
+                        color: 'text.secondary', 
+                        fontFamily: '"Inter", sans-serif',
+                        fontSize: '0.75rem'
+                      }}>
+                        {user?.email}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  {user?.userType && (
+                    <Box sx={{ 
+                      display: 'inline-flex',
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 1,
+                      backgroundColor: 'rgba(206, 14, 45, 0.1)',
+                      border: '1px solid rgba(206, 14, 45, 0.2)'
+                    }}>
+                      <Typography variant="caption" sx={{ 
+                        color: '#CE0E2D', 
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        {user.userType === 'SUPER_ADMIN' ? '👑 Super Admin' : 
+                         user.userType === 'AGENT' ? '🏢 Agent' : 
+                         user.userType === 'ADMIN' ? '⚡ Admin' : '👤 Member'}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
 
                 <MenuItem onClick={() => handleNavigation('/profile')}>
                   <ListItemIcon sx={{ color: 'text.secondary' }}>
                     <PersonIcon fontSize="small" />
                   </ListItemIcon>
-                  Profile
+{t('navigation.profile', 'Profile')}
                 </MenuItem>
 
                 <MenuItem onClick={() => handleNavigation('/watchlist')}>
                   <ListItemIcon sx={{ color: 'text.secondary' }}>
                     <FavoriteIcon fontSize="small" />
                   </ListItemIcon>
-                  Watchlist
+{t('navigation.watchlist', 'Watchlist')}
                 </MenuItem>
 
                 {(user?.userType === 'AGENT' || user?.userType === 'ADMIN' || user?.userType === 'SUPER_ADMIN') && (
@@ -639,7 +746,7 @@ export default function UltraModernHeader() {
                     <ListItemIcon sx={{ color: 'primary.main' }}>
                       <DashboardIcon fontSize="small" />
                     </ListItemIcon>
-                    Dashboard
+{t('navigation.dashboard', 'Dashboard')}
                   </MenuItem>
                 )}
 
@@ -647,7 +754,7 @@ export default function UltraModernHeader() {
                   <ListItemIcon sx={{ color: 'text.secondary' }}>
                     <SettingsIcon fontSize="small" />
                   </ListItemIcon>
-                  Settings
+{t('navigation.settings', 'Settings')}
                 </MenuItem>
 
                 <Divider sx={{ my: 1, borderColor: alpha(theme.palette.divider, 0.1) }} />
@@ -656,7 +763,7 @@ export default function UltraModernHeader() {
                   <ListItemIcon sx={{ color: 'error.main' }}>
                     <LogoutIcon fontSize="small" />
                   </ListItemIcon>
-                  Log out
+{t('auth.logout', 'Log out')}
                 </MenuItem>
               </Menu>
             </Box>
@@ -666,6 +773,7 @@ export default function UltraModernHeader() {
         {/* Mobile Drawer */}
         <ModernDrawer
           variant="temporary"
+          anchor={isRTL ? 'right' : 'left'}
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
@@ -676,7 +784,7 @@ export default function UltraModernHeader() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Logo sx={{ height: 32 }} />
                 <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1.1rem', fontFamily: '"Inter", sans-serif' }}>
-                  Lebanon Auction
+{t('common.siteName', 'Lebanon Auction')}
                 </Typography>
               </Box>
               <IconButton 
@@ -695,24 +803,58 @@ export default function UltraModernHeader() {
             {isAuthenticated && (
               <Box sx={{ 
                 mb: 3, 
-                p: 2, 
-                bgcolor: alpha(theme.palette.primary.main, 0.04), 
+                p: 3, 
+                bgcolor: 'rgba(206, 14, 45, 0.04)', 
                 borderRadius: 3,
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                border: '2px solid rgba(206, 14, 45, 0.1)',
               }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: 'primary.main', width: 44, height: 44 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Avatar sx={{ 
+                    bgcolor: '#CE0E2D', 
+                    color: 'white',
+                    width: 44, 
+                    height: 44,
+                    fontSize: '1.1rem',
+                    fontWeight: 700,
+                    boxShadow: '0 2px 8px rgba(206, 14, 45, 0.3)'
+                  }}>
                     {user?.firstName?.[0] || 'U'}
                   </Avatar>
-                  <Box>
-                    <Typography variant="subtitle2" fontWeight={700} fontFamily='"Inter", sans-serif'>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle2" fontWeight={700} fontFamily='"Inter", sans-serif' sx={{ mb: 0.5 }}>
                       {user?.firstName} {user?.lastName}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: '"Inter", sans-serif' }}>
+                    <Typography variant="caption" sx={{ 
+                      color: 'text.secondary', 
+                      fontFamily: '"Inter", sans-serif',
+                      fontSize: '0.75rem'
+                    }}>
                       {user?.email}
                     </Typography>
                   </Box>
                 </Box>
+                {user?.userType && (
+                  <Box sx={{ 
+                    display: 'inline-flex',
+                    px: 2,
+                    py: 0.8,
+                    borderRadius: 2,
+                    backgroundColor: 'rgba(206, 14, 45, 0.1)',
+                    border: '1px solid rgba(206, 14, 45, 0.2)'
+                  }}>
+                    <Typography variant="caption" sx={{ 
+                      color: '#CE0E2D', 
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      {user.userType === 'SUPER_ADMIN' ? '👑 Super Admin' : 
+                       user.userType === 'AGENT' ? '🏢 Agent' : 
+                       user.userType === 'ADMIN' ? '⚡ Admin' : '👤 Member'}
+                    </Typography>
+                  </Box>
+                )}
               </Box>
             )}
 
@@ -761,7 +903,7 @@ export default function UltraModernHeader() {
                         <FavoriteIcon />
                       </ListItemIcon>
                       <ListItemText 
-                        primary="Watchlist" 
+primary={t('navigation.watchlist', 'Watchlist')} 
                         primaryTypographyProps={{ fontFamily: '"Inter", sans-serif', fontWeight: 600 }}
                       />
                     </ListItemButton>
@@ -773,7 +915,7 @@ export default function UltraModernHeader() {
                         <PersonIcon />
                       </ListItemIcon>
                       <ListItemText 
-                        primary="Profile" 
+primary={t('navigation.profile', 'Profile')} 
                         primaryTypographyProps={{ fontFamily: '"Inter", sans-serif', fontWeight: 600 }}
                       />
                     </ListItemButton>
@@ -786,7 +928,7 @@ export default function UltraModernHeader() {
                           <DashboardIcon />
                         </ListItemIcon>
                         <ListItemText 
-                          primary="Dashboard" 
+primary={t('navigation.dashboard', 'Dashboard')} 
                           primaryTypographyProps={{ 
                             fontFamily: '"Inter", sans-serif',
                             color: 'primary.main',
@@ -805,7 +947,7 @@ export default function UltraModernHeader() {
                         <LogoutIcon />
                       </ListItemIcon>
                       <ListItemText 
-                        primary="Log out" 
+primary={t('auth.logout', 'Log out')} 
                         primaryTypographyProps={{ 
                           fontFamily: '"Inter", sans-serif',
                           color: 'error.main',
@@ -840,7 +982,7 @@ export default function UltraModernHeader() {
                         },
                       }}
                     >
-                      Log in
+  {t('auth.login', 'Log in')}
                     </Button>
                     <Button
                       fullWidth
@@ -860,7 +1002,7 @@ export default function UltraModernHeader() {
                         },
                       }}
                     >
-                      Sign up
+  {t('auth.signUp', 'Sign up')}
                     </Button>
                   </Box>
                 </>

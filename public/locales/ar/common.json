@@ -40,7 +40,14 @@
     "tickets": "تذاكر الدعم",
     "createTicket": "إنشاء تذكرة",
     "profile": "ملفي الشخصي",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "watchlist": "قائمة المراقبة"
+  },
+  "header": {
+    "liveAuctions": "مزادات مباشرة",
+    "featuredCollection": "المجموعة المميزة",
+    "premiumWatchesAndCars": "الساعات الفاخرة والسيارات",
+    "viewAuctions": "عرض المزادات"
   },
   "common": {
     "save": "حفظ",
@@ -98,6 +105,7 @@
     "private": "خاص",
     "required": "مطلوب",
     "optional": "اختياري",
+    "siteName": "مزاد لبنان",
     "user": "مستخدم",
     "all": "الكل",
     "category": "الفئة",
@@ -127,6 +135,7 @@
     "login": "تسجيل الدخول",
     "logout": "تسجيل الخروج",
     "register": "التسجيل",
+    "signUp": "التسجيل",
     "createAccount": "إنشاء حساب",
     "forgotPassword": "نسيت كلمة المرور",
     "resetPassword": "إعادة تعيين كلمة المرور",
@@ -1066,6 +1075,8 @@
       "activeUsers": "مستخدم نشط",
       "itemsSold": "قطعة مباعة",
       "totalVolume": "إجمالي الحجم",
+      "topAuctions": "أفضل المزادات",
+      "hottestDeals": "أحدث العروض المنتهية قريباً",
       "scrollToExplore": "مرر لأسفل للاستكشاف",
       "currentBid": "المزايدة الحالية",
       "participants": "المشاركون",

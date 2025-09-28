@@ -154,7 +154,7 @@ export default function SearchPage() {
 
       console.log('Search API call:', `/api/search?${queryParams.toString()}`);
 
-      const response = await fetch(`/api/search?${queryParams.toString()}`);
+      const response = await fetch(`/api/search/?${queryParams.toString()}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
