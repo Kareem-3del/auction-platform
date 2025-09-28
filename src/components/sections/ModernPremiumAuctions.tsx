@@ -327,7 +327,11 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
                           },
                         }}
                       >
-                        {t(`homepage.sections.viewAll${sectionKey.charAt(0).toUpperCase() + sectionKey.slice(1)}` as any)}
+                        {sectionKey === 'ending' ? t('homepage.sections.viewAllEndingSoon') :
+                         sectionKey === 'trending' ? t('homepage.sections.viewAllTrending') :
+                         sectionKey === 'featured' ? t('homepage.sections.viewAllFeatured') :
+                         sectionKey === 'recent' ? t('homepage.sections.viewAllRecent') :
+                         t('homepage.sections.viewAll')}
                       </Button>
                     </Box>
                   </>
@@ -479,7 +483,11 @@ export function ModernPremiumAuctions({ limit = 8, showTabs = true }: ModernPrem
                       },
                     }}
                   >
-                    {t(`homepage.sections.viewAll${currentSection.charAt(0).toUpperCase() + currentSection.slice(1)}` as any)}
+                    {currentSection === 'ending' ? t('homepage.sections.viewAllEndingSoon') :
+                     currentSection === 'trending' ? t('homepage.sections.viewAllTrending') :
+                     currentSection === 'featured' ? t('homepage.sections.viewAllFeatured') :
+                     currentSection === 'recent' ? t('homepage.sections.viewAllRecent') :
+                     t('homepage.sections.viewAll')}
                   </Button>
                 </Box>
               </>
