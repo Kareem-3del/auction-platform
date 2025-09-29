@@ -417,8 +417,8 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                         <CountdownTimer
                           startTime={product.startTime ? new Date(product.startTime) : undefined}
                           endTime={product.endTime ? new Date(product.endTime) : undefined}
-                          variant="detailed"
-                          size="medium"
+                          variant="modern"
+                          size="large"
                         />
                       </Box>
                     )}
@@ -1008,6 +1008,96 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                 </CardContent>
               </Card>
             </Grid>
+
+            {/* Seller Information */}
+            {product.showSellerInfo && (
+              product.sellerName || 
+              product.sellerContact || 
+              product.sellerEmail || 
+              product.sellerLocation || 
+              product.sellerNotes
+            ) && (
+              <Grid item xs={12} lg={4}>
+                <Card sx={{ 
+                  borderRadius: 2,
+                  boxShadow: '0 8px 32px rgba(25, 118, 210, 0.15)',
+                  border: '2px solid rgba(25, 118, 210, 0.2)',
+                  bgcolor: '#ffffff',
+                }}>
+                  <Box sx={{
+                    p: { xs: 3, md: 4 },
+                    bgcolor: '#1976d2',
+                    color: 'white'
+                  }}>
+                    <Typography variant="h6" fontWeight="bold" sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2
+                    }}>
+                      <PersonIcon /> Seller Information
+                    </Typography>
+                  </Box>
+                  <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+                    <Stack spacing={3}>
+                      {product.sellerName && (
+                        <Box>
+                          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                            Name
+                          </Typography>
+                          <Typography variant="body1" fontWeight={500}>
+                            {product.sellerName}
+                          </Typography>
+                        </Box>
+                      )}
+                      
+                      {product.sellerLocation && (
+                        <Box>
+                          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                            Location
+                          </Typography>
+                          <Typography variant="body1" fontWeight={500}>
+                            {product.sellerLocation}
+                          </Typography>
+                        </Box>
+                      )}
+                      
+                      {product.sellerContact && (
+                        <Box>
+                          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                            Contact
+                          </Typography>
+                          <Typography variant="body1" fontWeight={500}>
+                            {product.sellerContact}
+                          </Typography>
+                        </Box>
+                      )}
+                      
+                      {product.sellerEmail && (
+                        <Box>
+                          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                            Email
+                          </Typography>
+                          <Typography variant="body1" fontWeight={500}>
+                            {product.sellerEmail}
+                          </Typography>
+                        </Box>
+                      )}
+                      
+                      {product.sellerNotes && (
+                        <Box>
+                          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                            Additional Notes
+                          </Typography>
+                          <Typography variant="body2" sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
+                            {product.sellerNotes}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
 
             {/* Quick Bid Interface */}
             <Grid item xs={12} lg={4}>

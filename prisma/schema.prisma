@@ -242,6 +242,12 @@ model Product {
   locationAr               String?           @map("location_ar")
   shortDescriptionAr       String?           @map("short_description_ar")
   titleAr                  String?           @map("title_ar")
+  sellerName               String?           @map("seller_name")
+  sellerContact            String?           @map("seller_contact")
+  sellerEmail              String?           @map("seller_email")
+  sellerLocation           String?           @map("seller_location")
+  sellerNotes              String?           @map("seller_notes")
+  showSellerInfo           Boolean           @default(false) @map("show_seller_info")
   auctionReminders         AuctionReminder[]
   autoBids                 AutoBid[]
   bids                     Bid[]

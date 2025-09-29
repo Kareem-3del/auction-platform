@@ -52,6 +52,14 @@ const createAuctionSchema = z.object({
   // Shipping
   pickupAvailable: z.boolean().default(false),
   pickupAddress: z.string().optional().nullable(),
+  
+  // Seller Information
+  sellerName: z.string().optional().nullable(),
+  sellerContact: z.string().optional().nullable(),
+  sellerEmail: z.string().email('Invalid email').optional().nullable(),
+  sellerLocation: z.string().optional().nullable(),
+  sellerNotes: z.string().optional().nullable(),
+  showSellerInfo: z.boolean().default(false),
 }).refine(data => data.estimatedValueMax >= data.estimatedValueMin, {
   message: 'Maximum value must be greater than or equal to minimum value',
   path: ['estimatedValueMax'],
@@ -279,6 +287,14 @@ export const POST = withAuth(async (request) => {
         pickupAvailable: validatedData.pickupAvailable,
         pickupAddress: validatedData.pickupAddress,
         auctionStatus: 'SCHEDULED', // Set initial auction status
+        
+        // Seller Information
+        sellerName: validatedData.sellerName,
+        sellerContact: validatedData.sellerContact,
+        sellerEmail: validatedData.sellerEmail,
+        sellerLocation: validatedData.sellerLocation,
+        sellerNotes: validatedData.sellerNotes,
+        showSellerInfo: validatedData.showSellerInfo,
       },
       include: {
         category: {

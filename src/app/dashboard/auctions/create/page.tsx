@@ -23,6 +23,8 @@ import {
   FormControl,
   InputAdornment,
   CircularProgress,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 
 import { auctionsAPI } from 'src/lib/api-client';
@@ -74,6 +76,14 @@ export default function CreateAuctionPage() {
     // Shipping
     pickupAvailable: false,
     pickupAddress: '',
+    
+    // Seller Information
+    sellerName: '',
+    sellerContact: '',
+    sellerEmail: '',
+    sellerLocation: '',
+    sellerNotes: '',
+    showSellerInfo: false,
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -245,6 +255,14 @@ export default function CreateAuctionPage() {
         // Shipping
         pickupAvailable: formData.pickupAvailable,
         pickupAddress: formData.pickupAddress || null,
+        
+        // Seller Information
+        sellerName: formData.sellerName || null,
+        sellerContact: formData.sellerContact || null,
+        sellerEmail: formData.sellerEmail || null,
+        sellerLocation: formData.sellerLocation || null,
+        sellerNotes: formData.sellerNotes || null,
+        showSellerInfo: formData.showSellerInfo,
       };
 
       console.log('Creating auction with data:', { ...auctionData, images: `${images.length} images` });
@@ -660,6 +678,84 @@ export default function CreateAuctionPage() {
                         />
                       </Grid>
                     </Grid>
+                  </Stack>
+                </Card>
+
+                {/* Seller Information */}
+                <Card sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Seller Information
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Optional information about the seller that can be displayed on the auction page
+                  </Typography>
+                  <Stack spacing={3}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={formData.showSellerInfo}
+                          onChange={(e) => handleInputChange('showSellerInfo', e.target.checked)}
+                        />
+                      }
+                      label="Display seller information on auction page"
+                    />
+
+                    {formData.showSellerInfo && (
+                      <>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} md={6}>
+                            <TextField
+                              fullWidth
+                              label="Seller Name"
+                              value={formData.sellerName}
+                              onChange={(e) => handleInputChange('sellerName', e.target.value)}
+                              helperText="Name to display for the seller"
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={6}>
+                            <TextField
+                              fullWidth
+                              label="Seller Location"
+                              value={formData.sellerLocation}
+                              onChange={(e) => handleInputChange('sellerLocation', e.target.value)}
+                              helperText="City or region of the seller"
+                            />
+                          </Grid>
+                        </Grid>
+
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} md={6}>
+                            <TextField
+                              fullWidth
+                              label="Contact Number"
+                              value={formData.sellerContact}
+                              onChange={(e) => handleInputChange('sellerContact', e.target.value)}
+                              helperText="Phone or contact number"
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={6}>
+                            <TextField
+                              fullWidth
+                              label="Email Address"
+                              type="email"
+                              value={formData.sellerEmail}
+                              onChange={(e) => handleInputChange('sellerEmail', e.target.value)}
+                              helperText="Email for inquiries"
+                            />
+                          </Grid>
+                        </Grid>
+
+                        <TextField
+                          fullWidth
+                          label="Additional Notes"
+                          multiline
+                          rows={3}
+                          value={formData.sellerNotes}
+                          onChange={(e) => handleInputChange('sellerNotes', e.target.value)}
+                          helperText="Any additional information about the seller or item history"
+                        />
+                      </>
+                    )}
                   </Stack>
                 </Card>
               </Stack>
