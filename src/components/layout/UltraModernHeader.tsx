@@ -54,6 +54,7 @@ import { useAuth } from 'src/hooks/useAuth';
 import { useLocale } from 'src/hooks/useLocale';
 import { Logo } from 'src/components/logo';
 import LanguageSwitcher from '../language-switcher/LanguageSwitcher';
+import NotificationCenter from '../notifications/NotificationCenter';
 
 // Ultra-modern styled components
 const UltraModernAppBar = styled(AppBar)(({ theme, scrolled }: { theme: any; scrolled: boolean }) => ({
@@ -513,25 +514,7 @@ export default function UltraModernHeader() {
 
               {/* Notifications */}
               {isAuthenticated && (
-                <Tooltip title="Notifications">
-                  <IconButton
-                    sx={{
-                      color: 'text.secondary',
-                      borderRadius: 2,
-                      p: 1.5,
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        color: 'primary.main',
-                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                        transform: 'translateY(-1px)',
-                      },
-                    }}
-                  >
-                    <Badge badgeContent={3} color="error">
-                      <NotificationsIcon />
-                    </Badge>
-                  </IconButton>
-                </Tooltip>
+                <NotificationCenter />
               )}
 
               {/* User Section */}

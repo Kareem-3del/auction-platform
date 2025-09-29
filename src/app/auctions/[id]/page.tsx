@@ -47,6 +47,7 @@ import {
 import { formatDate, formatCurrency, formatTimeRemaining } from 'src/lib/utils';
 import BidHistory from 'src/components/bidding/BidHistory';
 import QuickBidDialog from 'src/components/bidding/QuickBidDialog';
+import { CountdownTimer } from 'src/components/common/CountdownTimer';
 import { useRealtimeBidding } from 'src/hooks/useRealtimeBidding';
 
 interface Product {
@@ -408,6 +409,17 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                         <Typography variant="h6" fontWeight="bold" sx={{ 
                           fontSize: { xs: '1.1rem', md: '1.25rem' }
                         }}>⏰ {timeLeft}</Typography>
+                      </Box>
+                    )}
+
+                    {product.auctionStatus === 'SCHEDULED' && (
+                      <Box sx={{ mt: 1.5 }}>
+                        <CountdownTimer
+                          startTime={product.startTime ? new Date(product.startTime) : undefined}
+                          endTime={product.endTime ? new Date(product.endTime) : undefined}
+                          variant="detailed"
+                          size="medium"
+                        />
                       </Box>
                     )}
                     
