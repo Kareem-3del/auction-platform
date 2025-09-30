@@ -3,12 +3,14 @@ import { z } from 'zod';
 
 import { prisma } from 'src/lib/prisma';
 import { withAuth } from 'src/lib/middleware/auth';
-import { 
-  handleAPIError, 
-  validateMethod, 
+import {
+  handleAPIError,
+  validateMethod,
   successResponse,
-  validateContentType
+  validateContentType,
 } from 'src/lib/api-response';
+import { logger } from 'src/lib/logger';
+import { withRateLimit, bidRateLimiter } from 'src/lib/middleware/rate-limit';
 
 interface RouteParams {
   params: Promise<{
@@ -34,23 +36,26 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Check if auction exists
     const auction = await prisma.product.findUnique({
-      where: { 
+      where: {
         id,
-        auctionStatus: { in: ['SCHEDULED', 'LIVE', 'ENDED'] }
+        auctionStatus: { in: ['SCHEDULED', 'LIVE', 'ENDED'] },
       },
-      select: { id: true, title: true }
+      select: { id: true, title: true },
     });
 
     if (!auction) {
-      return handleAPIError({
-        name: 'AuctionNotFoundError',
-        message: 'Auction not found',
-      }, 404);
+      return handleAPIError(
+        {
+          name: 'AuctionNotFoundError',
+          message: 'Auction not found',
+        },
+        404
+      );
     }
 
     // Get bid history
-    const totalCount = await prisma.bid.count({ 
-      where: { productId: id } 
+    const totalCount = await prisma.bid.count({
+      where: { productId: id },
     });
 
     const bids = await prisma.bid.findMany({
@@ -63,8 +68,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             isAnonymousDisplay: true,
             firstName: true,
             lastName: true,
-          }
-        }
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
@@ -77,10 +82,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       maxAmount: bid.maxAmount ? Number(bid.maxAmount) : null,
       user: {
         id: bid.user.id,
-        displayName: bid.user.isAnonymousDisplay 
-          ? bid.user.anonymousDisplayName 
+        displayName: bid.user.isAnonymousDisplay
+          ? bid.user.anonymousDisplayName
           : `${bid.user.firstName} ${bid.user.lastName}`,
-      }
+      },
     }));
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -95,108 +100,199 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         hasPreviousPage: page > 1,
       },
     });
-
   } catch (error) {
     return handleAPIError(error);
   }
 }
 
 // POST /api/auctions/[id]/bids - Place bid on auction
-export const POST = withAuth(async (request, { params }: RouteParams) => {
-  try {
-    validateMethod(request, ['POST']);
-    validateContentType(request);
-    const { id } = await params;
+export const POST = withAuth(
+  async (request, { params }: RouteParams) => {
+    try {
+      validateMethod(request, ['POST']);
+      validateContentType(request);
+      const { id } = await params;
 
-    const body = await request.json();
-    const validatedData = placeBidSchema.parse(body);
+      const body = await request.json();
+      const validatedData = placeBidSchema.parse(body);
 
-    // Check if auction exists and is live
-    const auction = await prisma.product.findUnique({
-      where: { 
-        id,
-        auctionStatus: 'LIVE'
-      },
-      select: { 
-        id: true, 
-        title: true, 
-        currentBid: true, 
-        startingBid: true,
-        bidIncrement: true,
-        endTime: true
+      logger.bid('Bid placement attempt', id, {
+        userId: request.user.id,
+        amount: validatedData.amount,
+        bidType: validatedData.bidType,
+      });
+
+      // Check if auction exists and is live
+      const auction = await prisma.product.findUnique({
+        where: {
+          id,
+          auctionStatus: 'LIVE',
+        },
+        select: {
+          id: true,
+          title: true,
+          currentBid: true,
+          startingBid: true,
+          bidIncrement: true,
+          endTime: true,
+        },
+      });
+
+      if (!auction) {
+        return handleAPIError(
+          {
+            name: 'AuctionNotFoundError',
+            message: 'Auction not found or not currently live',
+          },
+          404
+        );
       }
-    });
 
-    if (!auction) {
-      return handleAPIError({
-        name: 'AuctionNotFoundError',
-        message: 'Auction not found or not currently live',
-      }, 404);
-    }
+      // Check if auction has ended
+      if (auction.endTime && new Date() > auction.endTime) {
+        return handleAPIError(
+          {
+            name: 'AuctionEndedError',
+            message: 'This auction has already ended',
+          },
+          400
+        );
+      }
 
-    // Check if auction has ended
-    if (auction.endTime && new Date() > auction.endTime) {
-      return handleAPIError({
-        name: 'AuctionEndedError',
-        message: 'This auction has already ended',
-      }, 400);
-    }
+      const currentBid = Number(auction.currentBid) || Number(auction.startingBid) || 0;
+      const bidIncrement = Number(auction.bidIncrement) || 1;
+      const minBid = currentBid + bidIncrement;
 
-    const currentBid = Number(auction.currentBid) || Number(auction.startingBid) || 0;
-    const bidIncrement = Number(auction.bidIncrement) || 1;
-    const minBid = currentBid + bidIncrement;
+      // Validate bid amount
+      if (validatedData.amount < minBid) {
+        return handleAPIError(
+          {
+            name: 'InvalidBidError',
+            message: `Minimum bid is $${minBid.toFixed(2)}`,
+          },
+          400
+        );
+      }
 
-    // Validate bid amount
-    if (validatedData.amount < minBid) {
-      return handleAPIError({
-        name: 'InvalidBidError',
-        message: `Minimum bid is $${minBid.toFixed(2)}`,
-      }, 400);
-    }
+      // CRITICAL FIX: Check user balance BEFORE creating bid
+      const user = await prisma.user.findUnique({
+        where: { id: request.user.id },
+        select: {
+          id: true,
+          balanceReal: true,
+          balanceVirtual: true,
+          balanceUSD: true,
+        },
+      });
 
-    // Create the bid
-    const bid = await prisma.$transaction(async (tx) => {
-      // Create bid record
-      const newBid = await tx.bid.create({
-        data: {
+      if (!user) {
+        return handleAPIError(
+          {
+            name: 'UserNotFoundError',
+            message: 'User not found',
+          },
+          404
+        );
+      }
+
+      // Check if user has sufficient balance (using virtual balance for bidding)
+      const availableBalance = Number(user.balanceVirtual);
+      if (availableBalance < validatedData.amount) {
+        logger.warn('Insufficient balance for bid', {
+          userId: user.id,
+          requestedAmount: validatedData.amount,
+          availableBalance,
           productId: id,
-          userId: request.user.id,
-          amount: validatedData.amount,
-          bidType: validatedData.bidType,
-          maxAmount: validatedData.maxAmount,
-        }
+        });
+
+        return handleAPIError(
+          {
+            name: 'InsufficientBalanceError',
+            message: `Insufficient balance. You need $${validatedData.amount.toFixed(2)} but have $${availableBalance.toFixed(2)}`,
+            details: {
+              required: validatedData.amount,
+              available: availableBalance,
+              shortfall: validatedData.amount - availableBalance,
+            },
+          },
+          400
+        );
+      }
+
+      // Create the bid in a transaction
+      const bid = await prisma.$transaction(async (tx) => {
+        // Create bid record
+        const newBid = await tx.bid.create({
+          data: {
+            productId: id,
+            userId: request.user.id,
+            amount: validatedData.amount,
+            bidType: validatedData.bidType,
+            maxAmount: validatedData.maxAmount,
+            status: 'ACTIVE',
+          },
+        });
+
+        // Update product with new current bid
+        await tx.product.update({
+          where: { id },
+          data: {
+            currentBid: validatedData.amount,
+            bidCount: { increment: 1 },
+          },
+        });
+
+        // Create audit log
+        await tx.auditLog.create({
+          data: {
+            userId: request.user.id,
+            entityType: 'bid',
+            entityId: newBid.id,
+            targetId: id,
+            action: 'bid_placed',
+            newValues: {
+              amount: validatedData.amount,
+              bidType: validatedData.bidType,
+              productId: id,
+            },
+            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+            userAgent: request.headers.get('user-agent') || 'unknown',
+          },
+        });
+
+        return newBid;
       });
 
-      // Update product with new current bid
-      await tx.product.update({
-        where: { id },
-        data: {
-          currentBid: validatedData.amount,
-          bidCount: { increment: 1 }
-        }
+      logger.bid('Bid placed successfully', id, {
+        userId: request.user.id,
+        bidId: bid.id,
+        amount: validatedData.amount,
       });
 
-      return newBid;
-    });
-
-    return successResponse({
-      ...bid,
-      amount: Number(bid.amount),
-      maxAmount: bid.maxAmount ? Number(bid.maxAmount) : null,
-    });
-
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return handleAPIError({
-        name: 'ValidationError',
-        message: 'Invalid bid data',
-        details: error.errors.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
+      return successResponse({
+        ...bid,
+        amount: Number(bid.amount),
+        maxAmount: bid.maxAmount ? Number(bid.maxAmount) : null,
       });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return handleAPIError({
+          name: 'ValidationError',
+          message: 'Invalid bid data',
+          details: error.errors.map((err: any) => ({
+            field: err.path.join('.'),
+            message: err.message,
+          })),
+        });
+      }
+
+      logger.error('Bid placement error', error, {
+        userId: request.user?.id,
+        productId: (await params).id,
+      });
+
+      return handleAPIError(error);
     }
-
-    return handleAPIError(error);
-  }
-}, { required: true });
+  },
+  { required: true }
+);

@@ -1,13 +1,16 @@
 import type { RedisClientType } from 'redis';
 
 import { createClient } from 'redis';
+import { logger } from './logger';
 
 // Redis client singleton
 let redisClient: RedisClientType | null = null;
 let isConnecting = false;
 
 // Configuration
-const REDIS_URL = process.env.REDIS_URL || (process.env.NODE_ENV === 'production' ? 'redis://redis:6379' : 'redis://localhost:6379');
+const REDIS_URL =
+  process.env.REDIS_URL ||
+  (process.env.NODE_ENV === 'production' ? 'redis://redis:6379' : 'redis://localhost:6379');
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 const REDIS_DB = parseInt(process.env.REDIS_DB || '0');
 
@@ -37,7 +40,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
   if (isConnecting) {
     // Wait for connection to complete
     while (isConnecting) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
     if (redisClient && redisClient.isOpen) {
       return redisClient;
@@ -51,23 +54,23 @@ export async function getRedisClient(): Promise<RedisClientType> {
 
     // Error handling
     redisClient.on('error', (error) => {
-      console.error('❌ Redis Client Error:', error);
+      logger.error('Redis Client Error', error);
     });
 
     redisClient.on('connect', () => {
-      console.log('🔗 Redis Client Connected');
+      logger.info('Redis Client Connected');
     });
 
     redisClient.on('ready', () => {
-      console.log('✅ Redis Client Ready');
+      logger.info('Redis Client Ready');
     });
 
     redisClient.on('end', () => {
-      console.log('🔌 Redis Client Disconnected');
+      logger.info('Redis Client Disconnected');
     });
 
     redisClient.on('reconnecting', () => {
-      console.log('🔄 Redis Client Reconnecting');
+      logger.warn('Redis Client Reconnecting');
     });
 
     // Connect to Redis
@@ -75,13 +78,30 @@ export async function getRedisClient(): Promise<RedisClientType> {
 
     isConnecting = false;
     return redisClient;
-
   } catch (error) {
     isConnecting = false;
-    console.error('❌ Failed to connect to Redis:', error);
+    logger.error('Failed to connect to Redis', error);
     throw error;
   }
 }
+
+// Create a lazy-loading redis instance for direct use
+let lazyRedisInstance: RedisClientType | null = null;
+
+export const redis = new Proxy({} as RedisClientType, {
+  get(target, prop) {
+    return async function (...args: any[]) {
+      if (!lazyRedisInstance) {
+        lazyRedisInstance = await getRedisClient();
+      }
+      const method = (lazyRedisInstance as any)[prop];
+      if (typeof method === 'function') {
+        return method.apply(lazyRedisInstance, args);
+      }
+      return method;
+    };
+  },
+});
 
 /**
  * Disconnect from Redis
@@ -91,9 +111,9 @@ export async function disconnectRedis(): Promise<void> {
     try {
       await redisClient.quit();
       redisClient = null;
-      console.log('✅ Redis Client Disconnected');
+      logger.info('Redis Client Disconnected');
     } catch (error) {
-      console.error('❌ Error disconnecting from Redis:', error);
+      logger.error('Error disconnecting from Redis', error);
     }
   }
 }
@@ -101,13 +121,17 @@ export async function disconnectRedis(): Promise<void> {
 /**
  * Check Redis health
  */
-export async function checkRedisHealth(): Promise<{ status: string; latency?: number; error?: string }> {
+export async function checkRedisHealth(): Promise<{
+  status: string;
+  latency?: number;
+  error?: string;
+}> {
   try {
     const client = await getRedisClient();
     const start = Date.now();
     await client.ping();
     const latency = Date.now() - start;
-    
+
     return {
       status: 'healthy',
       latency,
@@ -123,22 +147,32 @@ export async function checkRedisHealth(): Promise<{ status: string; latency?: nu
 // Session management utilities
 export class RedisSessionManager {
   private static SESSION_PREFIX = 'session:';
+
   private static USER_SESSIONS_PREFIX = 'user_sessions:';
+
   private static DEFAULT_TTL = 30 * 24 * 60 * 60; // 30 days in seconds
 
   /**
    * Store session data
    */
-  static async setSession(sessionId: string, data: any, ttl: number = this.DEFAULT_TTL): Promise<void> {
+  static async setSession(
+    sessionId: string,
+    data: any,
+    ttl: number = this.DEFAULT_TTL
+  ): Promise<void> {
     try {
       const client = await getRedisClient();
       const key = this.SESSION_PREFIX + sessionId;
-      
-      await client.setEx(key, ttl, JSON.stringify({
-        ...data,
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + ttl * 1000).toISOString(),
-      }));
+
+      await client.setEx(
+        key,
+        ttl,
+        JSON.stringify({
+          ...data,
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + ttl * 1000).toISOString(),
+        })
+      );
 
       // Also maintain user sessions list
       if (data.userId) {
@@ -146,9 +180,8 @@ export class RedisSessionManager {
         await client.sAdd(userSessionsKey, sessionId);
         await client.expire(userSessionsKey, ttl);
       }
-
     } catch (error) {
-      console.error('Error setting session:', error);
+      logger.error('Error setting session', error);
       throw error;
     }
   }
@@ -160,16 +193,15 @@ export class RedisSessionManager {
     try {
       const client = await getRedisClient();
       const key = this.SESSION_PREFIX + sessionId;
-      
+
       const data = await client.get(key);
       if (!data) {
         return null;
       }
 
       return JSON.parse(data);
-
     } catch (error) {
-      console.error('Error getting session:', error);
+      logger.error('Error getting session', error);
       return null;
     }
   }
@@ -181,10 +213,10 @@ export class RedisSessionManager {
     try {
       const client = await getRedisClient();
       const key = this.SESSION_PREFIX + sessionId;
-      
+
       // Get session data to find userId
       const sessionData = await this.getSession(sessionId);
-      
+
       // Delete session
       await client.del(key);
 
@@ -193,9 +225,8 @@ export class RedisSessionManager {
         const userSessionsKey = this.USER_SESSIONS_PREFIX + sessionData.userId;
         await client.sRem(userSessionsKey, sessionId);
       }
-
     } catch (error) {
-      console.error('Error deleting session:', error);
+      logger.error('Error deleting session', error);
     }
   }
 
@@ -206,13 +237,13 @@ export class RedisSessionManager {
     try {
       const client = await getRedisClient();
       const userSessionsKey = this.USER_SESSIONS_PREFIX + userId;
-      
+
       // Get all session IDs for the user
       const sessionIds = await client.sMembers(userSessionsKey);
-      
+
       if (sessionIds.length > 0) {
         // Delete all sessions
-        const sessionKeys = sessionIds.map(id => this.SESSION_PREFIX + id);
+        const sessionKeys = sessionIds.map((id) => this.SESSION_PREFIX + id);
         if (sessionKeys.length > 0) {
           await client.del(sessionKeys);
         }
@@ -220,9 +251,8 @@ export class RedisSessionManager {
 
       // Delete user sessions list
       await client.del(userSessionsKey);
-
     } catch (error) {
-      console.error('Error deleting user sessions:', error);
+      logger.error('Error deleting user sessions', error);
     }
   }
 
@@ -233,7 +263,7 @@ export class RedisSessionManager {
     try {
       const client = await getRedisClient();
       const userSessionsKey = this.USER_SESSIONS_PREFIX + userId;
-      
+
       const sessionIds = await client.sMembers(userSessionsKey);
       const sessions = [];
 
@@ -248,9 +278,8 @@ export class RedisSessionManager {
       }
 
       return sessions;
-
     } catch (error) {
-      console.error('Error getting user sessions:', error);
+      logger.error('Error getting user sessions', error);
       return [];
     }
   }
@@ -262,11 +291,10 @@ export class RedisSessionManager {
     try {
       const client = await getRedisClient();
       const key = this.SESSION_PREFIX + sessionId;
-      
-      await client.expire(key, ttl);
 
+      await client.expire(key, ttl);
     } catch (error) {
-      console.error('Error extending session:', error);
+      logger.error('Error extending session', error);
     }
   }
 }
@@ -282,11 +310,10 @@ export class RedisCache {
     try {
       const client = await getRedisClient();
       const cacheKey = this.CACHE_PREFIX + key;
-      
-      await client.setEx(cacheKey, ttl, JSON.stringify(value));
 
+      await client.setEx(cacheKey, ttl, JSON.stringify(value));
     } catch (error) {
-      console.error('Error setting cache:', error);
+      logger.error('Error setting cache', error);
     }
   }
 
@@ -297,16 +324,15 @@ export class RedisCache {
     try {
       const client = await getRedisClient();
       const cacheKey = this.CACHE_PREFIX + key;
-      
+
       const data = await client.get(cacheKey);
       if (!data) {
         return null;
       }
 
       return JSON.parse(data);
-
     } catch (error) {
-      console.error('Error getting cache:', error);
+      logger.error('Error getting cache', error);
       return null;
     }
   }
@@ -318,11 +344,10 @@ export class RedisCache {
     try {
       const client = await getRedisClient();
       const cacheKey = this.CACHE_PREFIX + key;
-      
-      await client.del(cacheKey);
 
+      await client.del(cacheKey);
     } catch (error) {
-      console.error('Error deleting cache:', error);
+      logger.error('Error deleting cache', error);
     }
   }
 
@@ -333,14 +358,13 @@ export class RedisCache {
     try {
       const client = await getRedisClient();
       const cachePattern = this.CACHE_PREFIX + pattern;
-      
+
       const keys = await client.keys(cachePattern);
       if (keys.length > 0) {
         await client.del(keys);
       }
-
     } catch (error) {
-      console.error('Error deleting cache pattern:', error);
+      logger.error('Error deleting cache pattern', error);
     }
   }
 }
@@ -360,29 +384,28 @@ export class RedisRateLimit {
     try {
       const client = await getRedisClient();
       const key = this.RATE_LIMIT_PREFIX + identifier;
-      
+
       const current = await client.incr(key);
-      
+
       if (current === 1) {
         await client.expire(key, windowSize);
       }
 
       const ttl = await client.ttl(key);
-      const resetTime = Date.now() + (ttl * 1000);
+      const resetTime = Date.now() + ttl * 1000;
 
       return {
         allowed: current <= maxRequests,
         remaining: Math.max(0, maxRequests - current),
         resetTime,
       };
-
     } catch (error) {
-      console.error('Error checking rate limit:', error);
+      logger.error('Error checking rate limit', error);
       // Fail open - allow request if Redis is down
       return {
         allowed: true,
         remaining: maxRequests - 1,
-        resetTime: Date.now() + (windowSize * 1000),
+        resetTime: Date.now() + windowSize * 1000,
       };
     }
   }
@@ -394,11 +417,10 @@ export class RedisRateLimit {
     try {
       const client = await getRedisClient();
       const key = this.RATE_LIMIT_PREFIX + identifier;
-      
-      await client.del(key);
 
+      await client.del(key);
     } catch (error) {
-      console.error('Error resetting rate limit:', error);
+      logger.error('Error resetting rate limit', error);
     }
   }
 }
@@ -406,6 +428,7 @@ export class RedisRateLimit {
 // Pub/Sub utilities for real-time features
 export class RedisPubSub {
   private static subscriberClient: RedisClientType | null = null;
+
   private static publisherClient: RedisClientType | null = null;
 
   /**
@@ -438,7 +461,7 @@ export class RedisPubSub {
       const client = await this.getPublisherClient();
       await client.publish(channel, JSON.stringify(message));
     } catch (error) {
-      console.error('Error publishing message:', error);
+      logger.error('Error publishing message', error);
     }
   }
 
@@ -453,12 +476,12 @@ export class RedisPubSub {
           const parsedMessage = JSON.parse(message);
           callback(parsedMessage);
         } catch (error) {
-          console.error('Error parsing message:', error);
+          logger.error('Error parsing message', error);
           callback(message);
         }
       });
     } catch (error) {
-      console.error('Error subscribing to channel:', error);
+      logger.error('Error subscribing to channel', error);
     }
   }
 
@@ -470,7 +493,7 @@ export class RedisPubSub {
       const client = await this.getSubscriberClient();
       await client.unsubscribe(channel);
     } catch (error) {
-      console.error('Error unsubscribing from channel:', error);
+      logger.error('Error unsubscribing from channel', error);
     }
   }
 }
