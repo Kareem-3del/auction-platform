@@ -63,3 +63,4 @@ dump.rdb
 # SSL certificates
 ssl/*
 !ssl/.gitkeep
+.claude/

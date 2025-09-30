@@ -127,6 +127,16 @@ export const getNavData = (t: (key: string) => string): NavSectionProps['data'] 
     ],
   },
   /**
+   * Support & System
+   */
+  {
+    subheader: 'Support & System',
+    items: [
+      { title: 'Support Tickets', path: '/dashboard/support', icon: ICONS.chat },
+      { title: 'System Health', path: '/dashboard/system-health', icon: ICONS.analytics },
+    ],
+  },
+  /**
    * Settings
    */
   {
