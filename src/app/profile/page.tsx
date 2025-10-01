@@ -32,6 +32,7 @@ import {
   Badge,
   Fade,
   Skeleton,
+  useTheme,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -43,19 +44,13 @@ import {
   Cancel as CancelIcon,
   History as HistoryIcon,
   VolumeUp as VolumeUpIcon,
-  VolumeOff as VolumeOffIcon,
   PlayArrow as PlayArrowIcon,
   TrendingUp as TrendingUpIcon,
   AccountBalanceWallet as WalletIcon,
   Notifications as NotificationsIcon,
-  Payment as PaymentIcon,
-  Security as SecurityIcon,
   Star as StarIcon,
   Verified as VerifiedIcon,
   BusinessCenter as BusinessIcon,
-  Share as ShareIcon,
-  Settings as SettingsIcon,
-  Visibility as VisibilityIcon,
   MonetizationOn as MoneyIcon,
   Analytics as AnalyticsIcon,
   School as CertificationIcon,
@@ -146,36 +141,33 @@ interface ProfileFormData {
 }
 
 // Enhanced Stats Card Component
-function ModernStatsCard({ 
-  title, 
-  value, 
-  icon: Icon, 
-  color, 
-  subtitle, 
-  trend,
-  sparkline 
+function ModernStatsCard({
+  title,
+  value,
+  icon: Icon,
+  subtitle,
+  sparkline
 }: {
   title: string;
   value: string | number;
   icon: any;
-  color: string;
   subtitle?: string;
-  trend?: number;
   sparkline?: boolean;
 }) {
+  const theme = useTheme();
+
   return (
     <Card
       sx={{
-        background: `linear-gradient(135deg, ${color}08 0%, ${color}04 100%)`,
-        border: `1px solid ${color}20`,
+        background: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
         borderRadius: 3,
         position: 'relative',
         overflow: 'hidden',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: `0 12px 40px ${color}15`,
-          border: `1px solid ${color}40`,
+          boxShadow: theme.shadows[8],
         },
         '&::before': {
           content: '""',
@@ -184,7 +176,7 @@ function ModernStatsCard({
           left: 0,
           right: 0,
           height: 4,
-          background: `linear-gradient(90deg, ${color} 0%, ${color}80 100%)`,
+          background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
         }
       }}
     >
@@ -195,32 +187,17 @@ function ModernStatsCard({
               width: 56,
               height: 56,
               borderRadius: 2,
-              background: `linear-gradient(135deg, ${color}15 0%, ${color}25 100%)`,
+              background: theme.palette.action.hover,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: `2px solid ${color}30`,
+              border: `2px solid ${theme.palette.divider}`,
             }}
           >
-            <Icon sx={{ fontSize: 28, color: color }} />
+            <Icon sx={{ fontSize: 28, color: theme.palette.primary.main }} />
           </Box>
-          {trend !== undefined && (
-            <Box
-              sx={{
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 1,
-                bgcolor: trend > 0 ? 'success.main' : trend < 0 ? 'error.main' : 'grey.400',
-                color: 'white',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-              }}
-            >
-              {trend > 0 ? '+' : ''}{trend}%
-            </Box>
-          )}
         </Box>
-        <Typography variant="h3" fontWeight="bold" color={color} mb={1}>
+        <Typography variant="h3" fontWeight="bold" color="primary.main" mb={1}>
           {value}
         </Typography>
         <Typography variant="h6" fontWeight={600} color="text.primary" mb={0.5}>
@@ -239,9 +216,9 @@ function ModernStatsCard({
               sx={{
                 height: 6,
                 borderRadius: 3,
-                bgcolor: `${color}20`,
+                bgcolor: theme.palette.action.hover,
                 '& .MuiLinearProgress-bar': {
-                  bgcolor: color,
+                  bgcolor: theme.palette.primary.main,
                   borderRadius: 3,
                 },
               }}
@@ -259,6 +236,8 @@ function ModernProfileHeader({ profile, editing, onEdit }: {
   editing: boolean;
   onEdit: () => void;
 }) {
+  const theme = useTheme();
+
   const getUserTypeIcon = (userType: string) => {
     switch (userType) {
       case 'SUPER_ADMIN': return <LoyaltyIcon />;
@@ -270,32 +249,22 @@ function ModernProfileHeader({ profile, editing, onEdit }: {
 
   const getUserTypeColor = (userType: string) => {
     switch (userType) {
-      case 'SUPER_ADMIN': return '#ff6b35';
-      case 'ADMIN': return '#8b5cf6';
-      case 'AGENT': return '#06b6d4';
-      default: return '#64748b';
+      case 'SUPER_ADMIN': return theme.palette.error.main;
+      case 'ADMIN': return theme.palette.secondary.main;
+      case 'AGENT': return theme.palette.info.main;
+      default: return theme.palette.grey[500];
     }
   };
 
   return (
     <Card
       sx={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
         color: 'white',
         borderRadius: 4,
         position: 'relative',
         overflow: 'hidden',
         mb: 4,
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'url("/images/pattern.png")',
-          opacity: 0.1,
-        }
       }}
     >
       <CardContent sx={{ p: 4, position: 'relative', zIndex: 1 }}>
@@ -309,7 +278,7 @@ function ModernProfileHeader({ profile, editing, onEdit }: {
                     width: 120,
                     height: 120,
                     border: '4px solid white',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                    boxShadow: theme.shadows[8],
                     mb: 2,
                   }}
                 >
@@ -329,7 +298,7 @@ function ModernProfileHeader({ profile, editing, onEdit }: {
                         alignItems: 'center',
                         justifyContent: 'center',
                         border: '3px solid white',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        boxShadow: theme.shadows[3],
                       }}
                     >
                       {getUserTypeIcon(profile.userType)}
@@ -339,8 +308,8 @@ function ModernProfileHeader({ profile, editing, onEdit }: {
               </Box>
 
               <Typography variant="h4" fontWeight="bold" mb={1}>
-                {profile.isAnonymousDisplay 
-                  ? profile.anonymousDisplayName 
+                {profile.isAnonymousDisplay
+                  ? profile.anonymousDisplayName
                   : `${profile.firstName} ${profile.lastName}`}
               </Typography>
 
@@ -356,7 +325,7 @@ function ModernProfileHeader({ profile, editing, onEdit }: {
                 />
                 {profile.emailVerified && (
                   <Tooltip title="Verified Account">
-                    <VerifiedIcon sx={{ color: '#22c55e', fontSize: 24 }} />
+                    <VerifiedIcon sx={{ color: theme.palette.success.main, fontSize: 24 }} />
                   </Tooltip>
                 )}
               </Box>
@@ -482,8 +451,9 @@ function ModernProfileHeader({ profile, editing, onEdit }: {
   );
 }
 
-// ChargeTab component for wallet charging functionality (keeping the same as before)
+// ChargeTab component for wallet charging functionality
 function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalanceUpdate: () => void }) {
+  const theme = useTheme();
   const { t } = useLocale();
   const [chargeAmount, setChargeAmount] = useState('');
   const [loading, setLoading] = useState(false);
@@ -553,7 +523,7 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('💰 Wallet recharged successfully via Binance');
+        setSuccess('Wallet recharged successfully via Binance');
         setChargeAmount('');
         setSelectedAmount(null);
         setSelectedPaymentMethod(null);
@@ -597,7 +567,7 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('🚀 Wallet recharged successfully via Whish.money');
+        setSuccess('Wallet recharged successfully via Whish.money');
         setChargeAmount('');
         setSelectedAmount(null);
         setSelectedPaymentMethod(null);
@@ -634,8 +604,7 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
             title="Current Balance"
             value={formatCurrency(profile.balanceReal)}
             icon={WalletIcon}
-            color="#22c55e"
-            subtitle={profile.balanceVirtual > 0 ? `Virtual: ${formatCurrency(profile.balanceVirtual)}` : undefined}
+            subtitle={`Virtual: ${formatCurrency(profile.balanceReal * profile.virtualMultiplier)}`}
           />
         </Grid>
 
@@ -643,7 +612,7 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
           <Stack spacing={4}>
             <Card sx={{ p: 4, borderRadius: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-                💳 Choose Payment Method
+                Choose Payment Method
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
@@ -654,14 +623,14 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
                       cursor: 'pointer',
                       borderRadius: 3,
                       transition: 'all 0.3s ease',
-                      border: selectedPaymentMethod === 'binance' ? '2px solid #F0B90B' : '1px solid rgba(0,0,0,0.1)',
-                      background: selectedPaymentMethod === 'binance' 
-                        ? 'linear-gradient(135deg, rgba(240,185,11,0.05) 0%, rgba(240,185,11,0.1) 100%)'
+                      border: selectedPaymentMethod === 'binance' ? `2px solid ${theme.palette.warning.main}` : `1px solid ${theme.palette.divider}`,
+                      background: selectedPaymentMethod === 'binance'
+                        ? theme.palette.action.selected
                         : 'transparent',
                       '&:hover': {
                         transform: 'translateY(-4px)',
-                        boxShadow: '0 12px 40px rgba(240,185,11,0.2)',
-                        borderColor: '#F0B90B',
+                        boxShadow: theme.shadows[8],
+                        borderColor: theme.palette.warning.main,
                       },
                     }}
                     onClick={() => setSelectedPaymentMethod('binance')}
@@ -676,8 +645,7 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
                       Fast and secure crypto payments with low fees
                     </Typography>
                     <Box display="flex" alignItems="center" gap={1}>
-                      <SecurityIcon sx={{ fontSize: 16, color: '#F0B90B' }} />
-                      <Typography variant="caption" color="#F0B90B" fontWeight={600}>
+                      <Typography variant="caption" color={theme.palette.warning.main} fontWeight={600}>
                         Instant Processing • 0.1% Fee
                       </Typography>
                     </Box>
@@ -692,14 +660,14 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
                       cursor: 'pointer',
                       borderRadius: 3,
                       transition: 'all 0.3s ease',
-                      border: selectedPaymentMethod === 'whish' ? '2px solid #6366f1' : '1px solid rgba(0,0,0,0.1)',
-                      background: selectedPaymentMethod === 'whish' 
-                        ? 'linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(139,92,246,0.05) 100%)'
+                      border: selectedPaymentMethod === 'whish' ? `2px solid ${theme.palette.secondary.main}` : `1px solid ${theme.palette.divider}`,
+                      background: selectedPaymentMethod === 'whish'
+                        ? theme.palette.action.selected
                         : 'transparent',
                       '&:hover': {
                         transform: 'translateY(-4px)',
-                        boxShadow: '0 12px 40px rgba(99,102,241,0.2)',
-                        borderColor: '#6366f1',
+                        boxShadow: theme.shadows[8],
+                        borderColor: theme.palette.secondary.main,
                       },
                     }}
                     onClick={() => setSelectedPaymentMethod('whish')}
@@ -714,8 +682,7 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
                       Modern payment solution with instant transfers
                     </Typography>
                     <Box display="flex" alignItems="center" gap={1}>
-                      <SecurityIcon sx={{ fontSize: 16, color: '#6366f1' }} />
-                      <Typography variant="caption" color="#6366f1" fontWeight={600}>
+                      <Typography variant="caption" color={theme.palette.secondary.main} fontWeight={600}>
                         Instant Processing • 2.5% Fee
                       </Typography>
                     </Box>
@@ -727,9 +694,9 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
             {selectedPaymentMethod && (
               <Card sx={{ p: 4, borderRadius: 3 }}>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-                  💰 Select Amount
+                  Select Amount
                 </Typography>
-                
+
                 <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
                   Quick Select
                 </Typography>
@@ -745,18 +712,6 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
                           fontSize: '1.1rem',
                           fontWeight: 600,
                           borderRadius: 2,
-                          background: selectedAmount === amount 
-                            ? (selectedPaymentMethod === 'binance' 
-                                ? 'linear-gradient(45deg, #F0B90B 0%, #F0B90B 100%)'
-                                : 'linear-gradient(45deg, #6366f1 0%, #8b5cf6 100%)')
-                            : 'transparent',
-                          borderColor: selectedPaymentMethod === 'binance' ? '#F0B90B' : '#6366f1',
-                          color: selectedAmount === amount ? 'white' : (selectedPaymentMethod === 'binance' ? '#F0B90B' : '#6366f1'),
-                          '&:hover': {
-                            background: selectedPaymentMethod === 'binance' 
-                              ? 'rgba(240,185,11,0.1)'
-                              : 'rgba(99,102,241,0.1)',
-                          },
                         }}
                       >
                         ${amount}
@@ -791,14 +746,6 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
                     fontSize: '1.2rem',
                     fontWeight: 700,
                     borderRadius: 3,
-                    background: selectedPaymentMethod === 'binance'
-                      ? 'linear-gradient(45deg, #F0B90B 0%, #F0B90B 100%)'
-                      : 'linear-gradient(45deg, #6366f1 0%, #8b5cf6 100%)',
-                    '&:hover': {
-                      background: selectedPaymentMethod === 'binance'
-                        ? 'linear-gradient(45deg, #D19F0A 0%, #D19F0A 100%)'
-                        : 'linear-gradient(45deg, #5856eb 0%, #7c3aed 100%)',
-                    },
                   }}
                 >
                   {loading ? (
@@ -827,8 +774,9 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
 }
 
 export default function ProfilePage() {
+  const theme = useTheme();
   const { user, loading: authLoading } = useAuth();
-  const { preferences, updatePreferences } = useNotifications();
+  const notificationContext = useNotifications();
   const { t } = useLocale();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -847,6 +795,30 @@ export default function ProfilePage() {
     avatarUrl: '',
   });
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [notificationError, setNotificationError] = useState(false);
+
+  // Hash navigation
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    const tabMap: { [key: string]: number } = {
+      'overview': 0,
+      'transactions': 1,
+      'bids': 2,
+      'wallet': 3,
+      'notifications': 4,
+      'agent': 5,
+    };
+
+    if (hash && tabMap[hash] !== undefined) {
+      setTabValue(tabMap[hash]);
+    }
+  }, []);
+
+  const handleTabChange = (newValue: number) => {
+    setTabValue(newValue);
+    const tabNames = ['overview', 'transactions', 'bids', 'wallet', 'notifications', 'agent'];
+    window.location.hash = tabNames[newValue];
+  };
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -862,7 +834,7 @@ export default function ProfilePage() {
         setError('Please login to continue');
         return;
       }
-      
+
       const response = await fetch('/api/users/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -955,15 +927,21 @@ export default function ProfilePage() {
     setSuccess(null);
   };
 
-  const handleUpdateNotificationPreference = async (key: keyof typeof preferences, value: boolean) => {
+  const handleUpdateNotificationPreference = async (key: string, value: boolean) => {
     try {
       setSavingNotifications(true);
       setError(null);
-      await updatePreferences({ [key]: value });
-      setSuccess('Notification preferences updated');
-      setTimeout(() => setSuccess(null), 3000);
+
+      if (notificationContext && notificationContext.updatePreferences) {
+        await notificationContext.updatePreferences({ [key]: value });
+        setSuccess('Notification preferences updated');
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        throw new Error('Notification preferences not available');
+      }
     } catch (err) {
       setError('Failed to update notification preferences');
+      setNotificationError(true);
     } finally {
       setSavingNotifications(false);
     }
@@ -971,12 +949,12 @@ export default function ProfilePage() {
 
   const handlePlayNotificationSound = async () => {
     if (playingSound) return;
-    
+
     try {
       setPlayingSound(true);
       const audio = new Audio('/sounds/notification.mp3');
       audio.volume = 0.7;
-      
+
       await audio.play();
       audio.onended = () => setPlayingSound(false);
       audio.onerror = () => {
@@ -1040,6 +1018,8 @@ export default function ProfilePage() {
     );
   }
 
+  const calculatedVirtualBalance = profile.balanceReal * profile.virtualMultiplier;
+
   return (
     <Layout>
       <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -1070,51 +1050,15 @@ export default function ProfilePage() {
                 title="Real Balance"
                 value={formatCurrency(profile.balanceReal)}
                 icon={WalletIcon}
-                color="#22c55e"
-                trend={12}
                 sparkline
               />
 
               <ModernStatsCard
                 title="Virtual Balance"
-                value={formatCurrency(profile.balanceVirtual)}
+                value={formatCurrency(calculatedVirtualBalance)}
                 icon={TrendingUpIcon}
-                color="#8b5cf6"
-                subtitle={`Multiplier: ${profile.virtualMultiplier}x`}
+                subtitle={`Real Balance $${profile.balanceReal.toFixed(2)} × Multiplier ${profile.virtualMultiplier}x`}
               />
-
-              {/* Quick Actions */}
-              <Card sx={{ p: 3, borderRadius: 3 }}>
-                <Typography variant="h6" fontWeight={600} mb={2}>
-                  Quick Actions
-                </Typography>
-                <Stack spacing={2}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<SettingsIcon />}
-                    fullWidth
-                    sx={{ justifyContent: 'flex-start', borderRadius: 2 }}
-                  >
-                    Account Settings
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<SecurityIcon />}
-                    fullWidth
-                    sx={{ justifyContent: 'flex-start', borderRadius: 2 }}
-                  >
-                    Security Settings
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<ShareIcon />}
-                    fullWidth
-                    sx={{ justifyContent: 'flex-start', borderRadius: 2 }}
-                  >
-                    Share Profile
-                  </Button>
-                </Stack>
-              </Card>
             </Stack>
           </Grid>
 
@@ -1125,7 +1069,7 @@ export default function ProfilePage() {
                 <Typography variant="h5" fontWeight={600} mb={3}>
                   Edit Profile
                 </Typography>
-                
+
                 <Box mb={4}>
                   <Typography variant="subtitle1" fontWeight={600} mb={2}>
                     Profile Picture
@@ -1180,10 +1124,10 @@ export default function ProfilePage() {
                     />
                   </Grid>
                 </Grid>
-                
+
                 <Box mt={4} display="flex" gap={2}>
-                  <Button 
-                    variant="contained" 
+                  <Button
+                    variant="contained"
                     startIcon={<SaveIcon />}
                     onClick={handleSaveProfile}
                     disabled={saving}
@@ -1191,8 +1135,8 @@ export default function ProfilePage() {
                   >
                     {saving ? 'Saving...' : 'Save Changes'}
                   </Button>
-                  <Button 
-                    variant="outlined" 
+                  <Button
+                    variant="outlined"
                     startIcon={<CancelIcon />}
                     onClick={handleCancelEdit}
                     disabled={saving}
@@ -1204,9 +1148,9 @@ export default function ProfilePage() {
               </Card>
             ) : (
               <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
-                <Tabs 
-                  value={tabValue} 
-                  onChange={(_, newValue) => setTabValue(newValue)}
+                <Tabs
+                  value={tabValue}
+                  onChange={(_, newValue) => handleTabChange(newValue)}
                   variant="scrollable"
                   scrollButtons="auto"
                   sx={{
@@ -1238,8 +1182,6 @@ export default function ProfilePage() {
                           title="Active Bids"
                           value={profile.stats.activeBids}
                           icon={GavelIcon}
-                          color="#f59e0b"
-                          trend={8}
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
@@ -1247,8 +1189,6 @@ export default function ProfilePage() {
                           title="Auctions Won"
                           value={profile.stats.auctionsWon}
                           icon={StarIcon}
-                          color="#10b981"
-                          trend={15}
                         />
                       </Grid>
                       <Grid item xs={12}>
@@ -1419,80 +1359,90 @@ export default function ProfilePage() {
                       <Typography variant="h6" fontWeight={600} mb={3}>
                         Notification Preferences
                       </Typography>
-                      <Stack spacing={3}>
-                        <Card variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-                          <Box display="flex" alignItems="center" justifyContent="space-between">
-                            <Box display="flex" alignItems="center" gap={2}>
-                              <VolumeUpIcon color="primary" />
-                              <Box>
-                                <Typography variant="body1" fontWeight={600}>
-                                  Sound Notifications
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  Play sounds for new notifications
-                                </Typography>
+                      {notificationError ? (
+                        <Alert severity="warning" sx={{ mb: 3 }}>
+                          Notification preferences are currently unavailable. Please try again later.
+                        </Alert>
+                      ) : notificationContext && notificationContext.preferences ? (
+                        <Stack spacing={3}>
+                          <Card variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+                            <Box display="flex" alignItems="center" justifyContent="space-between">
+                              <Box display="flex" alignItems="center" gap={2}>
+                                <VolumeUpIcon color="primary" />
+                                <Box>
+                                  <Typography variant="body1" fontWeight={600}>
+                                    Sound Notifications
+                                  </Typography>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Play sounds for new notifications
+                                  </Typography>
+                                </Box>
                               </Box>
+                              <Switch
+                                checked={notificationContext.preferences.notificationSoundEnabled}
+                                onChange={(e) => handleUpdateNotificationPreference('notificationSoundEnabled', e.target.checked)}
+                                disabled={savingNotifications}
+                              />
                             </Box>
-                            <Switch
-                              checked={preferences.notificationSoundEnabled}
-                              onChange={(e) => handleUpdateNotificationPreference('notificationSoundEnabled', e.target.checked)}
-                              disabled={savingNotifications}
-                            />
-                          </Box>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<PlayArrowIcon />}
-                            onClick={handlePlayNotificationSound}
-                            disabled={playingSound}
-                            sx={{ mt: 2 }}
-                          >
-                            {playingSound ? 'Playing...' : 'Test Sound'}
-                          </Button>
-                        </Card>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<PlayArrowIcon />}
+                              onClick={handlePlayNotificationSound}
+                              disabled={playingSound}
+                              sx={{ mt: 2 }}
+                            >
+                              {playingSound ? 'Playing...' : 'Test Sound'}
+                            </Button>
+                          </Card>
 
-                        <Card variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-                          <Box display="flex" alignItems="center" justifyContent="space-between">
-                            <Box display="flex" alignItems="center" gap={2}>
-                              <EmailIcon color="primary" />
-                              <Box>
-                                <Typography variant="body1" fontWeight={600}>
-                                  Email Notifications
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  Receive notifications via email
-                                </Typography>
+                          <Card variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+                            <Box display="flex" alignItems="center" justifyContent="space-between">
+                              <Box display="flex" alignItems="center" gap={2}>
+                                <EmailIcon color="primary" />
+                                <Box>
+                                  <Typography variant="body1" fontWeight={600}>
+                                    Email Notifications
+                                  </Typography>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Receive notifications via email
+                                  </Typography>
+                                </Box>
                               </Box>
+                              <Switch
+                                checked={notificationContext.preferences.emailNotificationsEnabled}
+                                onChange={(e) => handleUpdateNotificationPreference('emailNotificationsEnabled', e.target.checked)}
+                                disabled={savingNotifications}
+                              />
                             </Box>
-                            <Switch
-                              checked={preferences.emailNotificationsEnabled}
-                              onChange={(e) => handleUpdateNotificationPreference('emailNotificationsEnabled', e.target.checked)}
-                              disabled={savingNotifications}
-                            />
-                          </Box>
-                        </Card>
+                          </Card>
 
-                        <Card variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-                          <Box display="flex" alignItems="center" justifyContent="space-between">
-                            <Box display="flex" alignItems="center" gap={2}>
-                              <NotificationsIcon color="primary" />
-                              <Box>
-                                <Typography variant="body1" fontWeight={600}>
-                                  Push Notifications
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  Receive browser push notifications
-                                </Typography>
+                          <Card variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+                            <Box display="flex" alignItems="center" justifyContent="space-between">
+                              <Box display="flex" alignItems="center" gap={2}>
+                                <NotificationsIcon color="primary" />
+                                <Box>
+                                  <Typography variant="body1" fontWeight={600}>
+                                    Push Notifications
+                                  </Typography>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Receive browser push notifications
+                                  </Typography>
+                                </Box>
                               </Box>
+                              <Switch
+                                checked={notificationContext.preferences.pushNotificationsEnabled}
+                                onChange={(e) => handleUpdateNotificationPreference('pushNotificationsEnabled', e.target.checked)}
+                                disabled={savingNotifications}
+                              />
                             </Box>
-                            <Switch
-                              checked={preferences.pushNotificationsEnabled}
-                              onChange={(e) => handleUpdateNotificationPreference('pushNotificationsEnabled', e.target.checked)}
-                              disabled={savingNotifications}
-                            />
-                          </Box>
-                        </Card>
-                      </Stack>
+                          </Card>
+                        </Stack>
+                      ) : (
+                        <Alert severity="info">
+                          Loading notification preferences...
+                        </Alert>
+                      )}
                     </Box>
                   )}
 
@@ -1515,7 +1465,6 @@ export default function ProfilePage() {
                               title="Rating"
                               value={profile.agent.rating?.toFixed(1) || 'N/A'}
                               icon={StarIcon}
-                              color="#f59e0b"
                             />
                           </Grid>
                           <Grid item xs={6} sm={3}>
@@ -1523,7 +1472,6 @@ export default function ProfilePage() {
                               title="Reviews"
                               value={profile.agent.reviewCount}
                               icon={AnalyticsIcon}
-                              color="#10b981"
                             />
                           </Grid>
                           <Grid item xs={6} sm={3}>
@@ -1531,7 +1479,6 @@ export default function ProfilePage() {
                               title="Auctions"
                               value={profile.agent.totalAuctions}
                               icon={GavelIcon}
-                              color="#3b82f6"
                             />
                           </Grid>
                           <Grid item xs={6} sm={3}>
@@ -1539,7 +1486,6 @@ export default function ProfilePage() {
                               title="Total Sales"
                               value={formatCurrency(profile.agent.totalSales)}
                               icon={MoneyIcon}
-                              color="#8b5cf6"
                             />
                           </Grid>
                         </Grid>
