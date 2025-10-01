@@ -175,6 +175,12 @@ export default function QuickBidDialog({
 
       const data = await response.json();
       if (data.success) {
+        console.log('✅ Bid placed successfully:', {
+          bidAmount: selectedBid,
+          productId,
+          timestamp: new Date().toISOString(),
+        });
+
         // Fetch updated user balance from the API to get accurate balance
         try {
           const balanceResponse = await authenticatedFetch('/api/users/balance');
@@ -182,40 +188,53 @@ export default function QuickBidDialog({
             const balanceData = await balanceResponse.json();
             if (balanceData.success && balanceData.data?.balance?.balances && user) {
               const balances = balanceData.data.balance.balances;
+
+              console.log('💰 Balance update after bid:', {
+                previousVirtual: user.balanceVirtual,
+                newVirtual: balances.virtual,
+                deducted: user.balanceVirtual - balances.virtual,
+                real: balances.real,
+                bidAmount: selectedBid,
+              });
+
               // Update the user's balance in auth context
               updateUser({
                 balanceVirtual: balances.virtual,
                 balanceReal: balances.real,
               });
               setLiveUserBalance(balances.virtual);
-              console.log('✅ Balance updated after bid:', {
-                virtual: balances.virtual,
-                real: balances.real,
-              });
 
               // Dispatch custom event to notify other components about balance change
               window.dispatchEvent(new CustomEvent('balanceUpdated', {
                 detail: {
                   balanceVirtual: balances.virtual,
                   balanceReal: balances.real,
+                  previousVirtual: user.balanceVirtual,
+                  deducted: user.balanceVirtual - balances.virtual,
                 }
               }));
             }
           }
         } catch (error) {
-          console.error('Error fetching updated balance:', error);
+          console.error('❌ Error fetching updated balance:', error);
           // Fallback: calculate estimated balance locally
           if (user) {
             const estimatedBalance = user.balanceVirtual - selectedBid;
             updateUser({ balanceVirtual: estimatedBalance });
             setLiveUserBalance(estimatedBalance);
-            console.log('⚠️ Using estimated balance:', estimatedBalance);
+            console.log('⚠️ Using estimated balance (API fetch failed):', {
+              previous: user.balanceVirtual,
+              estimated: estimatedBalance,
+              deducted: selectedBid,
+            });
 
             // Still dispatch event even with estimated balance
             window.dispatchEvent(new CustomEvent('balanceUpdated', {
               detail: {
                 balanceVirtual: estimatedBalance,
                 balanceReal: user.balanceReal,
+                previousVirtual: user.balanceVirtual,
+                deducted: selectedBid,
               }
             }));
           }

@@ -309,11 +309,49 @@ export const POST = withAuth(
 
         // Deduct balance from new bidder (only the additional amount for incremental bidding)
         const amountToDeduct = isSameUser ? additionalAmountNeeded : validatedData.amount;
-        const newBalance = Number(user.balanceVirtual) - amountToDeduct;
+        const previousVirtualBalance = Number(user.balanceVirtual);
+        const newBalance = previousVirtualBalance - amountToDeduct;
+
+        logger.info('💰 Deducting from virtual balance', {
+          userId: request.user.id,
+          productId: id,
+          isSameUser,
+          previousBid: userCurrentBid,
+          newBid: validatedData.amount,
+          amountToDeduct,
+          previousVirtualBalance,
+          newVirtualBalance: newBalance,
+        });
+
         await tx.user.update({
           where: { id: request.user.id },
           data: {
             balanceVirtual: newBalance,
+          },
+        });
+
+        // Create transaction record for bid deduction
+        await tx.transaction.create({
+          data: {
+            userId: request.user.id,
+            relatedId: id,
+            relatedType: 'product',
+            transactionType: 'BID_PLACED',
+            amountReal: 0,
+            amountVirtual: amountToDeduct,
+            status: 'COMPLETED',
+            description: `Bid placed on ${auction.title} - $${validatedData.amount.toFixed(2)}${isSameUser ? ' (increased bid)' : ''}`,
+            metadata: {
+              productId: id,
+              productTitle: auction.title,
+              bidAmount: validatedData.amount,
+              previousBid: userCurrentBid,
+              amountDeducted: amountToDeduct,
+              isIncrementalBid: isSameUser,
+              previousVirtualBalance,
+              newVirtualBalance: newBalance,
+            },
+            processedAt: new Date(),
           },
         });
 
