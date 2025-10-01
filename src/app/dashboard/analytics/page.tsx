@@ -53,8 +53,19 @@ export default function AnalyticsPage() {
         setLoading(true);
         const result = await apiClient.get('/api/analytics');
 
-        if (result.success) {
-          setData(result.data);
+        if (result.success && result.data?.data) {
+          // Parse the nested data structure and ensure numbers
+          const analyticsData = result.data.data;
+          setData({
+            totalRevenue: Number(analyticsData.totalRevenue) || 0,
+            totalAuctions: Number(analyticsData.totalAuctions) || 0,
+            totalUsers: Number(analyticsData.totalUsers) || 0,
+            totalBids: Number(analyticsData.totalBids) || 0,
+            revenueGrowth: Number(analyticsData.revenueGrowth) || 0,
+            auctionGrowth: Number(analyticsData.auctionGrowth) || 0,
+            userGrowth: Number(analyticsData.userGrowth) || 0,
+            bidGrowth: Number(analyticsData.bidGrowth) || 0,
+          });
         }
       } catch (error) {
         console.error('Error loading analytics:', error);
@@ -69,11 +80,14 @@ export default function AnalyticsPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(amount);
+    }).format(amount || 0);
 
-  const formatPercentage = (value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
+  const formatPercentage = (value: number | undefined) => {
+    const numValue = Number(value) || 0;
+    return `${numValue >= 0 ? '+' : ''}${numValue.toFixed(1)}%`;
+  };
 
-  const getGrowthColor = (growth: number) => growth >= 0 ? 'success.main' : 'error.main';
+  const getGrowthColor = (growth: number | undefined) => (growth || 0) >= 0 ? 'success.main' : 'error.main';
 
   if (loading) {
     return (
