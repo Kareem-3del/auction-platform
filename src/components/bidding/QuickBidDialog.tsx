@@ -796,23 +796,15 @@ export default function QuickBidDialog({
               
               <TextField
                 label="Your bid amount"
-                defaultValue=""
+                value={customAmount}
                 onChange={(e) => {
-                  console.log('TextField onChange fired with:', e.target.value);
                   handleCustomAmountChange(e.target.value);
                 }}
-                onInput={(e) => {
-                  console.log('TextField onInput fired with:', (e.target as HTMLInputElement).value);
-                }}
-                onKeyDown={(e) => {
-                  console.log('Key pressed:', e.key);
-                }}
-                type="text"
+                type="number"
                 placeholder="Enter amount (e.g. 100.50)"
                 autoComplete="off"
                 InputProps={{
                   startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                  autoComplete: 'off',
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
