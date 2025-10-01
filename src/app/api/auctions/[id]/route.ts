@@ -104,10 +104,84 @@ export const PUT = withAuth(async (request, { params }: RouteParams) => {
       });
     }
 
-    // Implementation for updating auction would go here
-    return handleAPIError({
-      name: 'NotImplementedError',
-      message: 'Auction update not implemented yet',
+    // Get existing auction
+    const existingAuction = await prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        agentId: true,
+        auctionStatus: true,
+      }
+    });
+
+    if (!existingAuction) {
+      return handleAPIError({
+        name: 'AuctionNotFoundError',
+        message: 'Auction not found',
+      }, 404);
+    }
+
+    // If user is an agent, verify they own this auction
+    if (request.user.userType === 'AGENT') {
+      const agent = await prisma.agent.findUnique({
+        where: { userId: request.user.id },
+        select: { id: true },
+      });
+
+      if (!agent || existingAuction.agentId !== agent.id) {
+        return handleAPIError({
+          name: 'UnauthorizedError',
+          message: 'You can only update your own auctions',
+        });
+      }
+    }
+
+    const body = await request.json();
+
+    // Build update data object
+    const updateData: any = {};
+
+    if (body.title !== undefined) updateData.title = body.title;
+    if (body.description !== undefined) updateData.description = body.description;
+    if (body.startingBid !== undefined) updateData.startingBid = body.startingBid;
+    if (body.reservePrice !== undefined) updateData.reservePrice = body.reservePrice;
+    if (body.bidIncrement !== undefined) updateData.bidIncrement = body.bidIncrement;
+    if (body.startTime !== undefined) updateData.startTime = new Date(body.startTime);
+    if (body.endTime !== undefined) updateData.endTime = new Date(body.endTime);
+    if (body.auctionStatus !== undefined) updateData.auctionStatus = body.auctionStatus;
+
+    // Handle images - convert array to JSON string for storage
+    if (body.images !== undefined) {
+      updateData.images = JSON.stringify(body.images);
+    }
+
+    // Update the auction
+    const updatedAuction = await prisma.product.update({
+      where: { id },
+      data: updateData,
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        agent: {
+          select: {
+            id: true,
+            displayName: true,
+            businessName: true,
+          },
+        },
+      },
+    });
+
+    return successResponse({
+      ...updatedAuction,
+      images: typeof updatedAuction.images === 'string'
+        ? JSON.parse(updatedAuction.images)
+        : updatedAuction.images,
     });
 
   } catch (error) {

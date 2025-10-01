@@ -28,6 +28,7 @@ import {
 
 import { apiClient } from 'src/lib/axios';
 import { DashboardContent } from 'src/layouts/dashboard';
+import MultiImageUpload from 'src/components/common/MultiImageUpload';
 
 interface Product {
   id: string;
@@ -47,8 +48,10 @@ interface Auction {
   startTime: string;
   endTime: string;
   status: string;
+  auctionStatus?: string;
   productId: string;
   product?: Product;
+  images?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -57,10 +60,11 @@ export default function EditAuctionPage() {
   const router = useRouter();
   const params = useParams();
   const auctionId = params.id as string;
-  
+
   const [loading, setLoading] = useState(true);
   const [auction, setAuction] = useState<Auction | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [images, setImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -72,7 +76,7 @@ export default function EditAuctionPage() {
     endTime: '',
     status: 'PENDING',
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -88,18 +92,32 @@ export default function EditAuctionPage() {
         setFormData({
           title: a.title || '',
           description: a.description || '',
-          productId: a.productId || '',
+          productId: a.productId || a.id,
           startingBid: a.startingBid?.toString() || '',
           reservePrice: a.reservePrice?.toString() || '',
           bidIncrement: a.bidIncrement?.toString() || '',
           startTime: a.startTime ? new Date(a.startTime).toISOString().slice(0, 16) : '',
           endTime: a.endTime ? new Date(a.endTime).toISOString().slice(0, 16) : '',
-          status: a.status || 'PENDING',
+          status: a.auctionStatus || a.status || 'PENDING',
         });
+
+        // Set images from the auction
+        if (a.images && Array.isArray(a.images)) {
+          setImages(a.images);
+        } else if (a.images && typeof a.images === 'string') {
+          try {
+            setImages(JSON.parse(a.images));
+          } catch {
+            setImages([]);
+          }
+        }
 
         // Set the current product as the only option (we don't allow changing products on edit)
         if (a.product) {
           setProducts([a.product]);
+        } else {
+          // If no product info, create one from auction data
+          setProducts([{ id: a.id, title: a.title, description: a.description, images: a.images }]);
         }
 
       } catch (error) {
@@ -173,17 +191,25 @@ export default function EditAuctionPage() {
       return;
     }
 
+    if (images.length === 0) {
+      setErrors({ general: 'At least one image is required' });
+      return;
+    }
+
     setIsSubmitting(true);
     setSuccessMessage('');
 
     try {
       const data = await apiClient.put(`/api/auctions/${auctionId}`, {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
         startingBid: parseFloat(formData.startingBid),
         reservePrice: formData.reservePrice ? parseFloat(formData.reservePrice) : null,
         bidIncrement: parseFloat(formData.bidIncrement),
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
+        auctionStatus: formData.status,
+        images: images,
       });
 
       if (data.success) {
@@ -308,13 +334,31 @@ export default function EditAuctionPage() {
                         label="Status"
                         onChange={(e) => handleInputChange('status', e.target.value)}
                       >
-                        <MenuItem value="PENDING">Pending</MenuItem>
-                        <MenuItem value="ACTIVE">Active</MenuItem>
-                        <MenuItem value="COMPLETED">Completed</MenuItem>
+                        <MenuItem value="SCHEDULED">Scheduled</MenuItem>
+                        <MenuItem value="LIVE">Live</MenuItem>
+                        <MenuItem value="ENDED">Ended</MenuItem>
                         <MenuItem value="CANCELLED">Cancelled</MenuItem>
                       </Select>
                     </FormControl>
                   </Stack>
+                </Card>
+
+                {/* Images */}
+                <Card sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Auction Images
+                  </Typography>
+                  <MultiImageUpload
+                    images={images}
+                    onChange={setImages}
+                    error={errors.images}
+                    maxImages={10}
+                  />
+                  {errors.images && (
+                    <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                      {errors.images}
+                    </Typography>
+                  )}
                 </Card>
 
                 {/* Bidding Settings */}
