@@ -147,7 +147,9 @@ export class AuctionSettlementService {
   }
 
   /**
-   * Process winner settlement: Deduct final price from real balance
+   * Process winner settlement:
+   * 1. Release funds from virtual balance (already held from bid)
+   * 2. Deduct from real balance (actual payment)
    */
   private static async processWinnerSettlement(
     userId: string,
@@ -165,9 +167,16 @@ export class AuctionSettlementService {
       }
 
       const currentRealBalance = Number(user.balanceReal);
+      const currentVirtualBalance = Number(user.balanceVirtual);
+
+      // Deduct from real balance (actual payment)
       const newRealBalance = currentRealBalance - finalPrice;
 
-      // Update user's real balance
+      // Virtual balance should already have the bid amount deducted during bidding
+      // No change to virtual balance needed here since it was already held
+      // The virtual balance will naturally stay as is (bid was already deducted)
+
+      // Update user's real balance only
       await prisma.user.update({
         where: { id: userId },
         data: {
@@ -188,8 +197,10 @@ export class AuctionSettlementService {
             productId,
             auctionEndTime: new Date(),
             finalPrice,
-            previousBalance: currentRealBalance,
-            newBalance: newRealBalance
+            previousRealBalance: currentRealBalance,
+            newRealBalance: newRealBalance,
+            currentVirtualBalance: currentVirtualBalance,
+            note: 'Bid amount was already held in virtual balance during bidding'
           }
         }
       });
@@ -277,7 +288,8 @@ export class AuctionSettlementService {
   }
 
   /**
-   * Process loser refund: Return their bid from virtual to real balance
+   * Process loser refund: Return their bid from virtual balance back to virtual balance
+   * Since bids are held in virtual balance, we just return them to virtual balance
    */
   private static async processLoserRefund(
     userId: string,
@@ -294,18 +306,15 @@ export class AuctionSettlementService {
         throw new Error('User not found');
       }
 
-      const currentRealBalance = Number(user.balanceReal);
       const currentVirtualBalance = Number(user.balanceVirtual);
-      
-      // Return bid amount from virtual to real balance
-      const newRealBalance = currentRealBalance + bidAmount;
-      const newVirtualBalance = Math.max(0, currentVirtualBalance - bidAmount);
 
-      // Update user's balances
+      // Return bid amount back to virtual balance (it was already deducted during bidding)
+      const newVirtualBalance = currentVirtualBalance + bidAmount;
+
+      // Update user's virtual balance only
       await prisma.user.update({
         where: { id: userId },
         data: {
-          balanceReal: new Decimal(newRealBalance),
           balanceVirtual: new Decimal(newVirtualBalance)
         }
       });
@@ -316,16 +325,14 @@ export class AuctionSettlementService {
           userId,
           type: 'BID_REFUND',
           amount: new Decimal(bidAmount),
-          balanceType: 'REAL',
+          balanceType: 'VIRTUAL',
           status: 'COMPLETED',
           description: `Refund for unsuccessful bid on: "${productTitle}"`,
           metadata: {
             productId,
             bidAmount,
             auctionEndTime: new Date(),
-            previousRealBalance: currentRealBalance,
             previousVirtualBalance: currentVirtualBalance,
-            newRealBalance,
             newVirtualBalance
           }
         }
@@ -336,13 +343,13 @@ export class AuctionSettlementService {
         userId,
         type: 'BID_REFUNDED',
         title: '💰 Bid Refunded',
-        message: `Your bid of $${bidAmount} for "${productTitle}" has been refunded to your account.`,
+        message: `Your bid of $${bidAmount.toFixed(2)} for "${productTitle}" has been refunded to your virtual balance.`,
         relatedId: productId,
         relatedType: 'PRODUCT',
         data: {
           productTitle,
           bidAmount,
-          newRealBalance,
+          newVirtualBalance,
           productId
         }
       });
@@ -354,7 +361,7 @@ export class AuctionSettlementService {
         {
           productTitle,
           productId,
-          newBalance: newRealBalance
+          newBalance: newVirtualBalance
         }
       );
 
@@ -362,7 +369,7 @@ export class AuctionSettlementService {
         userId,
         type: 'REFUND' as const,
         amount: bidAmount,
-        newBalance: newRealBalance,
+        newBalance: newVirtualBalance,
         status: 'SUCCESS' as const
       };
 

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from 'src/lib/prisma';
+import { AuctionSettlementService } from 'src/lib/auction-settlement';
 
 /**
  * Cron job endpoint to automatically update auction statuses
  * SCHEDULED -> LIVE (when startTime is reached)
  * LIVE -> ENDED (when endTime is reached)
- * Process winner payment when auction ends
+ * Process winner payment when auction ends using proper settlement service
  */
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +25,9 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Find LIVE auctions that have ended and need payment processing
+    console.log(`📢 Updated ${scheduledToLive.count} auctions from SCHEDULED to LIVE`);
+
+    // Find LIVE auctions that have ended and need settlement
     const endedAuctions = await prisma.product.findMany({
       where: {
         auctionStatus: 'LIVE',
@@ -32,95 +35,56 @@ export async function GET(request: NextRequest) {
           lte: now,
         },
       },
-      include: {
-        bids: {
-          orderBy: {
-            amount: 'desc',
-          },
-          take: 1,
-          include: {
-            user: true,
-          },
-        },
+      select: {
+        id: true,
+        title: true,
+        endTime: true,
       },
     });
 
-    let processedPayments = 0;
-    let failedPayments = 0;
+    console.log(`🏁 Found ${endedAuctions.length} auctions that need settlement`);
 
-    // Process payment for each ended auction
+    let processedSettlements = 0;
+    let failedSettlements = 0;
+    const settlementResults = [];
+
+    // Process settlement for each ended auction using the settlement service
     for (const auction of endedAuctions) {
       try {
-        if (auction.bids.length > 0) {
-          const winningBid = auction.bids[0];
-          const winner = winningBid.user;
+        console.log(`⚙️ Processing settlement for auction ${auction.id}: "${auction.title}"`);
 
-          // Check if winner has sufficient balance
-          if (winner.balanceReal >= winningBid.amount) {
-            // Process payment in a transaction
-            await prisma.$transaction(async (tx) => {
-              // Deduct from winner's real balance
-              await tx.user.update({
-                where: { id: winner.id },
-                data: {
-                  balanceReal: {
-                    decrement: winningBid.amount,
-                  },
-                },
-              });
+        const settlementResult = await AuctionSettlementService.processAuctionEnd(auction.id);
 
-              // Create transaction record
-              await tx.transaction.create({
-                data: {
-                  userId: winner.id,
-                  type: 'PAYMENT',
-                  amount: winningBid.amount,
-                  balanceType: 'REAL',
-                  description: `Payment for winning auction: ${auction.title}`,
-                  metadata: {
-                    auctionId: auction.id,
-                    bidId: winningBid.id,
-                    auctionTitle: auction.title,
-                  },
-                },
-              });
-
-              // Update auction status to ENDED
-              await tx.product.update({
-                where: { id: auction.id },
-                data: {
-                  auctionStatus: 'ENDED',
-                },
-              });
-            });
-
-            processedPayments++;
-          } else {
-            // Insufficient balance - still end auction but log warning
-            await prisma.product.update({
-              where: { id: auction.id },
-              data: {
-                auctionStatus: 'ENDED',
-              },
-            });
-
-            console.warn(`Winner ${winner.id} has insufficient balance for auction ${auction.id}. Required: ${winningBid.amount}, Available: ${winner.balanceReal}`);
-            failedPayments++;
-          }
+        if (settlementResult.success) {
+          processedSettlements++;
+          console.log(`✅ Settlement successful for auction ${auction.id}`);
         } else {
-          // No bids - just end the auction
-          await prisma.product.update({
-            where: { id: auction.id },
-            data: {
-              auctionStatus: 'ENDED',
-            },
-          });
+          failedSettlements++;
+          console.error(`❌ Settlement failed for auction ${auction.id}:`, settlementResult.errors);
         }
-      } catch (error) {
-        console.error(`Error processing auction ${auction.id}:`, error);
-        failedPayments++;
 
-        // Still try to end the auction even if payment fails
+        settlementResults.push({
+          auctionId: auction.id,
+          auctionTitle: auction.title,
+          success: settlementResult.success,
+          winnerId: settlementResult.winnerId,
+          finalPrice: settlementResult.finalPrice,
+          balanceUpdates: settlementResult.balanceUpdates.length,
+          errors: settlementResult.errors,
+        });
+
+      } catch (error) {
+        console.error(`💥 Error processing settlement for auction ${auction.id}:`, error);
+        failedSettlements++;
+
+        settlementResults.push({
+          auctionId: auction.id,
+          auctionTitle: auction.title,
+          success: false,
+          errors: [error instanceof Error ? error.message : 'Unknown error'],
+        });
+
+        // Still try to end the auction even if settlement fails
         try {
           await prisma.product.update({
             where: { id: auction.id },
@@ -134,14 +98,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    console.log(`📊 Settlement Summary: ${processedSettlements} successful, ${failedSettlements} failed`);
+
     return NextResponse.json({
       success: true,
       message: 'Auction statuses updated successfully',
       data: {
         scheduledToLive: scheduledToLive.count,
-        liveToEnded: endedAuctions.length,
-        paymentsProcessed: processedPayments,
-        paymentsFailed: failedPayments,
+        auctionsSettled: endedAuctions.length,
+        settlementsProcessed: processedSettlements,
+        settlementsFailed: failedSettlements,
+        settlementResults: settlementResults,
         timestamp: now.toISOString(),
       },
     });

@@ -196,12 +196,18 @@ export const POST = withAuth(
         );
       }
 
-      // Check if user has sufficient balance (using virtual balance for bidding)
+      // Check if this user is currently the highest bidder
+      const userCurrentBid = auction.highestBidderId === request.user.id ? currentBid : 0;
+      const additionalAmountNeeded = validatedData.amount - userCurrentBid;
+
+      // Check if user has sufficient balance for the ADDITIONAL amount (incremental bidding)
       const availableBalance = Number(user.balanceVirtual);
-      if (availableBalance < validatedData.amount) {
+      if (availableBalance < additionalAmountNeeded) {
         logger.warn('Insufficient balance for bid', {
           userId: user.id,
           requestedAmount: validatedData.amount,
+          currentBid: userCurrentBid,
+          additionalNeeded: additionalAmountNeeded,
           availableBalance,
           productId: id,
         });
@@ -209,11 +215,13 @@ export const POST = withAuth(
         return handleAPIError(
           {
             name: 'InsufficientBalanceError',
-            message: `Insufficient balance. You need $${validatedData.amount.toFixed(2)} but have $${availableBalance.toFixed(2)}`,
+            message: `Insufficient balance. You need an additional $${additionalAmountNeeded.toFixed(2)} but have $${availableBalance.toFixed(2)}`,
             details: {
-              required: validatedData.amount,
+              newBidAmount: validatedData.amount,
+              currentBidAmount: userCurrentBid,
+              additionalRequired: additionalAmountNeeded,
               available: availableBalance,
-              shortfall: validatedData.amount - availableBalance,
+              shortfall: additionalAmountNeeded - availableBalance,
             },
           },
           400
@@ -225,9 +233,10 @@ export const POST = withAuth(
         // Get the previous highest bidder
         const previousHighestBidderId = auction.highestBidderId;
         const previousBidAmount = currentBid;
+        const isSameUser = previousHighestBidderId === request.user.id;
 
         // If there was a previous highest bidder and it's a different user
-        if (previousHighestBidderId && previousHighestBidderId !== request.user.id && previousBidAmount > 0) {
+        if (previousHighestBidderId && !isSameUser && previousBidAmount > 0) {
           // Get previous bidder info
           const previousBidder = await tx.user.findUnique({
             where: { id: previousHighestBidderId },
@@ -298,8 +307,9 @@ export const POST = withAuth(
           }
         }
 
-        // Deduct balance from new bidder
-        const newBalance = Number(user.balanceVirtual) - validatedData.amount;
+        // Deduct balance from new bidder (only the additional amount for incremental bidding)
+        const amountToDeduct = isSameUser ? additionalAmountNeeded : validatedData.amount;
+        const newBalance = Number(user.balanceVirtual) - amountToDeduct;
         await tx.user.update({
           where: { id: request.user.id },
           data: {
