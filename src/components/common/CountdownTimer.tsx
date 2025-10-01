@@ -276,7 +276,7 @@ export function CountdownTimer({
               textTransform: 'uppercase',
             }}
           >
-            {status === 'upcoming' ? 'Auction Starts In' : 'Auction Ends In'}
+            {config.label}
           </Typography>
         </Box>
       </Box>
