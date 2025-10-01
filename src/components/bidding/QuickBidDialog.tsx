@@ -87,11 +87,10 @@ export default function QuickBidDialog({
   // Auto-increment selected bid when current bid increases
   useEffect(() => {
     const newMinimumBid = displayCurrentBid + bidIncrement;
-    
+
     // If selected bid is no longer valid (too low), auto-increment it
     if (selectedBid <= displayCurrentBid) {
       setSelectedBid(newMinimumBid);
-      setCustomAmount(''); // Clear custom amount if it becomes invalid
     }
   }, [displayCurrentBid, bidIncrement, selectedBid]);
 
