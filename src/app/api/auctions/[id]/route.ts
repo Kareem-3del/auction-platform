@@ -63,6 +63,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       }, 404);
     }
 
+    // Increment view count (async, don't wait for it)
+    prisma.product.update({
+      where: { id },
+      data: { viewCount: { increment: 1 } }
+    }).catch(err => console.error('Failed to increment view count:', err));
+
     const auctionData = {
       ...auction,
       images: typeof auction.images === 'string' ? JSON.parse(auction.images) : auction.images,
@@ -73,6 +79,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       currentBid: auction.currentBid ? Number(auction.currentBid) : 0,
       bidIncrement: auction.bidIncrement ? Number(auction.bidIncrement) : null,
       buyNowPrice: auction.buyNowPrice ? Number(auction.buyNowPrice) : null,
+      viewCount: auction.viewCount,
+      watcherCount: auction.watcherCount,
     };
 
     return successResponse(auctionData);

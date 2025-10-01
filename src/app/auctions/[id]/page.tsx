@@ -12,6 +12,7 @@ import {
   History as HistoryIcon,
   Info as InfoIcon,
   ChevronRight as ChevronRightIcon,
+  Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -42,6 +43,7 @@ import { useRealtimeBidding } from 'src/hooks/useRealtimeBidding';
 import AuctionStatusCard from 'src/components/auction/AuctionStatusCard';
 import AuctionBidCard from 'src/components/auction/AuctionBidCard';
 import AuctionImageGallery from 'src/components/auction/AuctionImageGallery';
+import { CountdownTimer } from 'src/components/common/CountdownTimer';
 
 interface Product {
   id: string;
@@ -62,6 +64,8 @@ interface Product {
   uniqueBidders: number;
   highestBidderId: string | null;
   createdAt: string;
+  viewCount?: number;
+  watcherCount?: number;
   agent: {
     id: string;
     displayName: string;
@@ -328,6 +332,21 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                     size="small"
                     sx={{ fontSize: '0.7rem', height: 22 }}
                   />
+                  {(product.watcherCount !== undefined && product.watcherCount > 0) && (
+                    <Chip
+                      icon={<VisibilityIcon sx={{ fontSize: '0.9rem' }} />}
+                      label={`${product.watcherCount} watching`}
+                      size="small"
+                      sx={{
+                        fontSize: '0.7rem',
+                        height: 22,
+                        bgcolor: 'warning.lighter',
+                        color: 'warning.dark',
+                        '& .MuiChip-icon': { color: 'warning.dark' },
+                        fontWeight: 600
+                      }}
+                    />
+                  )}
                 </Stack>
               </Box>
 
@@ -427,14 +446,31 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                       bidCooldownTime={0}
                     />
                   ) : product.auctionStatus === 'SCHEDULED' ? (
-                    <Alert severity="info" sx={{ fontSize: '0.75rem', py: 0.5 }}>
-                      <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
-                        Auction Not Started
+                    <Box>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, mb: 1, display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>
+                        Auction Starts In
                       </Typography>
-                      <Typography variant="caption">
+                      {product.startTime && (
+                        <Box sx={{
+                          p: 2,
+                          bgcolor: 'info.lighter',
+                          borderRadius: 2,
+                          border: '2px solid',
+                          borderColor: 'info.light',
+                          mb: 1.5
+                        }}>
+                          <CountdownTimer
+                            startTime={new Date(product.startTime)}
+                            endTime={product.endTime ? new Date(product.endTime) : undefined}
+                            variant="modern"
+                            size="medium"
+                          />
+                        </Box>
+                      )}
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', fontSize: '0.7rem' }}>
                         Starts: {product.startTime ? formatDate(product.startTime) : 'TBA'}
                       </Typography>
-                    </Alert>
+                    </Box>
                   ) : (
                     <Alert severity="warning" sx={{ fontSize: '0.75rem', py: 0.5 }}>
                       <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
