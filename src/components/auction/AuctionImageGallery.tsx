@@ -30,9 +30,8 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
         minHeight: { xs: '300px', md: '400px', lg: '480px' },
         maxHeight: { xs: '350px', md: '450px', lg: '540px' },
         overflow: 'hidden',
-        borderRadius: 2,
         bgcolor: 'grey.900',
-        border: '1px solid',
+        border: '2px solid',
         borderColor: 'divider',
       }}
     >
@@ -48,91 +47,98 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
         }}
       />
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - Formal Design */}
       {hasMultipleImages && (
         <>
           <IconButton
             onClick={handlePrevious}
             sx={{
               position: 'absolute',
-              left: 12,
+              left: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              bgcolor: 'rgba(255, 255, 255, 0.9)',
-              color: 'grey.800',
-              width: 36,
-              height: 36,
+              bgcolor: 'common.white',
+              color: 'grey.900',
+              width: 40,
+              height: 40,
+              border: '2px solid',
+              borderColor: 'grey.300',
               transition: 'all 0.2s',
               '&:hover': {
                 bgcolor: 'primary.main',
                 color: 'common.white',
-                transform: 'translateY(-50%) scale(1.1)',
+                borderColor: 'primary.main',
+                transform: 'translateY(-50%) scale(1.05)',
               },
             }}
           >
-            <ChevronLeftIcon sx={{ fontSize: '1.25rem' }} />
+            <ChevronLeftIcon sx={{ fontSize: '1.5rem', fontWeight: 700 }} />
           </IconButton>
 
           <IconButton
             onClick={handleNext}
             sx={{
               position: 'absolute',
-              right: 12,
+              right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
-              bgcolor: 'rgba(255, 255, 255, 0.9)',
-              color: 'grey.800',
-              width: 36,
-              height: 36,
+              bgcolor: 'common.white',
+              color: 'grey.900',
+              width: 40,
+              height: 40,
+              border: '2px solid',
+              borderColor: 'grey.300',
               transition: 'all 0.2s',
               '&:hover': {
                 bgcolor: 'primary.main',
                 color: 'common.white',
-                transform: 'translateY(-50%) scale(1.1)',
+                borderColor: 'primary.main',
+                transform: 'translateY(-50%) scale(1.05)',
               },
             }}
           >
-            <ChevronRightIcon sx={{ fontSize: '1.25rem' }} />
+            <ChevronRightIcon sx={{ fontSize: '1.5rem', fontWeight: 700 }} />
           </IconButton>
         </>
       )}
 
-      {/* Image Counter - Compact */}
+      {/* Image Counter - Professional Style */}
       <Box
         sx={{
           position: 'absolute',
-          bottom: 12,
-          right: 12,
+          bottom: 16,
+          right: 16,
         }}
       >
         <Chip
           label={`${currentImageIndex + 1} / ${images?.length || 1}`}
           size="small"
           sx={{
-            bgcolor: 'rgba(0, 0, 0, 0.7)',
-            color: 'common.white',
-            fontWeight: 600,
-            fontSize: '0.7rem',
-            height: 24,
-            backdropFilter: 'blur(8px)',
+            bgcolor: 'common.white',
+            color: 'grey.900',
+            fontWeight: 700,
+            fontSize: '0.75rem',
+            height: 28,
+            border: '1px solid',
+            borderColor: 'grey.300',
             '& .MuiChip-label': {
-              px: 1.5,
+              px: 2,
             },
           }}
         />
       </Box>
 
-      {/* Thumbnail Navigation (for multiple images) */}
+      {/* Thumbnail Navigation - Formal Design */}
       {hasMultipleImages && images.length <= 5 && (
         <Box
           sx={{
             position: 'absolute',
-            bottom: 12,
+            bottom: 16,
             left: '50%',
             transform: 'translateX(-50%)',
           }}
         >
-          <Stack direction="row" spacing={0.75}>
+          <Stack direction="row" spacing={1}>
             {images.map((img, index) => (
               <Box
                 key={index}
@@ -141,20 +147,19 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
                 alt={`Thumbnail ${index + 1}`}
                 onClick={() => setCurrentImageIndex(index)}
                 sx={{
-                  width: 48,
-                  height: 48,
+                  width: 56,
+                  height: 56,
                   objectFit: 'cover',
-                  borderRadius: 1,
                   cursor: 'pointer',
                   border: '2px solid',
-                  borderColor: currentImageIndex === index ? 'primary.main' : 'transparent',
-                  opacity: currentImageIndex === index ? 1 : 0.6,
+                  borderColor: currentImageIndex === index ? 'primary.main' : 'common.white',
+                  opacity: currentImageIndex === index ? 1 : 0.7,
                   transition: 'all 0.2s',
                   bgcolor: 'grey.900',
                   '&:hover': {
                     opacity: 1,
-                    borderColor: 'primary.light',
-                    transform: 'scale(1.05)',
+                    borderColor: currentImageIndex === index ? 'primary.main' : 'primary.light',
+                    transform: 'scale(1.08)',
                   },
                 }}
               />

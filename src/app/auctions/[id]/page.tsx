@@ -13,6 +13,9 @@ import {
   Info as InfoIcon,
   ChevronRight as ChevronRightIcon,
   Visibility as VisibilityIcon,
+  LocationOn as LocationIcon,
+  Label as LabelIcon,
+  TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -34,6 +37,7 @@ import {
   Tabs,
   Tab,
   Chip,
+  Paper,
 } from '@mui/material';
 
 import { formatDate, formatCurrency } from 'src/lib/utils';
@@ -219,16 +223,16 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
 
   if (loading) {
     return (
-      <Box sx={{ bgcolor: 'grey.100', minHeight: '100vh', py: 2 }}>
+      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 3 }}>
         <Container maxWidth="xl">
-          <Skeleton variant="text" width={300} height={30} sx={{ mb: 2 }} />
-          <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2, mb: 2 }} />
-          <Grid container spacing={2}>
+          <Skeleton variant="text" width={300} height={40} sx={{ mb: 3 }} />
+          <Skeleton variant="rectangular" height={500} sx={{ mb: 3 }} />
+          <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
-              <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
+              <Skeleton variant="rectangular" height={400} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
+              <Skeleton variant="rectangular" height={400} />
             </Grid>
           </Grid>
         </Container>
@@ -238,9 +242,9 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
 
   if (error || !product) {
     return (
-      <Box sx={{ bgcolor: 'grey.100', minHeight: '100vh', py: 3 }}>
+      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 4 }}>
         <Container maxWidth="xl">
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 3 }}>
             {error || 'Product not found'}
           </Alert>
           <Button variant="contained" onClick={() => router.back()}>
@@ -253,9 +257,9 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
 
   if (!product.auctionStatus) {
     return (
-      <Box sx={{ bgcolor: 'grey.100', minHeight: '100vh', py: 3 }}>
+      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 4 }}>
         <Container maxWidth="xl">
-          <Alert severity="info" sx={{ mb: 2 }}>
+          <Alert severity="info" sx={{ mb: 3 }}>
             This product is not available for auction.
           </Alert>
           <Button variant="contained" onClick={() => router.push(`/products/${product.id}`)}>
@@ -287,33 +291,69 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
-      <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, md: 3 } }}>
+      <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, py: { xs: 3, md: 4 } }}>
 
-        {/* Compact Breadcrumbs */}
+        {/* Professional Breadcrumbs */}
         <Breadcrumbs
-          separator={<ChevronRightIcon sx={{ fontSize: 14 }} />}
-          sx={{ mb: 2, fontSize: '0.75rem' }}
+          separator={<ChevronRightIcon sx={{ fontSize: 16, color: 'text.disabled' }} />}
+          sx={{ mb: 3 }}
         >
-          <MuiLink href="/" sx={{ color: 'text.secondary', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+          <MuiLink
+            href="/"
+            sx={{
+              color: 'text.secondary',
+              textDecoration: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              '&:hover': { color: 'primary.main', textDecoration: 'underline' }
+            }}
+          >
             Home
           </MuiLink>
-          <MuiLink href="/auctions" sx={{ color: 'text.secondary', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+          <MuiLink
+            href="/auctions"
+            sx={{
+              color: 'text.secondary',
+              textDecoration: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              '&:hover': { color: 'primary.main', textDecoration: 'underline' }
+            }}
+          >
             Auctions
           </MuiLink>
-          <Typography sx={{ color: 'text.primary', fontSize: '0.75rem', fontWeight: 600 }}>
+          <Typography sx={{ color: 'text.primary', fontSize: '0.875rem', fontWeight: 600 }}>
             {product.title.length > 50 ? product.title.substring(0, 50) + '...' : product.title}
           </Typography>
         </Breadcrumbs>
 
-        {/* Compact Info Bar */}
-        <Card elevation={0} sx={{ mb: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-          <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
-            <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" flexWrap="wrap">
-              <Box sx={{ flex: 1, minWidth: 200 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5, fontSize: '0.95rem' }}>
+        {/* Formal Header Card */}
+        <Paper
+          elevation={0}
+          sx={{
+            mb: 3,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderLeft: '4px solid',
+            borderLeftColor: product.auctionStatus === 'LIVE' ? 'primary.main' : 'grey.400',
+          }}
+        >
+          <Box sx={{ p: 2.5 }}>
+            <Stack direction="row" spacing={2} alignItems="flex-start" justifyContent="space-between">
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 1.5,
+                    color: 'text.primary',
+                    letterSpacing: '-0.01em'
+                  }}
+                >
                   {product.title}
                 </Typography>
-                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+
+                <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" sx={{ gap: 1 }}>
                   <AuctionStatusCard
                     auctionStatus={product.auctionStatus}
                     timeLeft={timeLeft}
@@ -321,27 +361,46 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                     endTime={product.endTime}
                     isConnected={isConnected}
                   />
+
                   <Chip
+                    icon={<LocationIcon sx={{ fontSize: '0.9rem' }} />}
                     label={product.location}
                     size="small"
-                    sx={{ fontSize: '0.7rem', height: 22 }}
+                    variant="outlined"
+                    sx={{
+                      fontSize: '0.75rem',
+                      height: 26,
+                      fontWeight: 600,
+                      borderColor: 'grey.400',
+                      '& .MuiChip-icon': { color: 'text.secondary' }
+                    }}
                   />
+
                   <Chip
+                    icon={<LabelIcon sx={{ fontSize: '0.9rem' }} />}
                     label={product.condition.replace('_', ' ')}
                     color={getConditionColor(product.condition)}
                     size="small"
-                    sx={{ fontSize: '0.7rem', height: 22 }}
+                    variant="outlined"
+                    sx={{
+                      fontSize: '0.75rem',
+                      height: 26,
+                      fontWeight: 600,
+                    }}
                   />
+
                   {(product.watcherCount !== undefined && product.watcherCount > 0) && (
                     <Chip
                       icon={<VisibilityIcon sx={{ fontSize: '0.9rem' }} />}
-                      label={`${product.watcherCount} watching`}
+                      label={`${product.watcherCount} Watching`}
                       size="small"
                       sx={{
-                        fontSize: '0.7rem',
-                        height: 22,
+                        fontSize: '0.75rem',
+                        height: 26,
                         bgcolor: 'warning.lighter',
                         color: 'warning.dark',
+                        border: '1px solid',
+                        borderColor: 'warning.light',
                         '& .MuiChip-icon': { color: 'warning.dark' },
                         fontWeight: 600
                       }}
@@ -351,26 +410,39 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               </Box>
 
               <Stack direction="row" spacing={1}>
-                <Tooltip title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
+                <Tooltip title={isFavorite ? 'Remove from watchlist' : 'Add to watchlist'}>
                   <IconButton
-                    size="small"
+                    size="medium"
                     onClick={() => setIsFavorite(!isFavorite)}
                     sx={{
+                      border: '1px solid',
+                      borderColor: isFavorite ? 'primary.main' : 'divider',
                       color: isFavorite ? 'primary.main' : 'text.secondary',
-                      bgcolor: isFavorite ? 'primary.lighter' : 'grey.100',
-                      '&:hover': { bgcolor: 'primary.main', color: 'common.white' }
+                      bgcolor: isFavorite ? 'primary.lighter' : 'background.paper',
+                      '&:hover': {
+                        bgcolor: 'primary.main',
+                        color: 'common.white',
+                        borderColor: 'primary.main'
+                      }
                     }}
                   >
                     {isFavorite ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
                   </IconButton>
                 </Tooltip>
+
                 <Tooltip title="Share auction">
                   <IconButton
-                    size="small"
+                    size="medium"
                     sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
                       color: 'text.secondary',
-                      bgcolor: 'grey.100',
-                      '&:hover': { bgcolor: 'info.main', color: 'common.white' }
+                      bgcolor: 'background.paper',
+                      '&:hover': {
+                        bgcolor: 'info.main',
+                        color: 'common.white',
+                        borderColor: 'info.main'
+                      }
                     }}
                   >
                     <ShareIcon fontSize="small" />
@@ -378,20 +450,22 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                 </Tooltip>
               </Stack>
             </Stack>
-          </CardContent>
-        </Card>
+          </Box>
+        </Paper>
 
-        {/* Hero Section - Image and Bid Actions Side by Side */}
-        <Grid container spacing={2} sx={{ mb: 2 }}>
-          {/* Left Half - Image Gallery */}
-          <Grid item xs={12} md={6}>
+        {/* Main Content Grid */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+
+          {/* Left Column - Image Gallery */}
+          <Grid item xs={12} md={7}>
             <AuctionImageGallery images={product.images} title={product.title} />
           </Grid>
 
-          {/* Right Half - Bid Actions */}
-          <Grid item xs={12} md={6}>
-            <Stack spacing={2} sx={{ height: '100%' }}>
-              {/* Compact Bid Stats */}
+          {/* Right Column - Bid Section */}
+          <Grid item xs={12} md={5}>
+            <Stack spacing={2.5}>
+
+              {/* Current Bid Card */}
               <AuctionBidCard
                 currentBid={displayCurrentBid}
                 bidCount={displayBidCount}
@@ -399,37 +473,115 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                 auctionStatus={product.auctionStatus}
               />
 
-              {/* Bid Details */}
-              <Card elevation={0} sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                  <Grid container spacing={1.5}>
+              {/* Bid Information */}
+              <Paper
+                elevation={0}
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <Box sx={{
+                  p: 1.5,
+                  bgcolor: 'grey.100',
+                  borderBottom: '1px solid',
+                  borderColor: 'divider'
+                }}>
+                  <Typography
+                    variant="overline"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '0.7rem',
+                      letterSpacing: 1,
+                      color: 'text.secondary'
+                    }}
+                  >
+                    Bidding Information
+                  </Typography>
+                </Box>
+
+                <Box sx={{ p: 2 }}>
+                  <Grid container spacing={2}>
                     <Grid item xs={6}>
-                      <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'success.lighter', border: '1px solid', borderColor: 'success.light' }}>
-                        <Typography variant="caption" color="success.dark" fontWeight={700} sx={{ fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
-                          STARTING BID
+                      <Box sx={{
+                        p: 1.5,
+                        border: '1px solid',
+                        borderColor: 'success.main',
+                        bgcolor: 'success.lighter',
+                      }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: 'success.dark',
+                            fontWeight: 700,
+                            fontSize: '0.65rem',
+                            mb: 0.5,
+                            display: 'block',
+                            letterSpacing: 0.5,
+                            textTransform: 'uppercase'
+                          }}
+                        >
+                          Starting Bid
                         </Typography>
-                        <Typography variant="body2" fontWeight="bold" color="text.primary" sx={{ fontSize: '0.85rem' }}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 700,
+                            color: 'text.primary',
+                            fontSize: '1rem'
+                          }}
+                        >
                           {formatCurrency(product.startingBid || 0)}
                         </Typography>
                       </Box>
                     </Grid>
+
                     <Grid item xs={6}>
-                      <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'secondary.lighter', border: '1px solid', borderColor: 'secondary.light' }}>
-                        <Typography variant="caption" color="secondary.dark" fontWeight={700} sx={{ fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
-                          BID INCREMENT
+                      <Box sx={{
+                        p: 1.5,
+                        border: '1px solid',
+                        borderColor: 'info.main',
+                        bgcolor: 'info.lighter',
+                      }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: 'info.dark',
+                            fontWeight: 700,
+                            fontSize: '0.65rem',
+                            mb: 0.5,
+                            display: 'block',
+                            letterSpacing: 0.5,
+                            textTransform: 'uppercase'
+                          }}
+                        >
+                          Bid Increment
                         </Typography>
-                        <Typography variant="body2" fontWeight="bold" color="text.primary" sx={{ fontSize: '0.85rem' }}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 700,
+                            color: 'text.primary',
+                            fontSize: '1rem'
+                          }}
+                        >
                           {formatCurrency(product.bidIncrement || 1)}
                         </Typography>
                       </Box>
                     </Grid>
                   </Grid>
-                </CardContent>
-              </Card>
+                </Box>
+              </Paper>
 
               {/* Quick Bid Interface */}
-              <Card elevation={0} sx={{ borderRadius: 2, border: '2px solid', borderColor: product.auctionStatus === 'LIVE' ? 'primary.main' : 'divider', flex: 1 }}>
-                <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 }, height: '100%' }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  border: '2px solid',
+                  borderColor: product.auctionStatus === 'LIVE' ? 'primary.main' : 'divider',
+                }}
+              >
+                <Box sx={{ p: 2 }}>
                   {product.auctionStatus === 'LIVE' && timeLeft && timeLeft !== 'Auction Ended' ? (
                     <QuickBidDialog
                       productId={product.id}
@@ -447,17 +599,26 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                     />
                   ) : product.auctionStatus === 'SCHEDULED' ? (
                     <Box>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, mb: 1, display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>
+                      <Typography
+                        variant="overline"
+                        sx={{
+                          color: 'text.secondary',
+                          fontWeight: 700,
+                          mb: 2,
+                          display: 'block',
+                          fontSize: '0.7rem',
+                          letterSpacing: 1
+                        }}
+                      >
                         Auction Starts In
                       </Typography>
                       {product.startTime && (
                         <Box sx={{
-                          p: 2,
+                          p: 3,
                           bgcolor: 'info.lighter',
-                          borderRadius: 2,
                           border: '2px solid',
-                          borderColor: 'info.light',
-                          mb: 1.5
+                          borderColor: 'info.main',
+                          mb: 2
                         }}>
                           <CountdownTimer
                             startTime={new Date(product.startTime)}
@@ -467,13 +628,27 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                           />
                         </Box>
                       )}
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', fontSize: '0.7rem' }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          textAlign: 'center',
+                          fontWeight: 500
+                        }}
+                      >
                         Starts: {product.startTime ? formatDate(product.startTime) : 'TBA'}
                       </Typography>
                     </Box>
                   ) : (
-                    <Alert severity="warning" sx={{ fontSize: '0.75rem', py: 0.5 }}>
-                      <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
+                    <Alert
+                      severity="warning"
+                      sx={{
+                        border: '1px solid',
+                        borderColor: 'warning.main',
+                        '& .MuiAlert-message': { width: '100%' }
+                      }}
+                    >
+                      <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
                         Auction Ended
                       </Typography>
                       <Typography variant="caption">
@@ -481,178 +656,388 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                       </Typography>
                     </Alert>
                   )}
-                </CardContent>
-              </Card>
+                </Box>
+              </Paper>
             </Stack>
           </Grid>
         </Grid>
 
-        {/* Main Content - Tabbed Details */}
-        <Grid container spacing={2}>
+        {/* Tabbed Content Section */}
+        <Paper
+          elevation={0}
+          sx={{
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Tabs
+            value={activeTab}
+            onChange={(e, newValue) => setActiveTab(newValue)}
+            sx={{
+              borderBottom: '2px solid',
+              borderColor: 'divider',
+              bgcolor: 'grey.50',
+              minHeight: 48,
+              '& .MuiTab-root': {
+                minHeight: 48,
+                fontSize: '0.875rem',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                letterSpacing: 0.5,
+                color: 'text.secondary',
+                py: 1.5,
+                '&.Mui-selected': {
+                  color: 'primary.main',
+                }
+              },
+              '& .MuiTabs-indicator': {
+                height: 3,
+              }
+            }}
+          >
+            <Tab icon={<InfoIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Details" />
+            <Tab icon={<HistoryIcon sx={{ fontSize: 18 }} />} iconPosition="start" label={`Bid History (${displayBidCount})`} />
+            <Tab icon={<PersonIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Seller Information" />
+          </Tabs>
 
-          {/* Full Width - Tabbed Content */}
-          <Grid item xs={12}>
-            <Card elevation={0} sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-              <Tabs
-                value={activeTab}
-                onChange={(e, newValue) => setActiveTab(newValue)}
-                sx={{
-                  borderBottom: 1,
-                  borderColor: 'divider',
-                  minHeight: 42,
-                  '& .MuiTab-root': {
-                    minHeight: 42,
-                    fontSize: '0.8rem',
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    py: 1,
-                  }
-                }}
-              >
-                <Tab icon={<InfoIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Details" />
-                <Tab icon={<HistoryIcon sx={{ fontSize: 16 }} />} iconPosition="start" label={`Bid History (${displayBidCount})`} />
-                <Tab icon={<PersonIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Seller" />
-              </Tabs>
-
-              {/* Tab 0: Details */}
-              {activeTab === 0 && (
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase', mb: 1, display: 'block', fontSize: '0.7rem' }}>
+          {/* Tab 0: Details */}
+          {activeTab === 0 && (
+            <Box sx={{ p: 3 }}>
+              <Box sx={{ mb: 4 }}>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  pb: 1,
+                  mb: 2,
+                  borderBottom: '2px solid',
+                  borderColor: 'divider'
+                }}>
+                  <DescriptionIcon sx={{ mr: 1, color: 'primary.main', fontSize: 20 }} />
+                  <Typography
+                    variant="overline"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '0.75rem',
+                      letterSpacing: 1,
+                      color: 'text.primary'
+                    }}
+                  >
                     Description
                   </Typography>
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-line', lineHeight: 1.7, color: 'text.secondary', mb: 3 }}>
-                    {product.description}
-                  </Typography>
-
-                  <Divider sx={{ my: 2 }} />
-
-                  <Grid container spacing={2}>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase', mb: 0.5, display: 'block', fontSize: '0.7rem' }}>
-                        Location
-                      </Typography>
-                      <Typography variant="body2" fontWeight={500}>{product.location}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase', mb: 0.5, display: 'block', fontSize: '0.7rem' }}>
-                        Condition
-                      </Typography>
-                      <Typography variant="body2" fontWeight={500}>{product.condition.replace('_', ' ')}</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase', mb: 0.5, display: 'block', fontSize: '0.7rem' }}>
-                        Estimated Value
-                      </Typography>
-                      <Typography variant="body2" fontWeight={700} color="primary.main">
-                        {formatCurrency(product.estimatedValueMin)} - {formatCurrency(product.estimatedValueMax)}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-
-                  {product.auctionStatus === 'ENDED' && winner && (
-                    <>
-                      <Divider sx={{ my: 2 }} />
-                      <Alert severity="success" sx={{ fontSize: '0.8rem', py: 0.5 }}>
-                        <Typography variant="body2" fontWeight={600}>
-                          Winner: {winner.isAnonymous ? 'Anonymous Bidder' : winner.name}
-                        </Typography>
-                      </Alert>
-                    </>
-                  )}
-                </CardContent>
-              )}
-
-              {/* Tab 1: Bid History */}
-              {activeTab === 1 && (
-                <Box sx={{ maxHeight: 500, overflow: 'auto' }}>
-                  <BidHistory
-                    auctionId={product.id}
-                    currentBid={displayCurrentBid}
-                    refreshTrigger={bidRefreshTrigger}
-                    isLive={product.auctionStatus === 'LIVE'}
-                    isConnected={isConnected}
-                  />
                 </Box>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    whiteSpace: 'pre-line',
+                    lineHeight: 1.8,
+                    color: 'text.primary',
+                    fontWeight: 400
+                  }}
+                >
+                  {product.description}
+                </Typography>
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                pb: 1,
+                mb: 2,
+                borderBottom: '2px solid',
+                borderColor: 'divider'
+              }}>
+                <InfoIcon sx={{ mr: 1, color: 'primary.main', fontSize: 20 }} />
+                <Typography
+                  variant="overline"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    letterSpacing: 1,
+                    color: 'text.primary'
+                  }}
+                >
+                  Item Information
+                </Typography>
+              </Box>
+
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Box sx={{
+                    p: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: 'background.paper'
+                  }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'text.secondary',
+                        fontWeight: 700,
+                        fontSize: '0.65rem',
+                        mb: 1,
+                        display: 'block',
+                        letterSpacing: 0.5,
+                        textTransform: 'uppercase'
+                      }}
+                    >
+                      Location
+                    </Typography>
+                    <Typography variant="body1" fontWeight={600} color="text.primary">
+                      {product.location}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={4}>
+                  <Box sx={{
+                    p: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: 'background.paper'
+                  }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'text.secondary',
+                        fontWeight: 700,
+                        fontSize: '0.65rem',
+                        mb: 1,
+                        display: 'block',
+                        letterSpacing: 0.5,
+                        textTransform: 'uppercase'
+                      }}
+                    >
+                      Condition
+                    </Typography>
+                    <Typography variant="body1" fontWeight={600} color="text.primary">
+                      {product.condition.replace('_', ' ')}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} sm={12} md={4}>
+                  <Box sx={{
+                    p: 2,
+                    border: '1px solid',
+                    borderColor: 'primary.main',
+                    bgcolor: 'primary.lighter'
+                  }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'primary.dark',
+                        fontWeight: 700,
+                        fontSize: '0.65rem',
+                        mb: 1,
+                        display: 'block',
+                        letterSpacing: 0.5,
+                        textTransform: 'uppercase'
+                      }}
+                    >
+                      Estimated Value
+                    </Typography>
+                    <Typography variant="h6" fontWeight={700} color="primary.main" sx={{ fontSize: '1.1rem' }}>
+                      {formatCurrency(product.estimatedValueMin)} - {formatCurrency(product.estimatedValueMax)}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              {product.auctionStatus === 'ENDED' && winner && (
+                <>
+                  <Divider sx={{ my: 3 }} />
+                  <Alert
+                    severity="success"
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'success.main',
+                      '& .MuiAlert-message': { width: '100%' }
+                    }}
+                  >
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      Winner: {winner.isAnonymous ? 'Anonymous Bidder' : winner.name}
+                    </Typography>
+                  </Alert>
+                </>
               )}
+            </Box>
+          )}
 
-              {/* Tab 2: Seller Info */}
-              {activeTab === 2 && (
-                <CardContent sx={{ p: 2 }}>
-                  {product.agent ? (
+          {/* Tab 1: Bid History */}
+          {activeTab === 1 && (
+            <Box sx={{ maxHeight: 600, overflow: 'auto' }}>
+              <BidHistory
+                auctionId={product.id}
+                currentBid={displayCurrentBid}
+                refreshTrigger={bidRefreshTrigger}
+                isLive={product.auctionStatus === 'LIVE'}
+                isConnected={isConnected}
+              />
+            </Box>
+          )}
+
+          {/* Tab 2: Seller Info */}
+          {activeTab === 2 && (
+            <Box sx={{ p: 3 }}>
+              {product.agent ? (
+                <Box>
+                  <Stack direction="row" spacing={2} alignItems="center" mb={3}>
+                    <Avatar
+                      src={product.agent.logoUrl}
+                      alt={product.agent.displayName}
+                      sx={{
+                        width: 64,
+                        height: 64,
+                        border: '2px solid',
+                        borderColor: 'primary.main'
+                      }}
+                    />
                     <Box>
-                      <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-                        <Avatar
-                          src={product.agent.logoUrl}
-                          alt={product.agent.displayName}
-                          sx={{ width: 48, height: 48, border: '2px solid', borderColor: 'primary.main' }}
-                        />
-                        <Box>
-                          <Typography variant="subtitle2" fontWeight={700}>{product.agent.displayName}</Typography>
-                          <Typography variant="caption" color="text.secondary">{product.agent.businessName}</Typography>
-                          {product.agent.rating && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                              <Typography variant="caption" fontWeight={600} color="warning.dark">
-                                ★ {Number(product.agent.rating).toFixed(1)}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                ({product.agent.reviewCount} reviews)
-                              </Typography>
-                            </Box>
-                          )}
-                        </Box>
-                      </Stack>
-
-                      {product.showSellerInfo && (product.sellerName || product.sellerContact || product.sellerEmail || product.sellerLocation) && (
-                        <>
-                          <Divider sx={{ my: 2 }} />
-                          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase', mb: 1.5, display: 'block', fontSize: '0.7rem' }}>
-                            Additional Information
+                      <Typography variant="h6" fontWeight={700} color="text.primary">
+                        {product.agent.displayName}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                        {product.agent.businessName}
+                      </Typography>
+                      {product.agent.rating && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                          <Typography variant="body2" fontWeight={700} color="warning.dark">
+                            ★ {Number(product.agent.rating).toFixed(1)}
                           </Typography>
-                          <Grid container spacing={2}>
-                            {product.sellerName && (
-                              <Grid item xs={6}>
-                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>Name</Typography>
-                                <Typography variant="body2" fontWeight={500}>{product.sellerName}</Typography>
-                              </Grid>
-                            )}
-                            {product.sellerLocation && (
-                              <Grid item xs={6}>
-                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>Location</Typography>
-                                <Typography variant="body2" fontWeight={500}>{product.sellerLocation}</Typography>
-                              </Grid>
-                            )}
-                            {product.sellerContact && (
-                              <Grid item xs={6}>
-                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>Contact</Typography>
-                                <Typography variant="body2" fontWeight={500}>{product.sellerContact}</Typography>
-                              </Grid>
-                            )}
-                            {product.sellerEmail && (
-                              <Grid item xs={6}>
-                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>Email</Typography>
-                                <Typography variant="body2" fontWeight={500}>{product.sellerEmail}</Typography>
-                              </Grid>
-                            )}
-                          </Grid>
-                          {product.sellerNotes && (
-                            <Box sx={{ mt: 2 }}>
-                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>Notes</Typography>
-                              <Typography variant="body2" sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>{product.sellerNotes}</Typography>
-                            </Box>
-                          )}
-                        </>
+                          <Typography variant="caption" color="text.secondary">
+                            ({product.agent.reviewCount} reviews)
+                          </Typography>
+                        </Box>
                       )}
                     </Box>
-                  ) : (
-                    <Alert severity="info" sx={{ fontSize: '0.8rem' }}>
-                      Seller information not available
-                    </Alert>
+                  </Stack>
+
+                  {product.showSellerInfo && (product.sellerName || product.sellerContact || product.sellerEmail || product.sellerLocation) && (
+                    <>
+                      <Divider sx={{ my: 3 }} />
+
+                      <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        pb: 1,
+                        mb: 2,
+                        borderBottom: '2px solid',
+                        borderColor: 'divider'
+                      }}>
+                        <PersonIcon sx={{ mr: 1, color: 'primary.main', fontSize: 20 }} />
+                        <Typography
+                          variant="overline"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: '0.75rem',
+                            letterSpacing: 1,
+                            color: 'text.primary'
+                          }}
+                        >
+                          Additional Information
+                        </Typography>
+                      </Box>
+
+                      <Grid container spacing={2}>
+                        {product.sellerName && (
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{
+                              p: 2,
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              bgcolor: 'background.paper'
+                            }}>
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                Name
+                              </Typography>
+                              <Typography variant="body1" fontWeight={600} color="text.primary">
+                                {product.sellerName}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                        {product.sellerLocation && (
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{
+                              p: 2,
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              bgcolor: 'background.paper'
+                            }}>
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                Location
+                              </Typography>
+                              <Typography variant="body1" fontWeight={600} color="text.primary">
+                                {product.sellerLocation}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                        {product.sellerContact && (
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{
+                              p: 2,
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              bgcolor: 'background.paper'
+                            }}>
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                Contact
+                              </Typography>
+                              <Typography variant="body1" fontWeight={600} color="text.primary">
+                                {product.sellerContact}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                        {product.sellerEmail && (
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{
+                              p: 2,
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              bgcolor: 'background.paper'
+                            }}>
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                Email
+                              </Typography>
+                              <Typography variant="body1" fontWeight={600} color="text.primary">
+                                {product.sellerEmail}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                      </Grid>
+
+                      {product.sellerNotes && (
+                        <Box sx={{ mt: 3, p: 2, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, mb: 1, display: 'block' }}>
+                            Notes
+                          </Typography>
+                          <Typography variant="body1" sx={{ whiteSpace: 'pre-line', lineHeight: 1.7, color: 'text.primary' }}>
+                            {product.sellerNotes}
+                          </Typography>
+                        </Box>
+                      )}
+                    </>
                   )}
-                </CardContent>
+                </Box>
+              ) : (
+                <Alert
+                  severity="info"
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'info.main'
+                  }}
+                >
+                  Seller information not available
+                </Alert>
               )}
-            </Card>
-          </Grid>
-        </Grid>
+            </Box>
+          )}
+        </Paper>
       </Container>
     </Box>
   );

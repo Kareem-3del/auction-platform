@@ -19,25 +19,29 @@ export default function AuctionStatusCard({
         return {
           label: isConnected ? `LIVE ${timeLeft ? `• ${timeLeft}` : ''}` : 'LIVE • RECONNECTING',
           color: 'error' as const,
-          icon: '🔴',
+          bgcolor: 'error.main',
+          textColor: 'common.white',
         };
       case 'ENDED':
         return {
           label: 'ENDED',
           color: 'default' as const,
-          icon: '👑',
+          bgcolor: 'grey.700',
+          textColor: 'common.white',
         };
       case 'SCHEDULED':
         return {
           label: 'UPCOMING',
           color: 'info' as const,
-          icon: '📅',
+          bgcolor: 'info.main',
+          textColor: 'common.white',
         };
       default:
         return {
           label: 'AUCTION',
           color: 'default' as const,
-          icon: '🔨',
+          bgcolor: 'grey.500',
+          textColor: 'common.white',
         };
     }
   };
@@ -46,14 +50,19 @@ export default function AuctionStatusCard({
 
   return (
     <Chip
-      label={`${config.icon} ${config.label}`}
-      color={config.color}
-      size="small"
+      label={config.label}
       sx={{
-        fontSize: '0.7rem',
-        height: 22,
+        fontSize: '0.75rem',
+        height: 26,
         fontWeight: 700,
-        letterSpacing: 0.3,
+        letterSpacing: 0.5,
+        bgcolor: config.bgcolor,
+        color: config.textColor,
+        border: '1px solid',
+        borderColor: config.bgcolor,
+        '& .MuiChip-label': {
+          px: 1.5,
+        },
       }}
     />
   );

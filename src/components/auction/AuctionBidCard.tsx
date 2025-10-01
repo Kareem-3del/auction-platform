@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
+import { Box, Paper, Grid, Typography } from '@mui/material';
 import { formatCurrency } from 'src/lib/utils';
 
 interface AuctionBidCardProps {
@@ -37,67 +37,70 @@ export default function AuctionBidCard({
   };
 
   return (
-    <Card
+    <Paper
       elevation={0}
       sx={{
-        borderRadius: 2,
         border: '2px solid',
         borderColor: getBorderColor(),
+        overflow: 'hidden',
       }}
     >
+      {/* Header Bar */}
       <Box
         sx={{
           bgcolor: getBorderColor(),
           color: 'common.white',
-          py: 1,
-          px: 1.5,
+          py: 1.25,
+          px: 2,
           textAlign: 'center',
+          borderBottom: '2px solid',
+          borderColor: getBorderColor(),
         }}
       >
         <Typography
-          variant="caption"
+          variant="overline"
           sx={{
             fontWeight: 700,
-            letterSpacing: 0.5,
-            fontSize: '0.7rem',
-            textTransform: 'uppercase',
+            letterSpacing: 1.2,
+            fontSize: '0.75rem',
           }}
         >
           {getTitle()}
         </Typography>
       </Box>
 
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+      {/* Content */}
+      <Box sx={{ p: 2.5, bgcolor: 'background.paper' }}>
         <Typography
-          variant="h5"
+          variant="h4"
           sx={{
-            fontWeight: 'bold',
-            fontSize: '1.5rem',
-            mb: 1.5,
+            fontWeight: 700,
+            fontSize: '2rem',
+            mb: 2,
             textAlign: 'center',
             color: 'text.primary',
+            letterSpacing: '-0.02em',
           }}
         >
           {formatCurrency(currentBid)}
         </Typography>
 
-        <Grid container spacing={1}>
+        <Grid container spacing={1.5}>
           <Grid item xs={6}>
             <Box
               sx={{
-                p: 1,
+                p: 1.5,
                 bgcolor: 'grey.50',
-                borderRadius: 1.5,
                 textAlign: 'center',
                 border: '1px solid',
-                borderColor: 'divider',
+                borderColor: 'grey.300',
               }}
             >
               <Typography
-                variant="body2"
-                fontWeight="bold"
+                variant="h6"
+                fontWeight={700}
                 color="primary.main"
-                sx={{ fontSize: '0.95rem' }}
+                sx={{ fontSize: '1.25rem', mb: 0.25 }}
               >
                 {bidCount}
               </Typography>
@@ -105,9 +108,10 @@ export default function AuctionBidCard({
                 variant="caption"
                 color="text.secondary"
                 sx={{
-                  fontSize: '0.65rem',
+                  fontSize: '0.7rem',
                   textTransform: 'uppercase',
-                  fontWeight: 600,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
                 }}
               >
                 Bids
@@ -117,19 +121,18 @@ export default function AuctionBidCard({
           <Grid item xs={6}>
             <Box
               sx={{
-                p: 1,
+                p: 1.5,
                 bgcolor: 'grey.50',
-                borderRadius: 1.5,
                 textAlign: 'center',
                 border: '1px solid',
-                borderColor: 'divider',
+                borderColor: 'grey.300',
               }}
             >
               <Typography
-                variant="body2"
-                fontWeight="bold"
+                variant="h6"
+                fontWeight={700}
                 color="info.main"
-                sx={{ fontSize: '0.95rem' }}
+                sx={{ fontSize: '1.25rem', mb: 0.25 }}
               >
                 {uniqueBidders}
               </Typography>
@@ -137,9 +140,10 @@ export default function AuctionBidCard({
                 variant="caption"
                 color="text.secondary"
                 sx={{
-                  fontSize: '0.65rem',
+                  fontSize: '0.7rem',
                   textTransform: 'uppercase',
-                  fontWeight: 600,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
                 }}
               >
                 Bidders
@@ -147,7 +151,7 @@ export default function AuctionBidCard({
             </Box>
           </Grid>
         </Grid>
-      </CardContent>
-    </Card>
+      </Box>
+    </Paper>
   );
 }
