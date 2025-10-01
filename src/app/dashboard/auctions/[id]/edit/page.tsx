@@ -80,14 +80,11 @@ export default function EditAuctionPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [auctionData, productsData] = await Promise.all([
-          apiClient.get(`/api/auctions/${auctionId}?includeProduct=true`),
-          apiClient.get('/api/auctions')
-        ]);
+        const auctionData = await apiClient.get(`/api/auctions/${auctionId}?includeProduct=true`);
 
         const a = auctionData.data || auctionData;
         setAuction(a);
-        
+
         setFormData({
           title: a.title || '',
           description: a.description || '',
@@ -100,7 +97,10 @@ export default function EditAuctionPage() {
           status: a.status || 'PENDING',
         });
 
-        setProducts(productsData.data || productsData || []);
+        // Set the current product as the only option (we don't allow changing products on edit)
+        if (a.product) {
+          setProducts([a.product]);
+        }
 
       } catch (error) {
         console.error('Error loading data:', error);
@@ -288,13 +288,15 @@ export default function EditAuctionPage() {
                       getOptionLabel={(option) => option.title}
                       value={selectedProduct || null}
                       onChange={(_, newValue) => handleInputChange('productId', newValue?.id || '')}
+                      disabled
                       renderInput={(params) => (
                         <TextField
                           {...params}
                           label="Product"
                           error={!!errors.productId}
-                          helperText={errors.productId || 'Select the product to auction'}
+                          helperText={errors.productId || 'Product cannot be changed after auction creation'}
                           required
+                          disabled
                         />
                       )}
                     />
