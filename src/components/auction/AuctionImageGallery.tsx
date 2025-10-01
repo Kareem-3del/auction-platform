@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Chip, IconButton, Paper } from '@mui/material';
+import { Box, Chip, IconButton, Paper, Stack } from '@mui/material';
 import { ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from '@mui/icons-material';
 
 interface AuctionImageGalleryProps {
@@ -10,8 +10,19 @@ interface AuctionImageGalleryProps {
 export default function AuctionImageGallery({ images, title }: AuctionImageGalleryProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  const handlePrevious = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? (images?.length || 1) - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentImageIndex((prev) => (prev === (images?.length || 1) - 1 ? 0 : prev + 1));
+  };
+
+  const hasMultipleImages = images?.length > 1;
+
   return (
     <Paper
+      elevation={3}
       sx={{
         position: 'relative',
         width: '100%',
@@ -20,13 +31,14 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
         maxHeight: { xs: '400px', md: '500px', lg: '600px' },
         overflow: 'hidden',
         borderRadius: 2,
-        boxShadow: (theme) => `0 8px 32px ${theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.12)'}`,
+        bgcolor: 'grey.900',
       }}
     >
+      {/* Main Image */}
       <Box
         component="img"
         src={images?.[currentImageIndex] || '/placeholder-image.jpg'}
-        alt={title}
+        alt={`${title} - Image ${currentImageIndex + 1}`}
         sx={{
           width: '100%',
           height: '100%',
@@ -34,81 +46,70 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
         }}
       />
 
-      {images?.length > 1 && (
+      {/* Navigation Arrows */}
+      {hasMultipleImages && (
         <>
           <IconButton
-            onClick={() =>
-              setCurrentImageIndex((prev) => (prev === 0 ? (images?.length || 1) - 1 : prev - 1))
-            }
+            onClick={handlePrevious}
             sx={{
               position: 'absolute',
-              left: 20,
+              left: 16,
               top: '50%',
               transform: 'translateY(-50%)',
               bgcolor: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-              width: 52,
-              height: 52,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              color: 'grey.800',
+              width: 48,
+              height: 48,
+              transition: 'all 0.3s',
               '&:hover': {
                 bgcolor: 'primary.main',
-                color: 'white',
-                transform: 'translateY(-50%) scale(1.1)',
-                boxShadow: '0 12px 40px rgba(206, 14, 45, 0.4)',
+                color: 'common.white',
+                transform: 'translateY(-50%) scale(1.15)',
               },
             }}
           >
-            <ChevronLeftIcon sx={{ fontSize: '1.5rem' }} />
+            <ChevronLeftIcon sx={{ fontSize: '1.75rem' }} />
           </IconButton>
 
           <IconButton
-            onClick={() =>
-              setCurrentImageIndex((prev) =>
-                prev === (images?.length || 1) - 1 ? 0 : prev + 1
-              )
-            }
+            onClick={handleNext}
             sx={{
               position: 'absolute',
-              right: 20,
+              right: 16,
               top: '50%',
               transform: 'translateY(-50%)',
               bgcolor: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-              width: 52,
-              height: 52,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              color: 'grey.800',
+              width: 48,
+              height: 48,
+              transition: 'all 0.3s',
               '&:hover': {
                 bgcolor: 'primary.main',
-                color: 'white',
-                transform: 'translateY(-50%) scale(1.1)',
-                boxShadow: '0 12px 40px rgba(206, 14, 45, 0.4)',
+                color: 'common.white',
+                transform: 'translateY(-50%) scale(1.15)',
               },
             }}
           >
-            <ChevronRightIcon sx={{ fontSize: '1.5rem' }} />
+            <ChevronRightIcon sx={{ fontSize: '1.75rem' }} />
           </IconButton>
         </>
       )}
 
+      {/* Image Counter */}
       <Box
         sx={{
           position: 'absolute',
-          bottom: 20,
-          right: 20,
-          display: 'flex',
-          gap: 1,
+          bottom: 16,
+          right: 16,
         }}
       >
         <Chip
           label={`${currentImageIndex + 1} / ${images?.length || 1}`}
           sx={{
-            bgcolor: 'rgba(15, 23, 42, 0.9)',
-            color: 'white',
-            fontWeight: 600,
+            bgcolor: 'rgba(0, 0, 0, 0.8)',
+            color: 'common.white',
+            fontWeight: 700,
+            fontSize: '0.875rem',
             backdropFilter: 'blur(10px)',
             border: '2px solid rgba(255, 255, 255, 0.2)',
             '& .MuiChip-label': {
@@ -117,6 +118,47 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
           }}
         />
       </Box>
+
+      {/* Thumbnail Navigation (for multiple images) */}
+      {hasMultipleImages && images.length <= 5 && (
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <Stack direction="row" spacing={1}>
+            {images.map((img, index) => (
+              <Box
+                key={index}
+                component="img"
+                src={img}
+                alt={`Thumbnail ${index + 1}`}
+                onClick={() => setCurrentImageIndex(index)}
+                sx={{
+                  width: 60,
+                  height: 60,
+                  objectFit: 'cover',
+                  borderRadius: 1,
+                  cursor: 'pointer',
+                  border: '3px solid',
+                  borderColor: currentImageIndex === index ? 'primary.main' : 'transparent',
+                  opacity: currentImageIndex === index ? 1 : 0.6,
+                  transition: 'all 0.3s',
+                  bgcolor: 'grey.900',
+                  '&:hover': {
+                    opacity: 1,
+                    borderColor: 'primary.light',
+                    transform: 'scale(1.1)',
+                  },
+                }}
+              />
+            ))}
+          </Stack>
+        </Box>
+      )}
     </Paper>
   );
 }

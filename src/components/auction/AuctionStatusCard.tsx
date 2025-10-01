@@ -16,67 +16,117 @@ export default function AuctionStatusCard({
   endTime,
   isConnected,
 }: AuctionStatusCardProps) {
-  const getBackgroundGradient = () => {
+  const getBackgroundColor = () => {
     switch (auctionStatus) {
       case 'LIVE':
-        return 'linear-gradient(135deg, #CE0E2D, #dc2626)';
+        return 'primary.main';
       case 'ENDED':
-        return 'linear-gradient(135deg, #f59e0b, #d97706)';
+        return 'warning.main';
       default:
-        return 'linear-gradient(135deg, #475569, #334155)';
+        return 'grey.600';
     }
   };
 
   const getStatusTitle = () => {
     switch (auctionStatus) {
       case 'LIVE':
-        return '🔴 LIVE AUCTION';
+        return 'LIVE AUCTION';
       case 'ENDED':
-        return '👑 AUCTION ENDED';
+        return 'AUCTION ENDED';
       case 'SCHEDULED':
-        return '📅 UPCOMING AUCTION';
+        return 'UPCOMING AUCTION';
       default:
         return 'AUCTION';
     }
   };
 
+  const getStatusIcon = () => {
+    switch (auctionStatus) {
+      case 'LIVE':
+        return '🔴';
+      case 'ENDED':
+        return '👑';
+      case 'SCHEDULED':
+        return '📅';
+      default:
+        return '🔨';
+    }
+  };
+
   return (
     <Card
+      elevation={3}
       sx={{
-        background: getBackgroundGradient(),
-        color: 'white',
         borderRadius: 2,
-        boxShadow: (theme) => `0 4px 15px ${theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)'}`,
+        overflow: 'hidden',
+        border: '2px solid',
+        borderColor: getBackgroundColor(),
       }}
     >
-      <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
-        <Box textAlign="center">
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            mb={1.5}
-            sx={{ fontSize: { xs: '1.1rem', md: '1.25rem' } }}
-          >
-            {getStatusTitle()}
-          </Typography>
+      <Box
+        sx={{
+          bgcolor: getBackgroundColor(),
+          color: 'common.white',
+          py: 2,
+          px: 2.5,
+          textAlign: 'center',
+        }}
+      >
+        <Typography
+          variant="h6"
+          fontWeight="bold"
+          sx={{
+            fontSize: { xs: '1rem', md: '1.1rem' },
+            letterSpacing: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
+          }}
+        >
+          <span>{getStatusIcon()}</span>
+          {getStatusTitle()}
+        </Typography>
+      </Box>
 
+      <CardContent sx={{ p: 2.5 }}>
+        <Box textAlign="center">
           {auctionStatus === 'LIVE' && timeLeft && (
-            <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'rgba(255, 255, 255, 0.15)' }}>
-              <Typography variant="body2" sx={{ opacity: 0.9, mb: 0.5, fontSize: '0.8rem' }}>
-                Time Remaining:
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: 'error.lighter',
+                border: '2px solid',
+                borderColor: 'error.light',
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="error.dark"
+                fontWeight={700}
+                sx={{
+                  display: 'block',
+                  mb: 1,
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                }}
+              >
+                Time Remaining
               </Typography>
               <Typography
-                variant="h6"
+                variant="h5"
                 fontWeight="bold"
-                sx={{ fontSize: { xs: '1.1rem', md: '1.25rem' } }}
+                color="text.primary"
+                sx={{ fontFamily: 'monospace' }}
               >
-                ⏰ {timeLeft}
+                {timeLeft}
               </Typography>
             </Box>
           )}
 
           {auctionStatus === 'SCHEDULED' && (
-            <Box sx={{ mt: 1.5 }}>
+            <Box sx={{ mt: 1 }}>
               <CountdownTimer
                 startTime={startTime ? new Date(startTime) : undefined}
                 endTime={endTime ? new Date(endTime) : undefined}
@@ -86,11 +136,20 @@ export default function AuctionStatusCard({
             </Box>
           )}
 
-          {auctionStatus === 'LIVE' && isConnected && (
+          {auctionStatus === 'LIVE' && (
             <Chip
-              label="🟢 CONNECTED"
+              label={isConnected ? 'CONNECTED' : 'DISCONNECTED'}
               size="small"
-              sx={{ mt: 1, bgcolor: 'rgba(76, 175, 80, 0.3)', color: 'white' }}
+              sx={{
+                mt: 2,
+                bgcolor: isConnected ? 'success.main' : 'error.main',
+                color: 'common.white',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                '& .MuiChip-label': {
+                  px: 2,
+                },
+              }}
             />
           )}
         </Box>
