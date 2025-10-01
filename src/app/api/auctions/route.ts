@@ -3,12 +3,13 @@ import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from 'src/lib/prisma';
 import { withAuth } from 'src/lib/middleware/auth';
-import { 
-  handleAPIError, 
-  validateMethod, 
-  successResponse, 
-  validateContentType 
+import {
+  handleAPIError,
+  validateMethod,
+  successResponse,
+  validateContentType
 } from 'src/lib/api-response';
+import { getSettingValue } from 'src/lib/settings';
 
 // Validation schema for creating auctions
 const createAuctionSchema = z.object({
@@ -18,14 +19,14 @@ const createAuctionSchema = z.object({
   condition: z.enum(['NEW', 'EXCELLENT', 'GOOD', 'FAIR', 'POOR']),
   location: z.string().min(1, 'Location is required'),
   images: z.array(z.string()).min(1, 'At least one image is required').max(10, 'Maximum 10 images allowed'),
-  
+
   // Specifications
   provenance: z.string().optional().nullable(),
   dimensions: z.string().optional().nullable(),
   weight: z.string().optional().nullable(),
   materials: z.string().optional().nullable(),
   authenticity: z.string().optional().nullable(),
-  
+
   // Pricing
   estimatedValueMin: z.number().positive('Minimum value must be positive'),
   estimatedValueMax: z.number().positive('Maximum value must be positive'),
@@ -33,7 +34,7 @@ const createAuctionSchema = z.object({
   reservePrice: z.number().positive('Reserve price must be positive').optional().nullable(),
   bidIncrement: z.number().positive('Bid increment must be positive'),
   buyNowPrice: z.number().positive('Buy now price must be positive').optional().nullable(),
-  
+
   // Auction settings
   auctionType: z.enum(['LIVE', 'TIMED', 'SILENT']),
   startTime: z.string().datetime('Invalid start time'),
@@ -43,16 +44,16 @@ const createAuctionSchema = z.object({
   extensionTriggerMinutes: z.number().positive('Extension trigger must be positive'),
   extensionDurationMinutes: z.number().positive('Extension duration must be positive'),
   maxExtensions: z.number().positive('Max extensions must be positive'),
-  
+
   // Display settings
   showBidderNames: z.boolean().default(true),
   showBidCount: z.boolean().default(true),
   showWatcherCount: z.boolean().default(true),
-  
+
   // Shipping
   pickupAvailable: z.boolean().default(false),
   pickupAddress: z.string().optional().nullable(),
-  
+
   // Seller Information
   sellerName: z.string().optional().nullable(),
   sellerContact: z.string().optional().nullable(),
@@ -87,20 +88,32 @@ export async function GET(request: NextRequest) {
     const categoryId = urlParams.get('categoryId') || undefined;
     const auctionStatus = urlParams.get('auctionStatus') || undefined;
     const sortBy = urlParams.get('sortBy') || 'newest';
-    
+
+    // Get item hide timeout setting
+    const hideTimeoutDays = await getSettingValue<number>('itemHideTimeoutDays', 30);
+    const hideDate = new Date();
+    hideDate.setDate(hideDate.getDate() - hideTimeoutDays);
+
     // Build where clause for auctions (products with auction functionality)
     const whereClause: any = {
       status: 'APPROVED', // Only show approved auctions
-      auctionStatus: {
-        in: ['SCHEDULED', 'LIVE', 'ENDED']
-      }
+      OR: [
+        { auctionStatus: { not: 'ENDED' } }, // Show if not ended
+        {
+          auctionStatus: 'ENDED',
+          endTime: { gte: hideDate }, // Show if ended recently
+        },
+      ],
     };
 
     if (search) {
-      whereClause.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-      ];
+      whereClause.AND = whereClause.AND || [];
+      whereClause.AND.push({
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ],
+      });
     }
 
     if (categoryId) {
@@ -108,6 +121,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (auctionStatus) {
+      // Override the OR clause if specific status is requested
+      delete whereClause.OR;
       whereClause.auctionStatus = auctionStatus;
     }
 
@@ -198,7 +213,7 @@ export const POST = withAuth(async (request) => {
       email: request.user.email,
       userType: request.user.userType
     });
-    
+
     validateMethod(request, ['POST']);
     validateContentType(request);
 
@@ -224,7 +239,7 @@ export const POST = withAuth(async (request) => {
           message: 'Agent account is not active',
         });
       }
-      
+
       agentId = agent.id;
     }
 
@@ -268,7 +283,7 @@ export const POST = withAuth(async (request) => {
         specifications: specifications,
         agentId: agentId, // Will be null for buyer users
         status: 'APPROVED', // Auto-approve auctions for immediate visibility
-        
+
         // Auction-specific fields
         startingBid: validatedData.startingBid,
         bidIncrement: validatedData.bidIncrement,
@@ -287,7 +302,7 @@ export const POST = withAuth(async (request) => {
         pickupAvailable: validatedData.pickupAvailable,
         pickupAddress: validatedData.pickupAddress,
         auctionStatus: 'SCHEDULED', // Set initial auction status
-        
+
         // Seller Information
         sellerName: validatedData.sellerName,
         sellerContact: validatedData.sellerContact,

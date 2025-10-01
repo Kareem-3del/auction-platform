@@ -135,6 +135,7 @@ export const POST = withAuth(
           startingBid: true,
           bidIncrement: true,
           endTime: true,
+          highestBidderId: true,
         },
       });
 
@@ -174,7 +175,7 @@ export const POST = withAuth(
         );
       }
 
-      // CRITICAL FIX: Check user balance BEFORE creating bid
+      // Check user balance BEFORE creating bid
       const user = await prisma.user.findUnique({
         where: { id: request.user.id },
         select: {
@@ -219,8 +220,93 @@ export const POST = withAuth(
         );
       }
 
-      // Create the bid in a transaction
-      const bid = await prisma.$transaction(async (tx) => {
+      // Create the bid in a transaction with balance restoration
+      const result = await prisma.$transaction(async (tx) => {
+        // Get the previous highest bidder
+        const previousHighestBidderId = auction.highestBidderId;
+        const previousBidAmount = currentBid;
+
+        // If there was a previous highest bidder and it's a different user
+        if (previousHighestBidderId && previousHighestBidderId !== request.user.id && previousBidAmount > 0) {
+          // Get previous bidder info
+          const previousBidder = await tx.user.findUnique({
+            where: { id: previousHighestBidderId },
+            select: {
+              id: true,
+              balanceVirtual: true,
+              firstName: true,
+              lastName: true,
+            },
+          });
+
+          if (previousBidder) {
+            // Restore previous bidder's balance
+            const restoredBalance = Number(previousBidder.balanceVirtual) + previousBidAmount;
+
+            await tx.user.update({
+              where: { id: previousHighestBidderId },
+              data: {
+                balanceVirtual: restoredBalance,
+              },
+            });
+
+            // Create transaction record for balance restoration
+            await tx.transaction.create({
+              data: {
+                userId: previousHighestBidderId,
+                relatedId: id,
+                relatedType: 'product',
+                transactionType: 'BALANCE_RESTORED',
+                amountReal: 0,
+                amountVirtual: previousBidAmount,
+                status: 'COMPLETED',
+                description: `Bid refunded - outbid on ${auction.title}`,
+                metadata: {
+                  productId: id,
+                  productTitle: auction.title,
+                  bidAmount: previousBidAmount,
+                  newBidderId: request.user.id,
+                },
+                processedAt: new Date(),
+              },
+            });
+
+            // Send notification to previous bidder
+            await tx.notification.create({
+              data: {
+                userId: previousHighestBidderId,
+                relatedId: id,
+                relatedType: 'product',
+                notificationType: 'BID_OUTBID',
+                title: 'You\'ve been outbid',
+                message: `You've been outbid on ${auction.title}. Your bid of $${previousBidAmount.toFixed(2)} has been refunded.`,
+                deliveryMethod: 'IN_APP',
+                data: {
+                  productId: id,
+                  productTitle: auction.title,
+                  previousBid: previousBidAmount,
+                  refundedAmount: previousBidAmount,
+                },
+              },
+            });
+
+            logger.info('Balance restored to previous bidder', {
+              previousBidderId: previousHighestBidderId,
+              restoredAmount: previousBidAmount,
+              productId: id,
+            });
+          }
+        }
+
+        // Deduct balance from new bidder
+        const newBalance = Number(user.balanceVirtual) - validatedData.amount;
+        await tx.user.update({
+          where: { id: request.user.id },
+          data: {
+            balanceVirtual: newBalance,
+          },
+        });
+
         // Create bid record
         const newBid = await tx.bid.create({
           data: {
@@ -233,12 +319,29 @@ export const POST = withAuth(
           },
         });
 
-        // Update product with new current bid
+        // Mark previous bids as OUTBID
+        if (previousHighestBidderId) {
+          await tx.bid.updateMany({
+            where: {
+              productId: id,
+              userId: previousHighestBidderId,
+              status: 'ACTIVE',
+            },
+            data: {
+              status: 'OUTBID',
+              outbidAt: new Date(),
+            },
+          });
+        }
+
+        // Update product with new current bid and highest bidder
         await tx.product.update({
           where: { id },
           data: {
             currentBid: validatedData.amount,
+            highestBidderId: request.user.id,
             bidCount: { increment: 1 },
+            lastBidAt: new Date(),
           },
         });
 
@@ -248,12 +351,14 @@ export const POST = withAuth(
             userId: request.user.id,
             entityType: 'bid',
             entityId: newBid.id,
-            targetId: id,
+            targetId: request.user.id,
             action: 'bid_placed',
             newValues: {
               amount: validatedData.amount,
               bidType: validatedData.bidType,
               productId: id,
+              previousHighestBidderId,
+              previousBidAmount,
             },
             ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
             userAgent: request.headers.get('user-agent') || 'unknown',
@@ -265,14 +370,14 @@ export const POST = withAuth(
 
       logger.bid('Bid placed successfully', id, {
         userId: request.user.id,
-        bidId: bid.id,
+        bidId: result.id,
         amount: validatedData.amount,
       });
 
       return successResponse({
-        ...bid,
-        amount: Number(bid.amount),
-        maxAmount: bid.maxAmount ? Number(bid.maxAmount) : null,
+        ...result,
+        amount: Number(result.amount),
+        maxAmount: result.maxAmount ? Number(result.maxAmount) : null,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {

@@ -631,6 +631,20 @@ model NotificationPreference {
   @@map("notification_preferences")
 }
 
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  category    String   @default("GENERAL")
+  dataType    String   @default("STRING")
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+
 enum UserType {
   BUYER
   AGENT
@@ -713,6 +727,7 @@ enum TransactionType {
   REFUND
   COMMISSION
   FEE
+  BALANCE_RESTORED
 }
 
 enum TransactionStatus {
