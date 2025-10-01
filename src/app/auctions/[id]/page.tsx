@@ -4,28 +4,17 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import {
-  Gavel as AuctionIcon,
   Person as PersonIcon,
-  Schedule as ScheduleIcon,
-  LocationOn as LocationIcon,
-  AccessTime as TimeIcon,
   MonetizationOn as BidIcon,
-  TrendingUp as TrendIcon,
-  Visibility as ViewIcon,
   Share as ShareIcon,
   Favorite as FavoriteIcon,
   FavoriteBorder as FavoriteBorderIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
-  Group as GroupIcon,
-  LocalOffer as OfferIcon,
   Assessment as AssessmentIcon,
 } from '@mui/icons-material';
 import {
   Box,
   Grid,
   Card,
-  Chip,
   Stack,
   Alert,
   Button,
@@ -36,19 +25,19 @@ import {
   Breadcrumbs,
   Link as MuiLink,
   Paper,
-  Divider,
   IconButton,
-  LinearProgress,
-  Badge,
   Tooltip,
   Container,
 } from '@mui/material';
 
-import { formatDate, formatCurrency, formatTimeRemaining } from 'src/lib/utils';
+import { formatDate, formatCurrency } from 'src/lib/utils';
 import BidHistory from 'src/components/bidding/BidHistory';
 import QuickBidDialog from 'src/components/bidding/QuickBidDialog';
-import { CountdownTimer } from 'src/components/common/CountdownTimer';
 import { useRealtimeBidding } from 'src/hooks/useRealtimeBidding';
+import AuctionStatusCard from 'src/components/auction/AuctionStatusCard';
+import AuctionInfoCard from 'src/components/auction/AuctionInfoCard';
+import AuctionBidCard from 'src/components/auction/AuctionBidCard';
+import AuctionImageGallery from 'src/components/auction/AuctionImageGallery';
 
 interface Product {
   id: string;
@@ -98,7 +87,6 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
   const [winner, setWinner] = useState<BidWinner | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [bidRefreshTrigger, setBidRefreshTrigger] = useState(0);
@@ -219,26 +207,6 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
     }
   };
 
-  const getStatusColor = (status: string | null) => {
-    switch (status) {
-      case 'LIVE': return 'error';
-      case 'SCHEDULED': return 'info';
-      case 'ENDED': return 'default';
-      default: return 'default';
-    }
-  };
-
-  const getConditionColor = (condition: string) => {
-    switch (condition) {
-      case 'NEW': return 'success';
-      case 'LIKE_NEW': return 'info';
-      case 'VERY_GOOD': return 'primary';
-      case 'GOOD': return 'secondary';
-      case 'FAIR': return 'warning';
-      case 'POOR': return 'error';
-      default: return 'default';
-    }
-  };
 
   if (loading) {
     return (
@@ -378,137 +346,21 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               gap: { xs: 2.5, md: 3 }
             }}>
               
-              {/* Auction Status & Timer */}
-              <Card sx={{ 
-                background: product.auctionStatus === 'LIVE' 
-                  ? 'linear-gradient(135deg, #CE0E2D, #dc2626)' 
-                  : product.auctionStatus === 'ENDED'
-                    ? 'linear-gradient(135deg, #f59e0b, #d97706)'
-                    : 'linear-gradient(135deg, #475569, #334155)',
-                color: 'white',
-                borderRadius: 2,
-                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
-              }}>
-                <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
-                  <Box textAlign="center">
-                    <Typography variant="h6" fontWeight="bold" mb={1.5} sx={{ 
-                      fontSize: { xs: '1.1rem', md: '1.25rem' }
-                    }}>
-                      {product.auctionStatus === 'LIVE' && '🔴 LIVE AUCTION'}
-                      {product.auctionStatus === 'ENDED' && '👑 AUCTION ENDED'}
-                      {product.auctionStatus === 'SCHEDULED' && '📅 UPCOMING AUCTION'}
-                    </Typography>
-                    
-                    {product.auctionStatus === 'LIVE' && timeLeft && (
-                      <Box sx={{ 
-                        p: 1.5, 
-                        borderRadius: 2, 
-                        bgcolor: 'rgba(255, 255, 255, 0.15)'
-                      }}>
-                        <Typography variant="body2" sx={{ opacity: 0.9, mb: 0.5, fontSize: '0.8rem' }}>Time Remaining:</Typography>
-                        <Typography variant="h6" fontWeight="bold" sx={{ 
-                          fontSize: { xs: '1.1rem', md: '1.25rem' }
-                        }}>⏰ {timeLeft}</Typography>
-                      </Box>
-                    )}
+              <AuctionStatusCard
+                auctionStatus={product.auctionStatus}
+                timeLeft={timeLeft}
+                startTime={product.startTime}
+                endTime={product.endTime}
+                isConnected={isConnected}
+              />
 
-                    {product.auctionStatus === 'SCHEDULED' && (
-                      <Box sx={{ mt: 1.5 }}>
-                        <CountdownTimer
-                          startTime={product.startTime ? new Date(product.startTime) : undefined}
-                          endTime={product.endTime ? new Date(product.endTime) : undefined}
-                          variant="modern"
-                          size="large"
-                        />
-                      </Box>
-                    )}
-                    
-                    {product.auctionStatus === 'LIVE' && isConnected && (
-                      <Chip 
-                        label="🟢 CONNECTED" 
-                        size="small" 
-                        sx={{ mt: 1, bgcolor: 'rgba(76, 175, 80, 0.3)', color: 'white' }}
-                      />
-                    )}
-                  </Box>
-                </CardContent>
-              </Card>
-
-              {/* Auction Title & Basic Info */}
-              <Card sx={{ 
-                mb: 3, 
-                flex: '1 1 auto',
-                borderRadius: 3,
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-                border: '1px solid rgba(0, 0, 0, 0.05)'
-              }}>
-                <CardContent sx={{ p: { xs: 2.5, lg: 3 } }}>
-                  <Typography variant="h4" fontWeight="bold" mb={3} sx={{
-                    color: '#0f172a',
-                    fontSize: { xs: '1.5rem', md: '1.75rem', lg: '2rem' },
-                    lineHeight: 1.3,
-                    letterSpacing: '-0.025em'
-                  }}>
-                    {product.title}
-                  </Typography>
-                  
-                  <Stack spacing={3}>
-                    <Box display="flex" alignItems="center" gap={1.5} sx={{
-                      p: 2,
-                      bgcolor: '#f8fafc',
-                      borderRadius: 2,
-                      border: '1px solid #e2e8f0'
-                    }}>
-                      <LocationIcon sx={{ color: '#CE0E2D', fontSize: '1.25rem' }} />
-                      <Typography variant="body1" fontWeight={500} color="#334155">{product.location}</Typography>
-                    </Box>
-                    
-                    <Box>
-                      <Typography variant="body2" color="#64748b" fontWeight={600} mb={1} sx={{
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        fontSize: '0.75rem'
-                      }}>
-                        CONDITION
-                      </Typography>
-                      <Chip 
-                        label={product.condition.replace('_', ' ')} 
-                        color={getConditionColor(product.condition)}
-                        sx={{ 
-                          fontWeight: 600,
-                          fontSize: '0.875rem',
-                          height: '36px',
-                          borderRadius: 2,
-                          '& .MuiChip-label': {
-                            px: 2
-                          }
-                        }}
-                      />
-                    </Box>
-                    
-                    <Box sx={{
-                      p: 2.5,
-                      bgcolor: 'linear-gradient(135deg, #fef7f0 0%, #fed7aa 100%)',
-                      borderRadius: 2,
-                      border: '2px solid #CE0E2D20'
-                    }}>
-                      <Typography variant="body2" color="#92400e" fontWeight={700} mb={1} sx={{
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        fontSize: '0.75rem'
-                      }}>
-                        💰 ESTIMATED VALUE
-                      </Typography>
-                      <Typography variant="h6" fontWeight="bold" sx={{
-                        color: '#CE0E2D',
-                        fontSize: { xs: '1.1rem', md: '1.25rem' }
-                      }}>
-                        {formatCurrency(product.estimatedValueMin)} - {formatCurrency(product.estimatedValueMax)}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
+              <AuctionInfoCard
+                title={product.title}
+                location={product.location}
+                condition={product.condition}
+                estimatedValueMin={product.estimatedValueMin}
+                estimatedValueMax={product.estimatedValueMax}
+              />
 
               {/* Quick Actions */}
               <Stack direction="row" spacing={2} justifyContent="center">
@@ -557,112 +409,11 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
             </Grid>
 
             {/* CENTER - Product Image */}
-            <Grid item xs={12} lg={6} sx={{ 
-              display: 'flex', 
+            <Grid item xs={12} lg={6} sx={{
+              display: 'flex',
               alignItems: 'stretch'
             }}>
-              <Paper sx={{ 
-                position: 'relative',
-                width: '100%',
-                aspectRatio: '16/10',
-                minHeight: { xs: '350px', md: '450px', lg: '500px' },
-                maxHeight: { xs: '400px', md: '500px', lg: '600px' },
-                overflow: 'hidden',
-                borderRadius: 2,
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
-              }}>
-                <Box
-                  component="img"
-                  src={product.images?.[currentImageIndex] || '/placeholder-image.jpg'}
-                  alt={product.title}
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  }}
-                />
-                
-                {/* Enhanced Image Navigation */}
-                {product.images?.length > 1 && (
-                  <>
-                    <IconButton
-                      onClick={() => setCurrentImageIndex(prev => 
-                        prev === 0 ? (product.images?.length || 1) - 1 : prev - 1
-                      )}
-                      sx={{
-                        position: 'absolute',
-                        left: 20,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        bgcolor: 'rgba(255, 255, 255, 0.95)',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                        border: '2px solid rgba(255, 255, 255, 0.2)',
-                        width: 52,
-                        height: 52,
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        '&:hover': { 
-                          bgcolor: '#CE0E2D', 
-                          color: 'white',
-                          transform: 'translateY(-50%) scale(1.1)',
-                          boxShadow: '0 12px 40px rgba(206, 14, 45, 0.4)'
-                        }
-                      }}
-                    >
-                      <ChevronLeftIcon sx={{ fontSize: '1.5rem' }} />
-                    </IconButton>
-                    
-                    <IconButton
-                      onClick={() => setCurrentImageIndex(prev => 
-                        prev === (product.images?.length || 1) - 1 ? 0 : prev + 1
-                      )}
-                      sx={{
-                        position: 'absolute',
-                        right: 20,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        bgcolor: 'rgba(255, 255, 255, 0.95)',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                        border: '2px solid rgba(255, 255, 255, 0.2)',
-                        width: 52,
-                        height: 52,
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        '&:hover': { 
-                          bgcolor: '#CE0E2D', 
-                          color: 'white',
-                          transform: 'translateY(-50%) scale(1.1)',
-                          boxShadow: '0 12px 40px rgba(206, 14, 45, 0.4)'
-                        }
-                      }}
-                    >
-                      <ChevronRightIcon sx={{ fontSize: '1.5rem' }} />
-                    </IconButton>
-                  </>
-                )}
-                
-                <Box sx={{
-                  position: 'absolute',
-                  bottom: 20,
-                  right: 20,
-                  display: 'flex',
-                  gap: 1
-                }}>
-                  <Chip
-                    label={`${currentImageIndex + 1} / ${product.images?.length || 1}`}
-                    sx={{
-                      bgcolor: 'rgba(15, 23, 42, 0.9)',
-                      color: 'white',
-                      fontWeight: 600,
-                      backdropFilter: 'blur(10px)',
-                      border: '2px solid rgba(255, 255, 255, 0.2)',
-                      '& .MuiChip-label': {
-                        px: 2
-                      }
-                    }}
-                  />
-                </Box>
-              </Paper>
+              <AuctionImageGallery images={product.images} title={product.title} />
             </Grid>
 
             {/* RIGHT PANEL - Bidding Interface */}
@@ -672,114 +423,12 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
               gap: { xs: 3.5, md: 4.5 }
             }}>
               
-              {/* Current Bid Display */}
-              <Card sx={{ 
-                mb: 3,
-                textAlign: 'center',
-                borderRadius: 3,
-                border: '3px solid',
-                borderColor: product.auctionStatus === 'LIVE' ? '#CE0E2D' : 
-                            product.auctionStatus === 'ENDED' ? '#f59e0b' : '#e2e8f0',
-                boxShadow: product.auctionStatus === 'LIVE' 
-                  ? '0 20px 40px rgba(206, 14, 45, 0.15)' 
-                  : '0 8px 32px rgba(0,0,0,0.08)',
-                background: product.auctionStatus === 'LIVE' 
-                  ? 'linear-gradient(135deg, #fef2f2 0%, #ffffff 100%)'
-                  : product.auctionStatus === 'ENDED'
-                    ? 'linear-gradient(135deg, #fffbeb 0%, #ffffff 100%)'
-                    : 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '6px',
-                  background: product.auctionStatus === 'LIVE' 
-                    ? 'linear-gradient(90deg, #CE0E2D 0%, #dc2626 100%)'
-                    : product.auctionStatus === 'ENDED'
-                      ? 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)'
-                      : 'linear-gradient(90deg, #64748b 0%, #475569 100%)'
-                }
-              }}>
-                <CardContent sx={{ p: { xs: 2.5, lg: 3 }, pt: 4 }}>
-                  <Typography variant="h6" fontWeight={700} mb={2} sx={{
-                    color: product.auctionStatus === 'LIVE' ? '#dc2626' : 
-                           product.auctionStatus === 'ENDED' ? '#d97706' : '#64748b',
-                    fontSize: { xs: '1rem', md: '1.1rem' },
-                    letterSpacing: '0.5px'
-                  }}>
-                    {product.auctionStatus === 'ENDED' ? '👑 WINNING BID' : 
-                     product.auctionStatus === 'LIVE' ? '💰 CURRENT BID' : '💵 STARTING BID'}
-                  </Typography>
-                  <Typography variant="h2" fontWeight="bold" mb={3} sx={{
-                    color: '#0f172a',
-                    fontSize: { xs: '2rem', md: '2.5rem', lg: '3rem' },
-                    lineHeight: 1,
-                    textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }}>
-                    {formatCurrency(displayCurrentBid)}
-                  </Typography>
-                  
-                  {/* Enhanced Bid Statistics */}
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <Box sx={{ 
-                        textAlign: 'center', 
-                        p: 2, 
-                        bgcolor: 'rgba(206, 14, 45, 0.05)',
-                        borderRadius: 2,
-                        border: '2px solid rgba(206, 14, 45, 0.1)',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          bgcolor: 'rgba(206, 14, 45, 0.1)',
-                          transform: 'translateY(-2px)'
-                        }
-                      }}>
-                        <Typography variant="h5" fontWeight="bold" sx={{ 
-                          color: '#CE0E2D',
-                          fontSize: { xs: '1.25rem', md: '1.5rem' }
-                        }}>
-                          {displayBidCount}
-                        </Typography>
-                        <Typography variant="body2" color="#64748b" fontWeight={600} sx={{
-                          fontSize: '0.8rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px'
-                        }}>Total Bids</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ 
-                        textAlign: 'center', 
-                        p: 2, 
-                        bgcolor: 'rgba(59, 130, 246, 0.05)',
-                        borderRadius: 2,
-                        border: '2px solid rgba(59, 130, 246, 0.1)',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          bgcolor: 'rgba(59, 130, 246, 0.1)',
-                          transform: 'translateY(-2px)'
-                        }
-                      }}>
-                        <Typography variant="h5" fontWeight="bold" sx={{ 
-                          color: '#3b82f6',
-                          fontSize: { xs: '1.25rem', md: '1.5rem' }
-                        }}>
-                          {product.uniqueBidders}
-                        </Typography>
-                        <Typography variant="body2" color="#64748b" fontWeight={600} sx={{
-                          fontSize: '0.8rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px'
-                        }}>Bidders</Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
+              <AuctionBidCard
+                currentBid={displayCurrentBid}
+                bidCount={displayBidCount}
+                uniqueBidders={product.uniqueBidders}
+                auctionStatus={product.auctionStatus}
+              />
 
               {/* Enhanced Bid Increment & Starting Info */}
               <Card sx={{ 
