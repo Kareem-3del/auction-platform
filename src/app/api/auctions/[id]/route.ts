@@ -69,6 +69,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       data: { viewCount: { increment: 1 } }
     }).catch(err => console.error('Failed to increment view count:', err));
 
+    // Get the actual highest bid from the Bid table (real-time)
+    const highestBid = await prisma.bid.findFirst({
+      where: {
+        productId: id,
+        status: 'ACTIVE',
+      },
+      orderBy: { amount: 'desc' },
+      select: { amount: true },
+    });
+
+    // Use the highest bid from Bid table, fallback to currentBid from product, then startingBid
+    const actualCurrentBid = highestBid
+      ? Number(highestBid.amount)
+      : (auction.currentBid ? Number(auction.currentBid) : (auction.startingBid ? Number(auction.startingBid) : 0));
+
     const auctionData = {
       ...auction,
       images: typeof auction.images === 'string' ? JSON.parse(auction.images) : auction.images,
@@ -76,7 +91,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       estimatedValueMax: Number(auction.estimatedValueMax),
       reservePrice: auction.reservePrice ? Number(auction.reservePrice) : null,
       startingBid: auction.startingBid ? Number(auction.startingBid) : null,
-      currentBid: auction.currentBid ? Number(auction.currentBid) : 0,
+      currentBid: actualCurrentBid,
       bidIncrement: auction.bidIncrement ? Number(auction.bidIncrement) : null,
       buyNowPrice: auction.buyNowPrice ? Number(auction.buyNowPrice) : null,
       viewCount: auction.viewCount,
