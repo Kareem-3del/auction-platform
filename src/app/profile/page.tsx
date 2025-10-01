@@ -987,6 +987,20 @@ export default function ProfilePage() {
     }
   }, [authLoading, user]);
 
+  // Listen for balance updates from bid placements
+  useEffect(() => {
+    const handleBalanceUpdate = (event: CustomEvent) => {
+      console.log('🔔 Balance update event received in profile:', event.detail);
+      // Refresh profile to get latest balance
+      fetchProfile();
+    };
+
+    window.addEventListener('balanceUpdated', handleBalanceUpdate as EventListener);
+    return () => {
+      window.removeEventListener('balanceUpdated', handleBalanceUpdate as EventListener);
+    };
+  }, []);
+
   const fetchProfile = async () => {
     try {
       setLoading(true);

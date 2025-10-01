@@ -192,6 +192,14 @@ export default function QuickBidDialog({
                 virtual: balances.virtual,
                 real: balances.real,
               });
+
+              // Dispatch custom event to notify other components about balance change
+              window.dispatchEvent(new CustomEvent('balanceUpdated', {
+                detail: {
+                  balanceVirtual: balances.virtual,
+                  balanceReal: balances.real,
+                }
+              }));
             }
           }
         } catch (error) {
@@ -202,6 +210,14 @@ export default function QuickBidDialog({
             updateUser({ balanceVirtual: estimatedBalance });
             setLiveUserBalance(estimatedBalance);
             console.log('⚠️ Using estimated balance:', estimatedBalance);
+
+            // Still dispatch event even with estimated balance
+            window.dispatchEvent(new CustomEvent('balanceUpdated', {
+              detail: {
+                balanceVirtual: estimatedBalance,
+                balanceReal: user.balanceReal,
+              }
+            }));
           }
         }
 

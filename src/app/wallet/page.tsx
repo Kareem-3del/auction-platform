@@ -118,6 +118,20 @@ export default function WalletPage() {
     }
   }, [user]);
 
+  // Listen for balance updates from bid placements
+  useEffect(() => {
+    const handleBalanceUpdate = (event: CustomEvent) => {
+      console.log('🔔 Balance update event received in wallet:', event.detail);
+      // Refresh balance data to get latest balance
+      loadBalanceData();
+    };
+
+    window.addEventListener('balanceUpdated', handleBalanceUpdate as EventListener);
+    return () => {
+      window.removeEventListener('balanceUpdated', handleBalanceUpdate as EventListener);
+    };
+  }, []);
+
   const loadBalanceData = async () => {
     try {
       setLoading(true);

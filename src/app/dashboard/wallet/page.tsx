@@ -84,6 +84,20 @@ export default function DashboardWalletPage() {
     }
   }, [user]);
 
+  // Listen for balance updates from bid placements
+  useEffect(() => {
+    const handleBalanceUpdate = (event: CustomEvent) => {
+      console.log('🔔 Balance update event received in dashboard wallet:', event.detail);
+      // Refresh wallet data to get latest balance
+      fetchWalletData();
+    };
+
+    window.addEventListener('balanceUpdated', handleBalanceUpdate as EventListener);
+    return () => {
+      window.removeEventListener('balanceUpdated', handleBalanceUpdate as EventListener);
+    };
+  }, []);
+
   const fetchWalletData = async () => {
     try {
       setLoading(true);
