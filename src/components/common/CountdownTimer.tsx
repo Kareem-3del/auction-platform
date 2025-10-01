@@ -117,327 +117,169 @@ export function CountdownTimer({
 
   const config = getStatusConfig();
 
-  // Modern variant with enhanced design
+  // Modern variant with formal, professional design
   if (variant === 'modern') {
     return (
-      <Card
+      <Box
         sx={{
-          background: config.bgColor,
-          border: `2px solid ${config.borderColor}30`,
-          borderRadius: 4,
-          p: 4,
+          bgcolor: 'background.paper',
+          border: '2px solid',
+          borderColor: config.borderColor,
           position: 'relative',
           overflow: 'hidden',
-          animation: status === 'live' ? `${glowAnimation} 2s infinite` : 'none',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 6,
-            background: `linear-gradient(90deg, ${config.color} 0%, ${config.color}80 100%)`,
-          },
         }}
       >
-        {/* Header */}
-        <Box display="flex" alignItems="center" justifyContent="center" mb={3}>
-          <Chip
-            icon={<Icon icon={config.icon} width={18} height={18} />}
-            label={status.toUpperCase() + ' AUCTION'}
-            sx={{
-              bgcolor: config.color,
-              color: 'white',
-              fontWeight: 700,
-              fontSize: '0.9rem',
-              px: 2,
-              py: 1,
-              height: 'auto',
-              '& .MuiChip-icon': {
-                color: 'white',
-                ml: 1,
-              },
-            }}
-          />
-        </Box>
-
-        {/* Status Label */}
-        <Typography
-          variant="h6"
-          textAlign="center"
-          mb={3}
-          sx={{
-            color: config.color,
-            fontWeight: 600,
-            fontSize: '1.1rem',
-            letterSpacing: '0.5px',
-            textTransform: 'uppercase',
-          }}
-        >
-          {config.label}
-        </Typography>
-
-        {/* Time Display */}
+        {/* Time Display Grid */}
         <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          gap={3}
+          display="grid"
+          gridTemplateColumns={timeLeft.days > 0 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)'}
           sx={{
-            animation: `${slideIn} 0.5s ease-out`,
+            borderBottom: '2px solid',
+            borderColor: 'divider',
           }}
         >
           {/* Days */}
           {timeLeft.days > 0 && (
-            <>
-              <Box textAlign="center">
-                <Box
-                  sx={{
-                    width: 80,
-                    height: 80,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 3,
-                    background: `linear-gradient(135deg, ${config.color}15 0%, ${config.color}25 100%)`,
-                    border: `3px solid ${config.color}40`,
-                    mb: 1,
-                    position: 'relative',
-                    animation: status === 'live' ? `${pulseAnimation} 2s infinite` : 'none',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: -3,
-                      left: -3,
-                      right: -3,
-                      bottom: -3,
-                      borderRadius: 3,
-                      background: `linear-gradient(45deg, ${config.color}40, transparent, ${config.color}40)`,
-                      animation: 'rotate 3s linear infinite',
-                      zIndex: -1,
-                      '@keyframes rotate': {
-                        '0%': { transform: 'rotate(0deg)' },
-                        '100%': { transform: 'rotate(360deg)' },
-                      },
-                    },
-                  }}
-                >
-                  <Typography
-                    variant="h3"
-                    sx={{
-                      color: config.color,
-                      fontWeight: 'bold',
-                      fontSize: '2rem',
-                      lineHeight: 1,
-                    }}
-                  >
-                    {timeLeft.days}
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: config.color,
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                  }}
-                >
-                  Days
-                </Typography>
-              </Box>
-              <Typography
-                sx={{
-                  color: config.color,
-                  fontSize: '2rem',
-                  fontWeight: 300,
-                  opacity: 0.6,
-                }}
-              >
-                :
-              </Typography>
-            </>
-          )}
-
-          {/* Hours */}
-          <Box textAlign="center">
             <Box
               sx={{
-                width: 80,
-                height: 80,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 3,
-                background: `linear-gradient(135deg, ${config.color}15 0%, ${config.color}25 100%)`,
-                border: `3px solid ${config.color}40`,
-                mb: 1,
-                animation: status === 'live' ? `${pulseAnimation} 2s infinite 0.2s` : 'none',
+                textAlign: 'center',
+                py: 2,
+                px: 2.5,
+                borderRight: '2px solid',
+                borderColor: 'divider',
+                bgcolor: 'grey.50',
               }}
             >
               <Typography
                 variant="h3"
                 sx={{
                   color: config.color,
-                  fontWeight: 'bold',
-                  fontSize: '2rem',
+                  fontWeight: 700,
+                  fontSize: '2.5rem',
                   lineHeight: 1,
+                  mb: 0.5,
+                  letterSpacing: '-0.02em',
                 }}
               >
-                {String(timeLeft.hours).padStart(2, '0')}
+                {timeLeft.days}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                  fontWeight: 700,
+                  fontSize: '0.7rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                }}
+              >
+                Days
               </Typography>
             </Box>
+          )}
+
+          {/* Hours */}
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: 2,
+              px: 2.5,
+              borderRight: '2px solid',
+              borderColor: 'divider',
+              bgcolor: 'grey.50',
+            }}
+          >
             <Typography
-              variant="body2"
+              variant="h3"
               sx={{
                 color: config.color,
-                fontWeight: 600,
-                fontSize: '0.85rem',
+                fontWeight: 700,
+                fontSize: '2.5rem',
+                lineHeight: 1,
+                mb: 0.5,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {String(timeLeft.hours).padStart(2, '0')}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'text.secondary',
+                fontWeight: 700,
+                fontSize: '0.7rem',
                 textTransform: 'uppercase',
-                letterSpacing: '1px',
+                letterSpacing: 1,
               }}
             >
               Hours
             </Typography>
           </Box>
 
-          <Typography
+          {/* Minutes */}
+          <Box
             sx={{
-              color: config.color,
-              fontSize: '2rem',
-              fontWeight: 300,
-              opacity: 0.6,
+              textAlign: 'center',
+              py: 2,
+              px: 2.5,
+              bgcolor: 'grey.50',
             }}
           >
-            :
-          </Typography>
-
-          {/* Minutes */}
-          <Box textAlign="center">
-            <Box
-              sx={{
-                width: 80,
-                height: 80,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 3,
-                background: `linear-gradient(135deg, ${config.color}15 0%, ${config.color}25 100%)`,
-                border: `3px solid ${config.color}40`,
-                mb: 1,
-                animation: status === 'live' ? `${pulseAnimation} 2s infinite 0.4s` : 'none',
-              }}
-            >
-              <Typography
-                variant="h3"
-                sx={{
-                  color: config.color,
-                  fontWeight: 'bold',
-                  fontSize: '2rem',
-                  lineHeight: 1,
-                }}
-              >
-                {String(timeLeft.minutes).padStart(2, '0')}
-              </Typography>
-            </Box>
             <Typography
-              variant="body2"
+              variant="h3"
               sx={{
                 color: config.color,
-                fontWeight: 600,
-                fontSize: '0.85rem',
+                fontWeight: 700,
+                fontSize: '2.5rem',
+                lineHeight: 1,
+                mb: 0.5,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {String(timeLeft.minutes).padStart(2, '0')}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'text.secondary',
+                fontWeight: 700,
+                fontSize: '0.7rem',
                 textTransform: 'uppercase',
-                letterSpacing: '1px',
+                letterSpacing: 1,
               }}
             >
               Minutes
             </Typography>
           </Box>
-
-          {/* Seconds - only show for live auctions */}
-          {status === 'live' && (
-            <>
-              <Typography
-                sx={{
-                  color: config.color,
-                  fontSize: '2rem',
-                  fontWeight: 300,
-                  opacity: 0.6,
-                }}
-              >
-                :
-              </Typography>
-              <Box textAlign="center">
-                <Box
-                  sx={{
-                    width: 80,
-                    height: 80,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 3,
-                    background: `linear-gradient(135deg, ${config.color}25 0%, ${config.color}35 100%)`,
-                    border: `3px solid ${config.color}60`,
-                    mb: 1,
-                    animation: `${pulseAnimation} 1s infinite`,
-                    boxShadow: `0 0 20px ${config.color}40`,
-                  }}
-                >
-                  <Typography
-                    variant="h3"
-                    sx={{
-                      color: 'white',
-                      fontWeight: 'bold',
-                      fontSize: '2rem',
-                      lineHeight: 1,
-                      textShadow: `0 0 10px ${config.color}`,
-                    }}
-                  >
-                    {String(timeLeft.seconds).padStart(2, '0')}
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: config.color,
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                  }}
-                >
-                  Seconds
-                </Typography>
-              </Box>
-            </>
-          )}
         </Box>
 
-        {/* Live indicator for ongoing auctions */}
-        {status === 'live' && (
-          <Box
-            display="flex"
-            justifyContent="center"
-            mt={3}
+        {/* Status Bar */}
+        <Box
+          sx={{
+            py: 1,
+            px: 2,
+            bgcolor: config.color,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
+          }}
+        >
+          <Icon icon={config.icon} width={16} height={16} style={{ color: 'white' }} />
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '0.75rem',
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+            }}
           >
-            <Chip
-              label="LIVE NOW"
-              sx={{
-                bgcolor: '#ef4444',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.8rem',
-                animation: `${pulseAnimation} 1.5s infinite`,
-                '&::before': {
-                  content: '"🔴"',
-                  mr: 0.5,
-                },
-              }}
-            />
-          </Box>
-        )}
-      </Card>
+            {status === 'upcoming' ? 'Auction Starts In' : 'Auction Ends In'}
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 

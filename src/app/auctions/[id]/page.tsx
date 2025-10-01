@@ -599,45 +599,14 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                     />
                   ) : product.auctionStatus === 'SCHEDULED' ? (
                     <Box>
-                      <Typography
-                        variant="overline"
-                        sx={{
-                          color: 'text.secondary',
-                          fontWeight: 700,
-                          mb: 2,
-                          display: 'block',
-                          fontSize: '0.7rem',
-                          letterSpacing: 1
-                        }}
-                      >
-                        Auction Starts In
-                      </Typography>
                       {product.startTime && (
-                        <Box sx={{
-                          p: 3,
-                          bgcolor: 'info.lighter',
-                          border: '2px solid',
-                          borderColor: 'info.main',
-                          mb: 2
-                        }}>
-                          <CountdownTimer
-                            startTime={new Date(product.startTime)}
-                            endTime={product.endTime ? new Date(product.endTime) : undefined}
-                            variant="modern"
-                            size="medium"
-                          />
-                        </Box>
+                        <CountdownTimer
+                          startTime={new Date(product.startTime)}
+                          endTime={product.endTime ? new Date(product.endTime) : undefined}
+                          variant="modern"
+                          size="medium"
+                        />
                       )}
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          textAlign: 'center',
-                          fontWeight: 500
-                        }}
-                      >
-                        Starts: {product.startTime ? formatDate(product.startTime) : 'TBA'}
-                      </Typography>
                     </Box>
                   ) : (
                     <Alert
