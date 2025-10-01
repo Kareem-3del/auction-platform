@@ -25,6 +25,7 @@ import {
   InputAdornment,
   Divider,
   Fade,
+  Grid,
 } from '@mui/material';
 
 import { useAuth, useAuthenticatedFetch } from 'src/hooks/useAuth';
@@ -99,6 +100,8 @@ export default function QuickBidDialog({
     displayCurrentBid + bidIncrement, // x1
     displayCurrentBid + bidIncrement * 2, // x2
     displayCurrentBid + bidIncrement * 3, // x3
+    displayCurrentBid + bidIncrement * 4, // x4
+    displayCurrentBid + bidIncrement * 5, // x5
   ];
   
   // Add affordability information to each bid
@@ -496,87 +499,87 @@ export default function QuickBidDialog({
               Quick Options
             </Typography>
             
-            <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+            <Grid container spacing={1} sx={{ mb: 2 }}>
               {quickBids.map((bid, index) => (
-                <Button
-                  key={index}
-                  variant={selectedBid === bid.amount ? 'contained' : 'outlined'}
-                  size="small"
-                  onClick={() => {
-                    setSelectedBid(bid.amount);
-                    setCustomAmount('');
-                  }}
-                  disabled={!bid.affordable}
-                  sx={{ 
-                    flex: 1,
-                    borderRadius: 1.5,
-                    fontWeight: 600,
-                    py: 0.75,
-                    minHeight: 40,
-                    fontSize: '0.75rem',
-                    transition: 'all 0.2s ease',
-                    ...(selectedBid === bid.amount ? {
-                      background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
-                      boxShadow: '0 2px 8px rgba(206, 14, 45, 0.25)',
-                      '&:hover': { 
-                        background: 'linear-gradient(135deg, #B00C24, #e63939)',
-                        boxShadow: '0 3px 12px rgba(206, 14, 45, 0.3)'
-                      }
-                    } : {
-                      borderColor: bid.affordable ? 'rgba(206, 14, 45, 0.25)' : 'rgba(224, 224, 224, 0.4)',
-                      backgroundColor: bid.affordable ? 'rgba(206, 14, 45, 0.02)' : 'rgba(245, 245, 245, 0.4)',
-                      color: bid.affordable ? '#CE0E2D' : '#999',
-                      '&:hover': { 
-                        borderColor: bid.affordable ? '#CE0E2D' : 'rgba(224, 224, 224, 0.4)',
-                        backgroundColor: bid.affordable ? 'rgba(206, 14, 45, 0.06)' : 'rgba(245, 245, 245, 0.4)',
-                        boxShadow: bid.affordable ? '0 1px 4px rgba(206, 14, 45, 0.12)' : 'none'
-                      }
-                    })
-                  }}
-                >
-                  <Box textAlign="center">
-                    <Typography variant="caption" fontWeight="bold" sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}>
-                      +{formatCurrency(bidIncrement * bid.multiplier)}
-                    </Typography>
-                    <Typography variant="caption" sx={{ 
-                      opacity: 0.7,
-                      fontSize: '0.6rem',
-                      color: 'inherit',
-                      display: 'block',
-                      lineHeight: 1
-                    }}>
-                      {bid.multiplier}x
-                    </Typography>
-                  </Box>
-                </Button>
+                <Grid item xs={2.4} key={index}>
+                  <Button
+                    variant={selectedBid === bid.amount ? 'contained' : 'outlined'}
+                    size="small"
+                    fullWidth
+                    onClick={() => {
+                      setSelectedBid(bid.amount);
+                      setCustomAmount('');
+                    }}
+                    disabled={!bid.affordable}
+                    sx={{
+                      borderRadius: 1.5,
+                      fontWeight: 600,
+                      py: 0.75,
+                      minHeight: 40,
+                      fontSize: '0.7rem',
+                      transition: 'all 0.2s ease',
+                      ...(selectedBid === bid.amount ? {
+                        background: 'linear-gradient(135deg, #CE0E2D, #FF4444)',
+                        boxShadow: '0 2px 8px rgba(206, 14, 45, 0.25)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #B00C24, #e63939)',
+                          boxShadow: '0 3px 12px rgba(206, 14, 45, 0.3)'
+                        }
+                      } : {
+                        borderColor: bid.affordable ? 'rgba(206, 14, 45, 0.25)' : 'rgba(224, 224, 224, 0.4)',
+                        backgroundColor: bid.affordable ? 'rgba(206, 14, 45, 0.02)' : 'rgba(245, 245, 245, 0.4)',
+                        color: bid.affordable ? '#CE0E2D' : '#999',
+                        '&:hover': {
+                          borderColor: bid.affordable ? '#CE0E2D' : 'rgba(224, 224, 224, 0.4)',
+                          backgroundColor: bid.affordable ? 'rgba(206, 14, 45, 0.06)' : 'rgba(245, 245, 245, 0.4)',
+                          boxShadow: bid.affordable ? '0 1px 4px rgba(206, 14, 45, 0.12)' : 'none'
+                        }
+                      })
+                    }}
+                  >
+                    <Box textAlign="center">
+                      <Typography variant="caption" fontWeight="bold" sx={{ fontSize: '0.65rem', lineHeight: 1.1 }}>
+                        {bid.multiplier}x
+                      </Typography>
+                      <Typography variant="caption" sx={{
+                        opacity: 0.8,
+                        fontSize: '0.55rem',
+                        color: 'inherit',
+                        display: 'block',
+                        lineHeight: 1
+                      }}>
+                        +{formatCurrency(bidIncrement * bid.multiplier)}
+                      </Typography>
+                    </Box>
+                  </Button>
+                </Grid>
               ))}
-            </Stack>
+            </Grid>
 
-            <Button
-              variant="outlined"
+            <TextField
               fullWidth
               size="small"
-              onClick={() => {
-                setOpen(true);
-                setError(null);
+              type="number"
+              placeholder="Enter custom amount"
+              value={customAmount}
+              onChange={(e) => handleCustomAmountChange(e.target.value)}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
               }}
-              sx={{ 
-                borderColor: 'rgba(206, 14, 45, 0.25)',
-                color: '#CE0E2D',
-                borderRadius: 1.5,
-                py: 1,
-                fontWeight: 600,
-                fontSize: '0.8rem',
-                transition: 'all 0.2s ease',
-                '&:hover': { 
-                  borderColor: '#CE0E2D',
-                  backgroundColor: 'rgba(206, 14, 45, 0.04)',
-                  boxShadow: '0 1px 4px rgba(206, 14, 45, 0.12)'
+              sx={{
+                mb: 2,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 1.5,
+                  fontSize: '0.85rem',
+                  '&:hover fieldset': {
+                    borderColor: '#CE0E2D',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#CE0E2D',
+                  }
                 }
               }}
-            >
-              Custom Amount
-            </Button>
+            />
           </Box>
 
           {/* Connection Status */}

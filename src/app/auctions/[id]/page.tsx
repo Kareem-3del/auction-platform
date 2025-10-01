@@ -301,11 +301,6 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
           </Typography>
         </Breadcrumbs>
 
-        {/* Hero Image Gallery */}
-        <Box sx={{ mb: 2 }}>
-          <AuctionImageGallery images={product.images} title={product.title} />
-        </Box>
-
         {/* Compact Info Bar */}
         <Card elevation={0} sx={{ mb: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
           <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
@@ -367,11 +362,100 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
           </CardContent>
         </Card>
 
-        {/* Main Content - Two Column Layout */}
+        {/* Hero Section - Image and Bid Actions Side by Side */}
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          {/* Left Half - Image Gallery */}
+          <Grid item xs={12} md={6}>
+            <AuctionImageGallery images={product.images} title={product.title} />
+          </Grid>
+
+          {/* Right Half - Bid Actions */}
+          <Grid item xs={12} md={6}>
+            <Stack spacing={2} sx={{ height: '100%' }}>
+              {/* Compact Bid Stats */}
+              <AuctionBidCard
+                currentBid={displayCurrentBid}
+                bidCount={displayBidCount}
+                uniqueBidders={product.uniqueBidders}
+                auctionStatus={product.auctionStatus}
+              />
+
+              {/* Bid Details */}
+              <Card elevation={0} sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+                <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                  <Grid container spacing={1.5}>
+                    <Grid item xs={6}>
+                      <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'success.lighter', border: '1px solid', borderColor: 'success.light' }}>
+                        <Typography variant="caption" color="success.dark" fontWeight={700} sx={{ fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
+                          STARTING BID
+                        </Typography>
+                        <Typography variant="body2" fontWeight="bold" color="text.primary" sx={{ fontSize: '0.85rem' }}>
+                          {formatCurrency(product.startingBid || 0)}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'secondary.lighter', border: '1px solid', borderColor: 'secondary.light' }}>
+                        <Typography variant="caption" color="secondary.dark" fontWeight={700} sx={{ fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
+                          BID INCREMENT
+                        </Typography>
+                        <Typography variant="body2" fontWeight="bold" color="text.primary" sx={{ fontSize: '0.85rem' }}>
+                          {formatCurrency(product.bidIncrement || 1)}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              {/* Quick Bid Interface */}
+              <Card elevation={0} sx={{ borderRadius: 2, border: '2px solid', borderColor: product.auctionStatus === 'LIVE' ? 'primary.main' : 'divider', flex: 1 }}>
+                <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 }, height: '100%' }}>
+                  {product.auctionStatus === 'LIVE' && timeLeft && timeLeft !== 'Auction Ended' ? (
+                    <QuickBidDialog
+                      productId={product.id}
+                      currentBid={displayCurrentBid}
+                      bidIncrement={product.bidIncrement || 1}
+                      timeLeft={timeLeft}
+                      endTime={product.endTime}
+                      auctionStatus={product.auctionStatus}
+                      onBidPlaced={handleBidPlaced}
+                      isConnected={isConnected}
+                      connectionError={connectionError}
+                      onReconnect={reconnect}
+                      bidButtonDisabled={false}
+                      bidCooldownTime={0}
+                    />
+                  ) : product.auctionStatus === 'SCHEDULED' ? (
+                    <Alert severity="info" sx={{ fontSize: '0.75rem', py: 0.5 }}>
+                      <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
+                        Auction Not Started
+                      </Typography>
+                      <Typography variant="caption">
+                        Starts: {product.startTime ? formatDate(product.startTime) : 'TBA'}
+                      </Typography>
+                    </Alert>
+                  ) : (
+                    <Alert severity="warning" sx={{ fontSize: '0.75rem', py: 0.5 }}>
+                      <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
+                        Auction Ended
+                      </Typography>
+                      <Typography variant="caption">
+                        Ended: {product.endTime ? formatDate(product.endTime) : 'N/A'}
+                      </Typography>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+            </Stack>
+          </Grid>
+        </Grid>
+
+        {/* Main Content - Tabbed Details */}
         <Grid container spacing={2}>
 
-          {/* Left Column - Tabbed Content */}
-          <Grid item xs={12} md={8}>
+          {/* Full Width - Tabbed Content */}
+          <Grid item xs={12}>
             <Card elevation={0} sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
               <Tabs
                 value={activeTab}
@@ -531,90 +615,6 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                 </CardContent>
               )}
             </Card>
-          </Grid>
-
-          {/* Right Column - Sticky Bid Card */}
-          <Grid item xs={12} md={4}>
-            <Box sx={{ position: 'sticky', top: 16 }}>
-              <Stack spacing={2}>
-
-                {/* Compact Bid Stats */}
-                <AuctionBidCard
-                  currentBid={displayCurrentBid}
-                  bidCount={displayBidCount}
-                  uniqueBidders={product.uniqueBidders}
-                  auctionStatus={product.auctionStatus}
-                />
-
-                {/* Bid Details */}
-                <Card elevation={0} sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                    <Grid container spacing={1.5}>
-                      <Grid item xs={6}>
-                        <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'success.lighter', border: '1px solid', borderColor: 'success.light' }}>
-                          <Typography variant="caption" color="success.dark" fontWeight={700} sx={{ fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
-                            STARTING BID
-                          </Typography>
-                          <Typography variant="body2" fontWeight="bold" color="text.primary" sx={{ fontSize: '0.85rem' }}>
-                            {formatCurrency(product.startingBid || 0)}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'secondary.lighter', border: '1px solid', borderColor: 'secondary.light' }}>
-                          <Typography variant="caption" color="secondary.dark" fontWeight={700} sx={{ fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
-                            BID INCREMENT
-                          </Typography>
-                          <Typography variant="body2" fontWeight="bold" color="text.primary" sx={{ fontSize: '0.85rem' }}>
-                            {formatCurrency(product.bidIncrement || 1)}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-
-                {/* Quick Bid Interface */}
-                <Card elevation={0} sx={{ borderRadius: 2, border: '2px solid', borderColor: product.auctionStatus === 'LIVE' ? 'primary.main' : 'divider' }}>
-                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                    {product.auctionStatus === 'LIVE' && timeLeft && timeLeft !== 'Auction Ended' ? (
-                      <QuickBidDialog
-                        productId={product.id}
-                        currentBid={displayCurrentBid}
-                        bidIncrement={product.bidIncrement || 1}
-                        timeLeft={timeLeft}
-                        endTime={product.endTime}
-                        auctionStatus={product.auctionStatus}
-                        onBidPlaced={handleBidPlaced}
-                        isConnected={isConnected}
-                        connectionError={connectionError}
-                        onReconnect={reconnect}
-                        bidButtonDisabled={false}
-                        bidCooldownTime={0}
-                      />
-                    ) : product.auctionStatus === 'SCHEDULED' ? (
-                      <Alert severity="info" sx={{ fontSize: '0.75rem', py: 0.5 }}>
-                        <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
-                          Auction Not Started
-                        </Typography>
-                        <Typography variant="caption">
-                          Starts: {product.startTime ? formatDate(product.startTime) : 'TBA'}
-                        </Typography>
-                      </Alert>
-                    ) : (
-                      <Alert severity="warning" sx={{ fontSize: '0.75rem', py: 0.5 }}>
-                        <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
-                          Auction Ended
-                        </Typography>
-                        <Typography variant="caption">
-                          Ended: {product.endTime ? formatDate(product.endTime) : 'N/A'}
-                        </Typography>
-                      </Alert>
-                    )}
-                  </CardContent>
-                </Card>
-              </Stack>
-            </Box>
           </Grid>
         </Grid>
       </Container>
