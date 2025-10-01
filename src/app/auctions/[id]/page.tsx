@@ -602,7 +602,6 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                       {product.startTime && (
                         <CountdownTimer
                           startTime={new Date(product.startTime)}
-                          endTime={product.endTime ? new Date(product.endTime) : undefined}
                           variant="modern"
                           size="medium"
                         />
