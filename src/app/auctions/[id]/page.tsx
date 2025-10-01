@@ -207,12 +207,12 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
       const bidsResponse = await fetch(`/api/auctions/${productId}/bids`);
       if (bidsResponse.ok) {
         const bidsData = await bidsResponse.json();
-        if (bidsData.success && bidsData.data?.bids?.length > 0) {
-          const winningBid = bidsData.data.bids[0];
+        if (bidsData.success && bidsData.data?.length > 0) {
+          const winningBid = bidsData.data[0];
           setWinner({
-            id: winningBid.bidder.id,
-            name: winningBid.bidder.name,
-            isAnonymous: winningBid.bidder.isAnonymous
+            id: winningBid.user.id,
+            name: winningBid.user.displayName,
+            isAnonymous: false
           });
         }
       }

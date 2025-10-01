@@ -43,6 +43,8 @@ interface BidHistoryProps {
   auctionId: string;
   currentBid: number;
   refreshTrigger?: number;
+  isLive?: boolean;
+  isConnected?: boolean;
 }
 
 export default function BidHistory({ 
@@ -67,17 +69,29 @@ export default function BidHistory({
       setLoading(true);
       const response = await fetch(`/api/auctions/${auctionId}/bids`);
       const data = await response.json();
-      
-      if (data.success) {
-        const newBids = data.data.bids;
-        
+
+      if (data.success && data.data) {
+        // Map API response to component format
+        const newBids: BidHistoryItem[] = data.data.map((bid: any, index: number) => ({
+          id: bid.id,
+          amount: bid.amount,
+          bidder: {
+            id: bid.user.id,
+            name: bid.user.displayName,
+            isAnonymous: false,
+          },
+          timestamp: bid.createdAt,
+          isWinning: index === 0 && bid.status === 'ACTIVE',
+          isAutomatic: bid.bidType === 'AUTOMATIC',
+        }));
+
         // Check for new bids to animate
         if ((bids || []).length > 0 && (newBids || []).length > (bids || []).length) {
           const newestBid = newBids[0];
           setNewBidAnimation(newestBid.id);
           setTimeout(() => setNewBidAnimation(null), 2000);
         }
-        
+
         setBids(newBids);
       }
     } catch (error) {
