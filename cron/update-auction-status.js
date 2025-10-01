@@ -31,6 +31,9 @@ const req = https.get(`${API_URL}${ENDPOINT}`, options, (res) => {
 
       if (result.success) {
         console.log(`✓ Updated: ${result.data.scheduledToLive} SCHEDULED→LIVE, ${result.data.liveToEnded} LIVE→ENDED`);
+        if (result.data.paymentsProcessed > 0 || result.data.paymentsFailed > 0) {
+          console.log(`  💰 Payments: ${result.data.paymentsProcessed} processed, ${result.data.paymentsFailed} failed`);
+        }
       } else {
         console.error('✗ Error:', result.error?.message);
       }

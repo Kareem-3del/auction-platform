@@ -56,6 +56,7 @@ import {
   School as CertificationIcon,
   Loyalty as LoyaltyIcon,
   WorkspacePremium as PremiumIcon,
+  LocationOn as LocationIcon,
 } from '@mui/icons-material';
 
 import { useAuth, getAccessToken } from 'src/hooks/useAuth';
@@ -773,6 +774,166 @@ function ChargeTab({ profile, onBalanceUpdate }: { profile: UserProfile; onBalan
   );
 }
 
+function WonItemsTab() {
+  const [wonItems, setWonItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchWonItems();
+  }, []);
+
+  const fetchWonItems = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = getAccessToken();
+      if (!token) {
+        setError('Please login to continue');
+        return;
+      }
+
+      const response = await fetch('/api/users/won-items', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setWonItems(data.data.wonItems);
+      } else {
+        setError(data.error?.message || 'Failed to load won items');
+      }
+    } catch (err) {
+      setError('Failed to load won items');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box textAlign="center" py={6}>
+        <CircularProgress />
+        <Typography variant="body2" color="text.secondary" mt={2}>
+          Loading won items...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert severity="error" sx={{ mb: 3 }}>
+        {error}
+      </Alert>
+    );
+  }
+
+  return (
+    <Box>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h6" fontWeight={600}>
+          Won Items
+        </Typography>
+        <Chip
+          icon={<PremiumIcon />}
+          label={`${wonItems.length} Won`}
+          color="success"
+          variant="outlined"
+        />
+      </Box>
+
+      {wonItems.length > 0 ? (
+        <Grid container spacing={3}>
+          {wonItems.map((item) => (
+            <Grid item xs={12} md={6} key={item.id}>
+              <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                {item.image && (
+                  <Box
+                    sx={{
+                      height: 200,
+                      backgroundImage: `url(${item.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  />
+                )}
+                <CardContent sx={{ flex: 1 }}>
+                  <Typography variant="h6" fontWeight={600} gutterBottom>
+                    {item.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" mb={2} sx={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}>
+                    {item.description}
+                  </Typography>
+
+                  <Box display="flex" gap={1} mb={2} flexWrap="wrap">
+                    <Chip label={item.condition.replace('_', ' ')} size="small" />
+                    <Chip icon={<LocationIcon sx={{ fontSize: '1rem' }} />} label={item.location} size="small" variant="outlined" />
+                  </Box>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        Winning Bid
+                      </Typography>
+                      <Typography variant="h5" fontWeight={700} color="success.main">
+                        {formatCurrency(item.winningBid)}
+                      </Typography>
+                    </Box>
+                    <Box textAlign="right">
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        Won on
+                      </Typography>
+                      <Typography variant="body2" fontWeight={600}>
+                        {item.endTime ? formatDate(item.endTime) : 'N/A'}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {item.agent && (
+                    <>
+                      <Divider sx={{ my: 2 }} />
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Avatar src={item.agent.logoUrl} sx={{ width: 24, height: 24 }}>
+                          {item.agent.displayName[0]}
+                        </Avatar>
+                        <Typography variant="caption" color="text.secondary">
+                          Sold by {item.agent.displayName}
+                        </Typography>
+                      </Box>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Box textAlign="center" py={8}>
+          <PremiumIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No Won Items Yet
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Win auctions to see your items here
+          </Typography>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
 export default function ProfilePage() {
   const theme = useTheme();
   const { user, loading: authLoading } = useAuth();
@@ -1168,6 +1329,7 @@ export default function ProfilePage() {
                   <Tab label="Overview" />
                   <Tab label="Transactions" />
                   <Tab label="Bid History" />
+                  <Tab label="Won Items" />
                   <Tab label="Charge Wallet" />
                   <Tab label="Notifications" />
                   {profile.agent && <Tab label="Agent Profile" />}
@@ -1348,13 +1510,18 @@ export default function ProfilePage() {
                     </Box>
                   )}
 
-                  {/* Charge Tab */}
+                  {/* Won Items Tab */}
                   {tabValue === 3 && (
+                    <WonItemsTab />
+                  )}
+
+                  {/* Charge Tab */}
+                  {tabValue === 4 && (
                     <ChargeTab profile={profile} onBalanceUpdate={fetchProfile} />
                   )}
 
                   {/* Notifications Tab */}
-                  {tabValue === 4 && (
+                  {tabValue === 5 && (
                     <Box>
                       <Typography variant="h6" fontWeight={600} mb={3}>
                         Notification Preferences
@@ -1447,7 +1614,7 @@ export default function ProfilePage() {
                   )}
 
                   {/* Agent Profile Tab */}
-                  {profile.agent && tabValue === 5 && (
+                  {profile.agent && tabValue === 6 && (
                     <Box>
                       <Typography variant="h6" fontWeight={600} mb={3}>
                         Agent Profile
