@@ -572,63 +572,75 @@ export default function AuctionDetailPage({ params }: AuctionPageProps) {
                   </Grid>
                 </Box>
               </Paper>
-
-              {/* Quick Bid Interface */}
-              <Paper
-                elevation={0}
-                sx={{
-                  border: '2px solid',
-                  borderColor: product.auctionStatus === 'LIVE' ? 'primary.main' : 'divider',
-                }}
-              >
-                <Box sx={{ p: 2 }}>
-                  {product.auctionStatus === 'LIVE' && timeLeft && timeLeft !== 'Auction Ended' ? (
-                    <QuickBidDialog
-                      productId={product.id}
-                      currentBid={displayCurrentBid}
-                      bidIncrement={product.bidIncrement || 1}
-                      timeLeft={timeLeft}
-                      endTime={product.endTime}
-                      auctionStatus={product.auctionStatus}
-                      onBidPlaced={handleBidPlaced}
-                      isConnected={isConnected}
-                      connectionError={connectionError}
-                      onReconnect={reconnect}
-                      bidButtonDisabled={false}
-                      bidCooldownTime={0}
-                    />
-                  ) : product.auctionStatus === 'SCHEDULED' ? (
-                    <Box>
-                      {product.startTime && (
-                        <CountdownTimer
-                          startTime={new Date(product.startTime)}
-                          variant="modern"
-                          size="medium"
-                        />
-                      )}
-                    </Box>
-                  ) : (
-                    <Alert
-                      severity="warning"
-                      sx={{
-                        border: '1px solid',
-                        borderColor: 'warning.main',
-                        '& .MuiAlert-message': { width: '100%' }
-                      }}
-                    >
-                      <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
-                        Auction Ended
-                      </Typography>
-                      <Typography variant="caption">
-                        Ended: {product.endTime ? formatDate(product.endTime) : 'N/A'}
-                      </Typography>
-                    </Alert>
-                  )}
-                </Box>
-              </Paper>
             </Stack>
           </Grid>
         </Grid>
+
+        {/* Quick Bid Interface - Full Width */}
+        {product.auctionStatus === 'LIVE' && timeLeft && timeLeft !== 'Auction Ended' ? (
+          <Box sx={{ mb: 3 }}>
+            <QuickBidDialog
+              productId={product.id}
+              currentBid={displayCurrentBid}
+              bidIncrement={product.bidIncrement || 1}
+              timeLeft={timeLeft}
+              endTime={product.endTime}
+              auctionStatus={product.auctionStatus}
+              onBidPlaced={handleBidPlaced}
+              isConnected={isConnected}
+              connectionError={connectionError}
+              onReconnect={reconnect}
+              liveCurrentBid={liveCurrentBid}
+              liveBidCount={liveBidCount}
+              lastBidUpdate={lastBid}
+              bidButtonDisabled={false}
+              bidCooldownTime={0}
+            />
+          </Box>
+        ) : product.auctionStatus === 'SCHEDULED' ? (
+          <Paper
+            elevation={0}
+            sx={{
+              mb: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Box sx={{ p: 3 }}>
+              {product.startTime && (
+                <CountdownTimer
+                  startTime={new Date(product.startTime)}
+                  variant="modern"
+                  size="medium"
+                />
+              )}
+            </Box>
+          </Paper>
+        ) : product.auctionStatus === 'ENDED' ? (
+          <Paper
+            elevation={0}
+            sx={{
+              mb: 3,
+              border: '1px solid',
+              borderColor: 'warning.main',
+            }}
+          >
+            <Alert
+              severity="warning"
+              sx={{
+                border: 'none',
+                '& .MuiAlert-message': { width: '100%' }
+              }}
+            >
+              <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
+                Auction Ended
+              </Typography>
+              <Typography variant="caption">
+                Ended: {product.endTime ? formatDate(product.endTime) : 'N/A'}
+              </Typography>
+            </Alert>
+          </Paper>
+        ) : null}
 
         {/* Tabbed Content Section */}
         <Paper
