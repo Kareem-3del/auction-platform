@@ -25,17 +25,6 @@ export default function AuctionBidCard({
     }
   };
 
-  const getBackgroundColor = () => {
-    switch (auctionStatus) {
-      case 'LIVE':
-        return 'primary.lighter';
-      case 'ENDED':
-        return 'warning.lighter';
-      default:
-        return 'grey.100';
-    }
-  };
-
   const getTitle = () => {
     switch (auctionStatus) {
       case 'ENDED':
@@ -47,136 +36,110 @@ export default function AuctionBidCard({
     }
   };
 
-  const getTitleIcon = () => {
-    switch (auctionStatus) {
-      case 'ENDED':
-        return '👑';
-      case 'LIVE':
-        return '💰';
-      default:
-        return '💵';
-    }
-  };
-
   return (
     <Card
-      elevation={3}
+      elevation={0}
       sx={{
-        textAlign: 'center',
         borderRadius: 2,
-        border: '3px solid',
+        border: '2px solid',
         borderColor: getBorderColor(),
-        overflow: 'hidden',
       }}
     >
       <Box
         sx={{
           bgcolor: getBorderColor(),
           color: 'common.white',
-          py: 1.5,
-          px: 2,
+          py: 1,
+          px: 1.5,
+          textAlign: 'center',
         }}
       >
         <Typography
-          variant="subtitle1"
-          fontWeight={700}
+          variant="caption"
           sx={{
-            letterSpacing: 1,
-            fontSize: '0.875rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 1,
+            fontWeight: 700,
+            letterSpacing: 0.5,
+            fontSize: '0.7rem',
+            textTransform: 'uppercase',
           }}
         >
-          <span>{getTitleIcon()}</span>
           {getTitle()}
         </Typography>
       </Box>
 
-      <CardContent sx={{ p: 3, bgcolor: getBackgroundColor() }}>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
         <Typography
-          variant="h2"
-          fontWeight="bold"
+          variant="h5"
           sx={{
+            fontWeight: 'bold',
+            fontSize: '1.5rem',
+            mb: 1.5,
+            textAlign: 'center',
             color: 'text.primary',
-            fontSize: { xs: '2rem', md: '2.5rem', lg: '2.75rem' },
-            lineHeight: 1,
-            mb: 3,
           }}
         >
           {formatCurrency(currentBid)}
         </Typography>
 
-        <Grid container spacing={2}>
+        <Grid container spacing={1}>
           <Grid item xs={6}>
             <Box
               sx={{
-                p: 2,
-                bgcolor: 'common.white',
-                borderRadius: 2,
-                border: '2px solid',
-                borderColor: 'primary.light',
-                transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                },
+                p: 1,
+                bgcolor: 'grey.50',
+                borderRadius: 1.5,
+                textAlign: 'center',
+                border: '1px solid',
+                borderColor: 'divider',
               }}
             >
               <Typography
-                variant="h4"
+                variant="body2"
                 fontWeight="bold"
                 color="primary.main"
-                sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }}
+                sx={{ fontSize: '0.95rem' }}
               >
                 {bidCount}
               </Typography>
               <Typography
                 variant="caption"
                 color="text.secondary"
-                fontWeight={600}
                 sx={{
+                  fontSize: '0.65rem',
                   textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                  display: 'block',
-                  mt: 0.5,
+                  fontWeight: 600,
                 }}
               >
-                Total Bids
+                Bids
               </Typography>
             </Box>
           </Grid>
           <Grid item xs={6}>
             <Box
               sx={{
-                p: 2,
-                bgcolor: 'common.white',
-                borderRadius: 2,
-                border: '2px solid',
-                borderColor: 'info.light',
-                transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                },
+                p: 1,
+                bgcolor: 'grey.50',
+                borderRadius: 1.5,
+                textAlign: 'center',
+                border: '1px solid',
+                borderColor: 'divider',
               }}
             >
               <Typography
-                variant="h4"
+                variant="body2"
                 fontWeight="bold"
                 color="info.main"
-                sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }}
+                sx={{ fontSize: '0.95rem' }}
               >
                 {uniqueBidders}
               </Typography>
               <Typography
                 variant="caption"
                 color="text.secondary"
-                fontWeight={600}
                 sx={{
+                  fontSize: '0.65rem',
                   textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                  display: 'block',
-                  mt: 0.5,
+                  fontWeight: 600,
                 }}
               >
                 Bidders

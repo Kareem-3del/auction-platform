@@ -22,16 +22,18 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
 
   return (
     <Paper
-      elevation={3}
+      elevation={0}
       sx={{
         position: 'relative',
         width: '100%',
-        aspectRatio: '16/10',
-        minHeight: { xs: '350px', md: '450px', lg: '500px' },
-        maxHeight: { xs: '400px', md: '500px', lg: '600px' },
+        aspectRatio: '16/9',
+        minHeight: { xs: '300px', md: '400px', lg: '480px' },
+        maxHeight: { xs: '350px', md: '450px', lg: '540px' },
         overflow: 'hidden',
         borderRadius: 2,
         bgcolor: 'grey.900',
+        border: '1px solid',
+        borderColor: 'divider',
       }}
     >
       {/* Main Image */}
@@ -53,67 +55,68 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
             onClick={handlePrevious}
             sx={{
               position: 'absolute',
-              left: 16,
+              left: 12,
               top: '50%',
               transform: 'translateY(-50%)',
-              bgcolor: 'rgba(255, 255, 255, 0.95)',
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
               color: 'grey.800',
-              width: 48,
-              height: 48,
-              transition: 'all 0.3s',
+              width: 36,
+              height: 36,
+              transition: 'all 0.2s',
               '&:hover': {
                 bgcolor: 'primary.main',
                 color: 'common.white',
-                transform: 'translateY(-50%) scale(1.15)',
+                transform: 'translateY(-50%) scale(1.1)',
               },
             }}
           >
-            <ChevronLeftIcon sx={{ fontSize: '1.75rem' }} />
+            <ChevronLeftIcon sx={{ fontSize: '1.25rem' }} />
           </IconButton>
 
           <IconButton
             onClick={handleNext}
             sx={{
               position: 'absolute',
-              right: 16,
+              right: 12,
               top: '50%',
               transform: 'translateY(-50%)',
-              bgcolor: 'rgba(255, 255, 255, 0.95)',
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
               color: 'grey.800',
-              width: 48,
-              height: 48,
-              transition: 'all 0.3s',
+              width: 36,
+              height: 36,
+              transition: 'all 0.2s',
               '&:hover': {
                 bgcolor: 'primary.main',
                 color: 'common.white',
-                transform: 'translateY(-50%) scale(1.15)',
+                transform: 'translateY(-50%) scale(1.1)',
               },
             }}
           >
-            <ChevronRightIcon sx={{ fontSize: '1.75rem' }} />
+            <ChevronRightIcon sx={{ fontSize: '1.25rem' }} />
           </IconButton>
         </>
       )}
 
-      {/* Image Counter */}
+      {/* Image Counter - Compact */}
       <Box
         sx={{
           position: 'absolute',
-          bottom: 16,
-          right: 16,
+          bottom: 12,
+          right: 12,
         }}
       >
         <Chip
           label={`${currentImageIndex + 1} / ${images?.length || 1}`}
+          size="small"
           sx={{
-            bgcolor: 'rgba(0, 0, 0, 0.8)',
+            bgcolor: 'rgba(0, 0, 0, 0.7)',
             color: 'common.white',
-            fontWeight: 700,
-            fontSize: '0.875rem',
-            backdropFilter: 'blur(10px)',
-            border: '2px solid rgba(255, 255, 255, 0.2)',
+            fontWeight: 600,
+            fontSize: '0.7rem',
+            height: 24,
+            backdropFilter: 'blur(8px)',
             '& .MuiChip-label': {
-              px: 2,
+              px: 1.5,
             },
           }}
         />
@@ -124,12 +127,12 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
         <Box
           sx={{
             position: 'absolute',
-            bottom: 16,
+            bottom: 12,
             left: '50%',
             transform: 'translateX(-50%)',
           }}
         >
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={0.75}>
             {images.map((img, index) => (
               <Box
                 key={index}
@@ -138,20 +141,20 @@ export default function AuctionImageGallery({ images, title }: AuctionImageGalle
                 alt={`Thumbnail ${index + 1}`}
                 onClick={() => setCurrentImageIndex(index)}
                 sx={{
-                  width: 60,
-                  height: 60,
+                  width: 48,
+                  height: 48,
                   objectFit: 'cover',
                   borderRadius: 1,
                   cursor: 'pointer',
-                  border: '3px solid',
+                  border: '2px solid',
                   borderColor: currentImageIndex === index ? 'primary.main' : 'transparent',
                   opacity: currentImageIndex === index ? 1 : 0.6,
-                  transition: 'all 0.3s',
+                  transition: 'all 0.2s',
                   bgcolor: 'grey.900',
                   '&:hover': {
                     opacity: 1,
                     borderColor: 'primary.light',
-                    transform: 'scale(1.1)',
+                    transform: 'scale(1.05)',
                   },
                 }}
               />
