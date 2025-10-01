@@ -50,7 +50,7 @@ export default function QuickBidDialog({
   bidButtonDisabled = false,
   bidCooldownTime = 0,
 }: BidDialogProps) {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const authenticatedFetch = useAuthenticatedFetch();
   const { t } = useLocale();
   
@@ -175,11 +175,36 @@ export default function QuickBidDialog({
 
       const data = await response.json();
       if (data.success) {
-        // Update live balance immediately
-        if (user) {
-          setLiveUserBalance(user.balanceVirtual - selectedBid);
+        // Fetch updated user balance from the API to get accurate balance
+        try {
+          const balanceResponse = await authenticatedFetch('/api/users/balance');
+          if (balanceResponse.ok) {
+            const balanceData = await balanceResponse.json();
+            if (balanceData.success && balanceData.data?.balance?.balances && user) {
+              const balances = balanceData.data.balance.balances;
+              // Update the user's balance in auth context
+              updateUser({
+                balanceVirtual: balances.virtual,
+                balanceReal: balances.real,
+              });
+              setLiveUserBalance(balances.virtual);
+              console.log('✅ Balance updated after bid:', {
+                virtual: balances.virtual,
+                real: balances.real,
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching updated balance:', error);
+          // Fallback: calculate estimated balance locally
+          if (user) {
+            const estimatedBalance = user.balanceVirtual - selectedBid;
+            updateUser({ balanceVirtual: estimatedBalance });
+            setLiveUserBalance(estimatedBalance);
+            console.log('⚠️ Using estimated balance:', estimatedBalance);
+          }
         }
-        
+
         setOpen(false);
         setCustomAmount('');
         setSelectedBid(displayCurrentBid + bidIncrement);
